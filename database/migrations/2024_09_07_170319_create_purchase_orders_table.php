@@ -13,12 +13,14 @@ return new class extends Migration
     {
         Schema::create('purchase_orders', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('supplier_id')->constrained('suppliers')->onDelete('cascade')->onUpdate('cascade');
+            $table->foreignUuid('supplier_id')->nullable()->constrained('suppliers')->onDelete('cascade')->onUpdate('cascade');
             $table->foreignUuid('user_id')->constrained('users')->onDelete('cascade')->onUpdate('cascade');
-            $table->string('subject');
+            $table->string('number')->unique();
+            $table->string('subject')->nullable();
             $table->date('order_date');
+            $table->decimal('total_amount', 10, 2)->default(0);
             $table->string('status');
-            $table->decimal('total_amount', 10, 2);
+            $table->string('comment')->nullable();
             $table->timestamps();
         });
     }

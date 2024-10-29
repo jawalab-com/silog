@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\OrderStatus;
 use App\Models\Supplier;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -26,8 +27,9 @@ class PurchaseOrderFactory extends Factory
             'user_id' => function () {
                 return User::inRandomOrder()->first()->id;
             },
+            'number' => fake()->randomNumber(5, true),
             'order_date' => fake()->date,
-            'status' => fake()->randomElement(['pending', 'completed']),
+            'status' => fake()->randomElement(array_column(OrderStatus::cases(), 'value')),
             'total_amount' => fake()->randomFloat(2, 0, 10000000),
             'created_at' => fake()->dateTime,
             'updated_at' => fake()->dateTime,

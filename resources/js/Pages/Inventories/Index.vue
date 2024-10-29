@@ -5,12 +5,12 @@ import { Breadcrumb, Button, DataTable, Icon } from '@/Components';
 import { FwbButtonGroup } from 'flowbite-vue';
 
 const props = defineProps({
-    products: Array,
+    inventories: Array,
 });
 
 const form = useForm({});
 
-const title = 'Barang';
+const title = 'Inventaris Stok Barang';
 const breadcrumbs = [
     { name: 'Home', href: route('dashboard') },
     { name: title, href: '#' },
@@ -18,17 +18,11 @@ const breadcrumbs = [
 const columns = [
     { name: 'product_name', label: 'Nama Barang' },
     { name: 'brand_name', label: 'Merk' },
-    { name: 'tag', label: 'Tag' },
-    { name: 'product_description', label: 'Deskripsi Barang' },
-    { name: 'quantity', label: 'Jumlah Stok' },
-    // { name: 'price', label: 'Harga', align: 'right' },
-    // { name: 'updated_at', label: 'Tanggal Update', align: 'right' },
+    { name: 'quantity', label: 'Jumlah' },
+    { name: 'updated_at', label: 'Update Terakhir', align: 'right' },
 ];
-const data = props.products.map(item => ({
+const data = props.inventories.map(item => ({
     ...item,
-    brand_name: item.brand.brand_name,
-    quantity: item.inventory?.quantity || 0,
-    price: utils.formatCurrency(item.price),
     updated_at: utils.formatDateTime(item.updated_at),
 }));
 
@@ -39,7 +33,7 @@ const deleteAction = async (id) => {
     });
 
     if (result.isConfirmed) {
-        form.delete(route("products.destroy", id), {
+        form.delete(route("inventories.destroy", id), {
             preserveScroll: true,
         });
     }
@@ -53,7 +47,7 @@ const deleteAction = async (id) => {
         </template>
 
         <div class="flex flex-wrap space-y-4 sm:space-y-0 items-center justify-between mb-4">
-            <Button color="green" :href="route('products.create')">
+            <Button color="green" :href="route('inventories.create')">
                 <template #prefix>
                     <Icon name="plus" />
                 </template>
@@ -64,15 +58,12 @@ const deleteAction = async (id) => {
         <DataTable :data="data" :columns="columns">
             <template v-slot:actionColumn="{ item, columns, index }">
                 <fwb-button-group>
-                    <Button color="yellow" class="p-0 py-1" :href="route('products.edit', item.id)">
+                    <Button color="yellow" class="p-0 py-1" :href="route('inventories.edit', item.id)">
                         <Icon name="pencil" class="w-4.5 h-4.5" />
                     </Button>
-                    <Button color="green" class="p-0 py-1" :href="route('products.show', item.id)">
-                        <Icon name="info" class="w-4.5 h-4.5" />
-                    </Button>
-                    <!-- <Button color="red" class="p-0 py-1" @click="deleteAction(item.id)">
+                    <Button color="red" class="p-0 py-1" @click="deleteAction(item.id)">
                         <Icon name="close" class="w-4.5 h-4.5" />
-                    </Button> -->
+                    </Button>
                 </fwb-button-group>
             </template>
         </DataTable>

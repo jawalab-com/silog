@@ -26,7 +26,7 @@ class StoreProductRequest extends FormRequest
             'brand_id' => 'required|exists:brands,id',
             'tag' => 'nullable|string',
             'product_description' => 'nullable|string',
-            'price' => 'required|numeric|min:0',
+            'price' => 'nullable|numeric|min:0',
         ];
     }
 }

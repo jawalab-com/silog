@@ -43,31 +43,7 @@ const isLog = true;
                 </li>
                 <template v-if="isLog">
                     <li>
-                        <Link :href="route('brands.index')"
-                            class="flex items-center p-2 font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
-                        <span class="ml-3">Merk</span>
-                        </Link>
-                    </li>
-                    <li>
-                        <Link :href="route('products.index')"
-                            class="flex items-center p-2 font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
-                        <span class="ml-3">Produk</span>
-                        </Link>
-                    </li>
-                    <li>
-                        <Link :href="route('suppliers.index')"
-                            class="flex items-center p-2 font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
-                        <span class="ml-3">Supplier</span>
-                        </Link>
-                    </li>
-                    <li>
-                        <Link :href="route('suppliers.index')"
-                            class="flex items-center p-2 font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
-                        <span class="ml-3">Customer</span>
-                        </Link>
-                    </li>
-                    <li>
-                        <Link :href="route('pengajuan')"
+                        <Link :href="route('purchase-orders.index', { formType: 'submission' })"
                             class="flex items-center p-2 font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
                         <span class="ml-3">Pengajuan</span>
                         </Link>
@@ -79,6 +55,37 @@ const isLog = true;
                         </Link>
                     </li>
                     <li>
+                        <Link :href="route('sales-orders.index')"
+                            class="flex items-center p-2 font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+                        <span class="ml-3">Sales Order</span>
+                        </Link>
+                    </li>
+                    <li class="pt-0 mt-5 space-y-1 border-t border-gray-200 dark:border-gray-700 text-base"></li>
+                    <li>
+                        <Link :href="route('products.index')"
+                            class="flex items-center p-2 font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+                        <span class="ml-3">Barang</span>
+                        </Link>
+                    </li>
+                    <li>
+                        <Link :href="route('brands.index')"
+                            class="flex items-center p-2 font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+                        <span class="ml-3">Merk</span>
+                        </Link>
+                    </li>
+                    <li>
+                        <Link :href="route('suppliers.index')"
+                            class="flex items-center p-2 font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+                        <span class="ml-3">Supplier</span>
+                        </Link>
+                    </li>
+                    <!-- <li>
+                        <Link :href="route('suppliers.index')"
+                            class="flex items-center p-2 font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+                        <span class="ml-3">Customer</span>
+                        </Link>
+                    </li> -->
+                    <!-- <li>
                         <Link :href="route('purchase-orders.index')"
                             class="flex items-center p-2 font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
                         <span class="ml-3">Sales Order</span>
@@ -89,7 +96,7 @@ const isLog = true;
                             class="flex items-center p-2 font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
                         <span class="ml-3">Inventori</span>
                         </Link>
-                    </li>
+                    </li> -->
                 </template>
                 <template v-else>
                     <li>

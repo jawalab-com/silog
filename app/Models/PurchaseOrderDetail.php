@@ -15,6 +15,7 @@ class PurchaseOrderDetail extends Model
         'purchase_order_id',
         'product_id',
         'quantity',
+        'unit',
         'unit_price',
         'total_price',
     ];
@@ -22,5 +23,10 @@ class PurchaseOrderDetail extends Model
     public function purchaseOrder()
     {
         return $this->belongsTo(PurchaseOrder::class);
+    }
+
+    public function product()
+    {
+        return $this->belongsTo(Product::class);
     }
 }

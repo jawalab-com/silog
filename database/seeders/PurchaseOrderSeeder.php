@@ -13,6 +13,6 @@ class PurchaseOrderSeeder extends Seeder
     public function run(): void
     {
         PurchaseOrder::truncate();
-        PurchaseOrder::factory()->count(15)->create();
+        PurchaseOrder::factory()->count(3)->create();
     }
 }

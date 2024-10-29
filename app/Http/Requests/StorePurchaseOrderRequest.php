@@ -22,11 +22,12 @@ class StorePurchaseOrderRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'supplier_id' => 'required|exists:suppliers,id',
-            'user_id' => 'required|exists:users,id',
+            'number' => 'required|string',
             'order_date' => 'required|date',
-            'status' => 'required|string',
-            'total_amount' => 'required|numeric',
+            'details' => 'nullable|array|min:1',
+            'details.*.product_id' => 'required|uuid',
+            'details.*.quantity' => 'required|integer|min:1',
+            'details.*.unit' => 'nullable|string',
         ];
     }
 }

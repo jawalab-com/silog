@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\OrderStatus;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -16,11 +17,27 @@ class PurchaseOrder extends Model
     protected $fillable = [
         'supplier_id',
         'user_id',
+        'number',
         'subject',
         'order_date',
-        'status',
         'total_amount',
+        'status',
+        'comment',
     ];
+
+    protected $casts = [
+        'status' => OrderStatus::class,
+    ];
+
+    public function generateNumber(): void
+    {
+        $no = self::whereYear('order_date', date('Y'))
+            ->whereMonth('order_date', date('m'))
+            ->count();
+        $no++;
+
+        $this->attributes['number'] = implode('/', [$no, 0, 'ADMIN', date('m'), date('Y')]);
+    }
 
     public function supplier(): BelongsTo
     {

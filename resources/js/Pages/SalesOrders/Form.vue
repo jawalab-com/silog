@@ -8,20 +8,20 @@ import { AutoComplete, Breadcrumb, Button, Card, DataTable, Icon, InputError, In
 
 const props = defineProps({
     formType: String,
-    purchaseOrder: Object,
+    salesOrder: Object,
     suppliers: Object,
 });
 
 const form = useForm({
-    _method: props.purchaseOrder.id ? 'put' : 'post',
+    _method: props.salesOrder.id ? 'put' : 'post',
     form_type: props.formType,
-    supplier_id: props.purchaseOrder?.supplier_id || '',
-    user_id: props.purchaseOrder?.user_id || '',
-    number: props.purchaseOrder?.number,
-    order_date: props.purchaseOrder?.order_date || new Date().toISOString().split('T')[0],
-    status: props.purchaseOrder?.status || '',
-    total_amount: props.purchaseOrder?.total_amount || '',
-    details: props.purchaseOrder?.details || [],
+    supplier_id: props.salesOrder?.supplier_id || '',
+    user_id: props.salesOrder?.user_id || '',
+    number: props.salesOrder?.number,
+    order_date: props.salesOrder?.order_date || new Date().toISOString().split('T')[0],
+    status: props.salesOrder?.status || '',
+    total_amount: props.salesOrder?.total_amount || '',
+    details: props.salesOrder?.details || [],
 });
 
 const satuanOptions = [
@@ -69,16 +69,16 @@ const removeRow = (index) => {
     form.details.splice(index, 1);
 };
 
-const title = (!!props.purchaseOrder ? 'Edit' : 'Tambah') + (props.formType == 'submission' ? ' Pengajuan' : ' Purchase Order');
+const title = (!!props.salesOrder ? 'Edit' : 'Tambah') + (props.formType == 'submission' ? ' Pengajuan' : ' Sales Order');
 const breadcrumbs = [
     { name: 'Home', href: route('dashboard') },
-    { name: 'Purchase Order', href: route('purchase-orders.index') },
-    { name: !!props.purchaseOrder ? 'Edit' : 'Tambah', href: '#' },
+    { name: 'Sales Order', href: route('purchase-orders.index') },
+    { name: !!props.salesOrder ? 'Edit' : 'Tambah', href: '#' },
 ];
 
 const saveAction = () => {
-    if (!!props.purchaseOrder.id) {
-        form.put(route("purchase-orders.update", props.purchaseOrder.id));
+    if (!!props.salesOrder.id) {
+        form.put(route("purchase-orders.update", props.salesOrder.id));
     } else {
         form.post(route("purchase-orders.store"));
     }
@@ -147,19 +147,6 @@ watch(() => newProduct.value.product_id, async (newVal) => {
                         <InputLabel for="product_id" value="Barang" />
                         <AutoComplete v-model="newProduct.product_id" :label="newProduct.product_label"
                             @update:label="newProduct.product_label = $event" apiUrl="/api/products/suggestions" />
-                        <!-- <AutoComplete v-model="newProduct.product_id" :label="newProduct.product_label"
-                            @update:label="newProduct.product_label = $event" api-url="/api/products/suggestions">
-                            <template #suggestion-item="{ suggestion, highlighted }">
-                                <li :class="['cursor-pointer px-4 py-2 flex items-center', { 'bg-blue-200': highlighted }]"
-                                    @click="$emit('click', suggestion)" @mousedown="$emit('mousedown', suggestion)">
-                                    <p class="text-md font-semibold">{{ suggestion.product_name }}</p>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">
-                                        {{ suggestion.brand.brand_name }}
-                                    </p>
-                                </li>
-                                <hr class="my-1">
-                            </template>
-                        </AutoComplete> -->
                     </div>
                     <div>
                         <InputLabel for="brand" value="Merk" />

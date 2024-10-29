@@ -14,7 +14,11 @@ const props = defineProps({
     href: String,
 });
 
-const goto = (url) => router.visit(url);
+const goto = (url) => {
+    if (url && url !== '#') {
+        router.visit(url);
+    }
+};
 
 const buttonClasses = computed(() => {
     const color = props.color;

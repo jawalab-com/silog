@@ -7,11 +7,12 @@ import InputLabel from '@/Components/InputLabel.vue';
 import InputError from '@/Components/InputError.vue';
 import TextInput from '@/Components/TextInput.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
-import { Breadcrumb, Button, DataTable, Icon } from '@/Components';
+import { Breadcrumb, Button, DataTable, Icon, Select } from '@/Components';
 import { FwbButton } from 'flowbite-vue';
 
 const props = defineProps({
     product: Object,
+    brands: Array,
 });
 
 const form = useForm({
@@ -32,7 +33,7 @@ const breadcrumbs = [
 const back = () => window.history.back();
 
 const saveAction = () => {
-    if (!!props.product) {
+    if (!!props.product.id) {
         form.put(route("products.update", props.product.id));
     } else {
         form.post(route("products.store"));
@@ -73,7 +74,12 @@ const saveAction = () => {
 
                     <div>
                         <InputLabel for="brand_id" value="Brand" />
-                        <TextInput id="brand_id" v-model="form.brand_id" />
+                        <Select id="brand_id" v-model="form.brand_id">
+                            <option value="">Pilih Brand</option>
+                            <option v-for="brand in brands" :key="brand.id" :value="brand.id">
+                                {{ brand.brand_name }}
+                            </option>
+                        </Select>
                         <InputError :message="form.errors.brand_id" />
                     </div>
 
@@ -89,11 +95,11 @@ const saveAction = () => {
                         <InputError :message="form.errors.product_description" />
                     </div>
 
-                    <div>
+                    <!-- <div>
                         <InputLabel for="price" value="Harga" />
                         <TextInput id="price" v-model="form.price" type="number" />
                         <InputError :message="form.errors.price" />
-                    </div>
+                    </div> -->
                 </div>
                 <template #footer>
                     <div class="flex justify-end">

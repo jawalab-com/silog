@@ -13,7 +13,7 @@ import { FwbButtonGroup } from 'flowbite-vue';
 
 const props = defineProps({
     formType: String,
-    purchaseOrders: Array,
+    salesOrders: Array,
 });
 
 const title = props.formType == 'submission' ? 'Pengajuan' : 'Purchase Order';
@@ -44,7 +44,7 @@ const columns = props.formType == 'submission' ? [
     { name: 'total_amount', label: 'Total Amount' },
 ];
 
-const data = props.purchaseOrders.map(item => ({
+const data = props.salesOrders.map(item => ({
     ...item,
     supplier_name: item.supplier?.supplier_name || '',
     user_name: item.user.name,
@@ -52,7 +52,7 @@ const data = props.purchaseOrders.map(item => ({
 }));
 
 
-// Delete purchaseOrder with confirmation
+// Delete salesOrder with confirmation
 const deleteAction = async (id) => {
     const result = await Swal.fire({
         title: 'Are you sure?',
@@ -66,7 +66,7 @@ const deleteAction = async (id) => {
 
     if (result.isConfirmed) {
         uniqueKey.value++;
-        form.delete(route("purchaseOrders.destroy", id), {
+        form.delete(route("salesOrders.destroy", id), {
             preserveScroll: true,
         });
     }
@@ -81,7 +81,7 @@ const deleteAction = async (id) => {
 
         <div class="flex flex-wrap space-y-4 sm:space-y-0 items-center justify-between pb-4">
             <SuccessButton v-if="props.formType == 'submission'"
-                :href="route('purchase-orders.create', { formType: formType })">
+                :href="route('sales-orders.create', { formType: formType })">
                 <Icon name="plus" class="mr-2" />
                 Tambah {{ title }}
             </SuccessButton>
@@ -91,11 +91,11 @@ const deleteAction = async (id) => {
             <template v-slot:actionColumn="{ item, columns, index }">
                 <fwb-button-group>
                     <Button color="yellow" class="p-0 py-1"
-                        :href="route('purchase-orders.edit', { id: item.id }) + `?formType=submission`">
+                        :href="route('sales-orders.edit', { id: item.id }) + `?formType=submission`">
                         <Icon name="pencil" class="w-4.5 h-4.5" />
                     </Button>
                     <Button color="green" class="p-0 py-1"
-                        :href="route('purchase-orders.show', { id: item.id }) + `?formType=submission`">
+                        :href="route('sales-orders.show', { id: item.id }) + `?formType=submission`">
                         <Icon name="info" class="w-4.5 h-4.5" />
                     </Button>
                 </fwb-button-group>

@@ -1,0 +1,15 @@
+<?php
+
+namespace App\Enums;
+
+enum OrderStatus: string
+{
+    case SUBMISSION_PENDING = 'SUBMISSION_PENDING';
+    case SUBMISSION_APPROVED = 'SUBMISSION_APPROVED';
+    case SUBMISSION_REJECTED = 'SUBMISSION_REJECTED';
+    case PO_APPROVED = 'PO_APPROVED';
+    case PO_SENT = 'PO_SENT';
+    case COMPLETED = 'COMPLETED';
+    case CANCELLED = 'CANCELED';
+    case REFUNDED = 'REFUNDED';
+}

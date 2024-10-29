@@ -7,22 +7,27 @@
                 class="bg-gray-50 border border-gray-300 text-gray-900 rounded-md focus:ring-primary-500 focus:border-primary-500 block w-full
                 dark:bg-gray-900 dark:border-gray-700 dark:placeholder-gray-400 dark:text-gray-100 dark:focus:ring-primary-600 dark:focus:border-primary-600"
                 @focus="showDropdown" ref="textInput" />
+        </div>
 
-            <!-- Dropdown button with hover effect -->
-            <!-- <button type="button" @click="onButtonClick"
+        <!-- Dropdown button with hover effect -->
+        <!-- <button type="button" @click="onButtonClick"
                 class="bg-gray-300 border border-gray-300 text-gray-900 px-2 rounded-r-md focus:outline-none hover:bg-gray-400 dark:bg-gray-700 dark:border-gray-600 dark:hover:bg-gray-600">
                 &#x25BC;
             </button> -->
-        </div>
 
         <!-- Dropdown suggestions list -->
         <ul v-if="isDropdownVisible && suggestions.length"
             class="absolute w-full bg-white border border-gray-300 rounded-md mt-1 z-10">
-            <li v-for="(suggestion, index) in suggestions.slice(0, 10)" :key="index"
-                @click="selectSuggestion(suggestion)" @mousedown="selectSuggestion(suggestion)"
-                :class="['cursor-pointer px-4 py-2 hover:bg-gray-100', { 'bg-gray-200': index === highlightedIndex }]">
-                {{ suggestion.label }}
-            </li>
+            <template v-for="(suggestion, index) in suggestions.slice(0, 10)" :key="index">
+                <slot name="suggestion-item" :suggestion="suggestion" :highlighted="index === highlightedIndex"
+                    @click="selectSuggestion(suggestion)" @mousedown="selectSuggestion(suggestion)">
+                    <!-- Default rendering if no slot provided -->
+                    <li @click="selectSuggestion(suggestion)" @mousedown="selectSuggestion(suggestion)"
+                        :class="['cursor-pointer px-4 py-2 hover:bg-gray-100', { 'bg-gray-200': index === highlightedIndex }]">
+                        {{ suggestion.label }}
+                    </li>
+                </slot>
+            </template>
         </ul>
     </div>
 </template>
