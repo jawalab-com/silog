@@ -47,7 +47,7 @@ class PurchaseOrderController extends Controller
         $po = new PurchaseOrder;
         $po->generateNumber();
 
-        return Inertia::render('PurchaseOrders/Form', [
+        return Inertia::render('PurchaseOrders/'.($formType == 'purchase-order' ? 'Form' : 'Submission'), [
             'suppliers' => $suppliers,
             'purchaseOrder' => $po,
             'formType' => $formType,
