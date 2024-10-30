@@ -91,11 +91,11 @@ const deleteAction = async (id) => {
             <template v-slot:actionColumn="{ item, columns, index }">
                 <fwb-button-group>
                     <Button color="yellow" class="p-0 py-1"
-                        :href="route('purchase-orders.edit', { id: item.id }) + `?formType=submission`">
+                        :href="route('purchase-orders.edit', { id: item.id }) + `?formType=${props.formType}`">
                         <Icon name="pencil" class="w-4.5 h-4.5" />
                     </Button>
                     <Button color="green" class="p-0 py-1"
-                        :href="route('purchase-orders.show', { id: item.id }) + `?formType=submission`">
+                        :href="route('purchase-orders.show', { id: item.id }) + `?formType=${props.formType}`">
                         <Icon name="info" class="w-4.5 h-4.5" />
                     </Button>
                 </fwb-button-group>

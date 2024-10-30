@@ -7,6 +7,7 @@ use App\Http\Controllers\PurchaseOrderController;
 use App\Http\Controllers\RoomTypeController;
 use App\Http\Controllers\SalesOrderController;
 use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\TagController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Artisan;
@@ -61,5 +62,6 @@ Route::middleware([
         'suppliers' => SupplierController::class,
         'purchase-orders' => PurchaseOrderController::class,
         'sales-orders' => SalesOrderController::class,
+        'tags' => TagController::class,
     ]);
 });

@@ -19,7 +19,6 @@ return new class extends Migration
             $table->uuid('reference_id');
             $table->integer('quantity_change');
             $table->timestamp('transaction_date');
-            $table->integer('quantity_change');
             $table->text('note')->nullable();
             $table->timestamps();
         });

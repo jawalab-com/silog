@@ -124,7 +124,7 @@ class PurchaseOrderController extends Controller
             $data['details'][$key]['product_label'] = $detail->product->product_name;
         }
 
-        return Inertia::render('PurchaseOrders/Form', [
+        return Inertia::render('PurchaseOrders/'.($formType == 'purchase-order' ? 'Form' : 'Submission'), [
             'suppliers' => $suppliers,
             'purchaseOrder' => $data,
             'formType' => $formType,
