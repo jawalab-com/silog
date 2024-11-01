@@ -11,7 +11,7 @@ class StoreTagRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -24,6 +24,7 @@ class StoreTagRequest extends FormRequest
         return [
             'tag_name' => 'required|string',
             'tag_description' => 'nullable|string',
+            'slug' => 'string|unique:tags,slug',
         ];
     }
 }

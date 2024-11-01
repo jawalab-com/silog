@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('tag')->nullable();
             $table->text('product_description')->nullable();
             $table->decimal('price', 10, 2)->default(0.00);
+            $table->integer('minimum_quantity')->default(0);
             $table->timestamps();
         });
     }

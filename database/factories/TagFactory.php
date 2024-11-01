@@ -16,8 +16,13 @@ class TagFactory extends Factory
      */
     public function definition(): array
     {
+        $slug = fake()->unique()->slug(2);
+        $name = ucfirst(str_replace('-', ' ', $slug));
+
         return [
-            //
+            'tag_name' => $name,
+            'tag_description' => fake()->sentence(),
+            'slug' => $slug,
         ];
     }
 }

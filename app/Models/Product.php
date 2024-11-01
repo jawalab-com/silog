@@ -20,7 +20,13 @@ class Product extends Model
         'tag',
         'product_description',
         'price',
+        'minimum_quantity',
     ];
+
+    public function tag()
+    {
+        return $this->belongsTo(Tag::class, 'tag', 'slug');
+    }
 
     public function brand(): BelongsTo
     {

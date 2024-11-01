@@ -7,6 +7,7 @@ use App\Http\Requests\UpdateProductRequest;
 use App\Models\Brand;
 use App\Models\InventoryTransaction;
 use App\Models\Product;
+use App\Models\Tag;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -18,7 +19,7 @@ class ProductController extends Controller
      */
     public function index(Request $request)
     {
-        $products = Product::with(['brand', 'inventory'])->orderBy('product_name')->get();
+        $products = Product::with(['brand', 'tag', 'inventory'])->orderBy('product_name')->get();
 
         return Inertia::render('Products/Index', [
             'products' => $products,
@@ -49,10 +50,12 @@ class ProductController extends Controller
     public function create()
     {
         $brands = Brand::orderBy('brand_name')->get();
+        $tags = Tag::orderBy('tag_name')->get();
 
         return Inertia::render('Products/Form', [
             'product' => new Product,
             'brands' => $brands,
+            'tags' => $tags,
         ]);
     }
 
@@ -117,10 +120,12 @@ class ProductController extends Controller
     public function edit(Product $product)
     {
         $brands = Brand::orderBy('brand_name')->get();
+        $tags = Tag::orderBy('tag_name')->get();
 
         return Inertia::render('Products/Form', [
             'product' => $product,
             'brands' => $brands,
+            'tags' => $tags,
         ]);
     }
 

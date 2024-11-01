@@ -32,16 +32,19 @@ const orderStatus = [
 ];
 
 const columns = props.formType == 'submission' ? [
+    { name: 'submission_number', label: 'Nomor Pengajuan' },
     { name: 'order_date', label: 'Tanggal Pengajuan' },
     { name: 'user_name', label: 'Pengaju' },
     { name: 'status', label: 'Status' },
     { name: 'comment', label: 'Komentar' },
 ] : [
+    { name: 'submission_number', label: 'Nomor Pengajuan' },
+    { name: 'po_number', label: 'Nomor PO' },
     { name: 'supplier_name', label: 'Supplier' },
     { name: 'order_date', label: 'Tanggal Pengajuan' },
     { name: 'user_name', label: 'Pengaju' },
     { name: 'status', label: 'Status' },
-    { name: 'total_amount', label: 'Total Amount' },
+    { name: 'total_amount', label: 'Total', align: 'right' },
 ];
 
 const data = props.purchaseOrders.map(item => ({

@@ -17,8 +17,8 @@ const breadcrumbs = [
     { name: title, href: '#' },
 ];
 const columns = [
-    { name: 'tag_name', label: 'Brand Name' },
-    { name: 'tag_description', label: 'Brand Description' },
+    { name: 'tag_name', label: 'Nama Kategori' },
+    { name: 'tag_description', label: 'Deskripsi' },
     { name: 'updated_at', label: 'Tanggal Diperbarui', align: 'right' },
 ];
 const data = computed(() => {

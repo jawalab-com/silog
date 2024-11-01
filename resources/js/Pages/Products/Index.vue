@@ -18,14 +18,16 @@ const breadcrumbs = [
 const columns = [
     { name: 'product_name', label: 'Nama Barang' },
     { name: 'brand_name', label: 'Merk' },
-    { name: 'tag', label: 'Tag' },
+    { name: 'tag_name', label: 'Tag' },
     { name: 'product_description', label: 'Deskripsi Barang' },
-    { name: 'quantity', label: 'Jumlah Stok' },
+    { name: 'minimum_quantity', label: 'Stok Minimum', align: 'right' },
+    { name: 'quantity', label: 'Jumlah Stok', align: 'right' },
     // { name: 'price', label: 'Harga', align: 'right' },
     // { name: 'updated_at', label: 'Tanggal Update', align: 'right' },
 ];
 const data = props.products.map(item => ({
     ...item,
+    tag_name: item.tag.tag_name,
     brand_name: item.brand.brand_name,
     quantity: item.inventory?.quantity || 0,
     price: utils.formatCurrency(item.price),

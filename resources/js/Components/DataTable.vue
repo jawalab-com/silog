@@ -98,7 +98,7 @@ const setSortKey = (key) => {
                 <tr>
                     <th v-for="(column, key) in columns" :key="key" scope="col"
                         class="px-4 py-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600"
-                        :class="`text-${column?.align || 'left'}`" @click="setSortKey(column.name)">
+                        @click="setSortKey(column.name)">
                         <div class="flex items-center justify-between">
                             {{ column.label }}
                             <SortIcon :sortKey="sortKey" :sortOrder="sortOrder" :columnName="column.name" />
@@ -116,7 +116,8 @@ const setSortKey = (key) => {
                     class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
                     <slot name="tbodyTd" :item="item" :columns="columns" :index="index">
                         <template v-for="(column, key) in columns" :key="key">
-                            <td class="px-4 py-3" :class="`text-${column.align || 'left'}`">
+                            <td class="px-4 py-3"
+                                :class="`text-${column.align || 'left'} ${column.align === 'right' ? 'pr-8' : ''}`">
                                 {{ item[column.name] }}
                             </td>
                         </template>

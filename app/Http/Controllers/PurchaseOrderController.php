@@ -8,6 +8,7 @@ use App\Http\Requests\UpdatePurchaseOrderRequest;
 use App\Models\InventoryTransaction;
 use App\Models\PurchaseOrder;
 use App\Models\Supplier;
+use App\Models\Tag;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -44,10 +45,12 @@ class PurchaseOrderController extends Controller
     {
         $formType = $request->input('formType', 'purchase-order');
         $suppliers = Supplier::orderBy('supplier_name')->get();
+        $tags = Tag::orderBy('tag_name')->get();
         $po = new PurchaseOrder;
         $po->generateNumber();
 
         return Inertia::render('PurchaseOrders/'.($formType == 'purchase-order' ? 'Form' : 'Submission'), [
+            'tags' => $tags,
             'suppliers' => $suppliers,
             'purchaseOrder' => $po,
             'formType' => $formType,
@@ -118,6 +121,7 @@ class PurchaseOrderController extends Controller
     {
         $formType = $request->input('formType', 'purchase-order');
         $suppliers = Supplier::orderBy('supplier_name')->get();
+        $tags = Tag::orderBy('tag_name')->get();
         $data = $purchaseOrder->toArray();
         foreach ($purchaseOrder->purchaseOrderDetails()->get() as $key => $detail) {
             $data['details'][$key] = $detail->toArray();
@@ -126,6 +130,7 @@ class PurchaseOrderController extends Controller
 
         return Inertia::render('PurchaseOrders/'.($formType == 'purchase-order' ? 'Form' : 'Submission'), [
             'suppliers' => $suppliers,
+            'tags' => $tags,
             'purchaseOrder' => $data,
             'formType' => $formType,
         ]);

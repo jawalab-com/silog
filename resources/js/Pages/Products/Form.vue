@@ -13,6 +13,7 @@ import { FwbButton } from 'flowbite-vue';
 const props = defineProps({
     product: Object,
     brands: Array,
+    tags: Array,
 });
 
 const form = useForm({
@@ -21,6 +22,7 @@ const form = useForm({
     tag: props.product?.tag || '',
     product_description: props.product?.product_description || '',
     price: props.product?.price || 0,
+    minimum_quantity: props.product?.minimum_quantity || 0,
 });
 
 const title = (!!props.product ? 'Edit' : 'Tambah') + ' Product';
@@ -85,7 +87,12 @@ const saveAction = () => {
 
                     <div>
                         <InputLabel for="tag" value="Tag" />
-                        <TextInput id="tag" v-model="form.tag" />
+                        <Select id="tag" v-model="form.tag">
+                            <option value="">Pilih Brand</option>
+                            <option v-for="tag in tags" :key="tag.slug" :value="tag.slug">
+                                {{ tag.tag_name }}
+                            </option>
+                        </Select>
                         <InputError :message="form.errors.tag" />
                     </div>
 

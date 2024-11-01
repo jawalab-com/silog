@@ -17,7 +17,8 @@ const form = useForm({
     form_type: props.formType,
     supplier_id: props.purchaseOrder?.supplier_id || '',
     user_id: props.purchaseOrder?.user_id || '',
-    number: props.purchaseOrder?.number,
+    submission_number: props.purchaseOrder?.submission_number,
+    po_number: props.purchaseOrder?.po_number,
     order_date: props.purchaseOrder?.order_date || new Date().toISOString().split('T')[0],
     status: props.purchaseOrder?.status || '',
     total_amount: props.purchaseOrder?.total_amount || '',
@@ -126,9 +127,15 @@ watch(() => newProduct.value.product_id, async (newVal) => {
                     </div>
 
                     <div>
-                        <InputLabel for="number" value="Nomor" />
-                        <TextInput id="number" v-model="form.number" disabled />
-                        <InputError :message="form.errors.number" />
+                        <InputLabel for="submission_number" value="Nomor Pengajuan" />
+                        <TextInput id="submission_number" v-model="form.submission_number" disabled />
+                        <InputError :message="form.errors.submission_number" />
+                    </div>
+
+                    <div>
+                        <InputLabel for="po_number" value="Nomor PO" />
+                        <TextInput id="po_number" v-model="form.po_number" disabled />
+                        <InputError :message="form.errors.po_number" />
                     </div>
 
                     <div>
@@ -233,6 +240,7 @@ watch(() => newProduct.value.product_id, async (newVal) => {
                             </tr>
                         </tbody>
                     </table>
+                    <InputError :message="form.errors.details" />
                 </div>
 
                 <div class="flex justify-between mt-2">

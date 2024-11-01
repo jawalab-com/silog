@@ -27,7 +27,8 @@ class PurchaseOrderFactory extends Factory
             'user_id' => function () {
                 return User::inRandomOrder()->first()->id;
             },
-            'number' => fake()->randomNumber(5, true),
+            'submission_number' => fake()->randomNumber(5, true),
+            'po_number' => strtoupper(fake()->bothify('??###')),
             'order_date' => fake()->date,
             'status' => fake()->randomElement(array_column(OrderStatus::cases(), 'value')),
             'total_amount' => fake()->randomFloat(2, 0, 10000000),

@@ -2,15 +2,12 @@
 import { useForm, Link } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
-import Card from '@/Components/Card.vue';
-import InputLabel from '@/Components/InputLabel.vue';
-import InputError from '@/Components/InputError.vue';
-import TextInput from '@/Components/TextInput.vue';
-import Breadcrumb from '@/Components/Breadcrumb.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
+import { AutoComplete, Breadcrumb, Button, Card, DataTable, Icon, InputError, InputLabel, Select, TextInput } from '@/Components';
 
 const props = defineProps({
     supplier: Object,
+    tags: Object,
 });
 
 // Initialize the form with useForm, setting initial values
@@ -20,6 +17,7 @@ const form = useForm({
     address: props.supplier?.address || '',
     phone: props.supplier?.phone || '',
     email: props.supplier?.email || '',
+    tag: props.supplier?.tag || '',
 });
 
 const title = (!!props.supplier ? 'Edit' : 'Tambah') + ' Supplier';
@@ -73,6 +71,15 @@ const saveAction = () => {
                     <div>
                         <InputLabel for="email" value="Email" />
                         <TextInput id="email" v-model="form.email" type="email" />
+                        <InputError :message="form.errors.email" />
+                    </div>
+                    <div>
+                        <InputLabel for="tag" value="Kategori" />
+                        <Select id="tag" v-model="form.tag">
+                            <option v-for="tag in tags" :value="tag.slug" :key="tag.slug">
+                                {{ tag.tag_name }}
+                            </option>
+                        </Select>
                         <InputError :message="form.errors.email" />
                     </div>
                 </div>

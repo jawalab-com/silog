@@ -18,10 +18,21 @@ class Supplier extends Model
         'address',
         'phone',
         'email',
+        'tag',
     ];
 
     public function purchaseOrders(): HasMany
     {
         return $this->hasMany(PurchaseOrder::class);
     }
+
+    public function tag()
+    {
+        return $this->belongsTo(Tag::class, 'tag', 'slug');
+    }
+
+    // public function getTagsAttribute($value)
+    // {
+    //     return json_decode($value);
+    // }
 }

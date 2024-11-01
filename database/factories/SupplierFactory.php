@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Tag;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -23,6 +24,9 @@ class SupplierFactory extends Factory
             'address' => fake()->address(),
             'phone' => fake()->phoneNumber(),
             'email' => fake()->email(),
+            'tag' => function () {
+                return Tag::inRandomOrder()->first()->slug;
+            },
             'created_at' => fake()->dateTime(),
             'updated_at' => fake()->dateTime(),
         ];

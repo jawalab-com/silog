@@ -27,6 +27,7 @@ class UpdateSupplierRequest extends FormRequest
             'address' => 'nullable|string',
             'phone' => 'nullable|string',
             'email' => 'nullable|email',
+            'tag' => 'nullable|string',
         ];
     }
 }

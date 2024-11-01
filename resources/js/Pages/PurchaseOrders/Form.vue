@@ -9,6 +9,7 @@ import { AutoComplete, Breadcrumb, Button, Card, DataTable, Icon, InputError, In
 const props = defineProps({
     formType: String,
     purchaseOrder: Object,
+    tags: Object,
     suppliers: Object,
 });
 
@@ -17,7 +18,7 @@ const form = useForm({
     form_type: props.formType,
     supplier_id: props.purchaseOrder?.supplier_id || '',
     user_id: props.purchaseOrder?.user_id || '',
-    number: props.purchaseOrder?.number,
+    submission_number: props.purchaseOrder?.submission_number,
     order_date: props.purchaseOrder?.order_date || new Date().toISOString().split('T')[0],
     status: props.purchaseOrder?.status || '',
     total_amount: props.purchaseOrder?.total_amount || '',
@@ -116,12 +117,12 @@ watch(() => newProduct.value.product_id, async (newVal) => {
             <form @submit.prevent="saveAction">
                 <div class="grid grid-cols-2 gap-2">
                     <div>
-                        <InputLabel for="number" value="Nomor" />
-                        <TextInput type="hidden" id="number" v-model="form.number" disabled />
+                        <InputLabel for="submission_number" value="Nomor" />
+                        <TextInput type="hidden" id="submission_number" v-model="form.submission_number" disabled />
                         <p class="py-2 dark:text-white">
-                            {{ form.number }}
+                            {{ form.submission_number }}
                         </p>
-                        <InputError :message="form.errors.number" />
+                        <InputError :message="form.errors.submission_number" />
                     </div>
 
                     <div>
@@ -134,10 +135,10 @@ watch(() => newProduct.value.product_id, async (newVal) => {
                     </div>
 
                     <div>
-                        <InputLabel for="supplier_id" value="Kategori" />
-                        <Select id="supplier_id" v-model="form.supplier_id">
-                            <option v-for="supplier in suppliers" :value="supplier.id" :key="supplier.id">
-                                {{ supplier.supplier_name }}
+                        <InputLabel for="slug" value="Kategori" />
+                        <Select id="slug" v-model="form.slug">
+                            <option v-for="tag in tags" :value="tag.slug" :key="tag.slug">
+                                {{ tag.tag_name }}
                             </option>
                         </Select>
                         <InputError :message="form.errors.supplier_id" />
@@ -188,7 +189,10 @@ watch(() => newProduct.value.product_id, async (newVal) => {
                                     <TextInput class="py-1" type="number" v-model="item.price" />
                                 </td>
                                 <td class="px-4 py-1">
-                                    <p class="py-1">{{ (item.quantity * item.price).toFixed(2) }}</p>
+                                    <p class="py-1">
+                                        {{ isNaN(item.quantity * item.price) ? '0.00' : (item.quantity *
+                                            item.price).toFixed(0) }}
+                                    </p>
                                 </td>
                             </tr>
                         </tbody>

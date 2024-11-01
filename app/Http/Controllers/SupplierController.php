@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreSupplierRequest;
 use App\Http\Requests\UpdateSupplierRequest;
 use App\Models\Supplier;
+use App\Models\Tag;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -16,7 +17,7 @@ class SupplierController extends Controller
      */
     public function index(Request $request)
     {
-        $suppliers = Supplier::get();
+        $suppliers = Supplier::with(['tag'])->orderBy('supplier_name')->get();
 
         return Inertia::render('Suppliers/Index', [
             'suppliers' => $suppliers,
@@ -44,8 +45,11 @@ class SupplierController extends Controller
      */
     public function create()
     {
+        $tags = Tag::orderBy('tag_name')->get();
+
         return Inertia::render('Suppliers/Form', [
             'supplier' => null,
+            'tags' => $tags,
         ]);
     }
 
@@ -80,8 +84,11 @@ class SupplierController extends Controller
      */
     public function edit(Supplier $supplier)
     {
+        $tags = Tag::orderBy('tag_name')->get();
+
         return Inertia::render('Suppliers/Form', [
             'supplier' => $supplier,
+            'tags' => $tags,
         ]);
     }
 
