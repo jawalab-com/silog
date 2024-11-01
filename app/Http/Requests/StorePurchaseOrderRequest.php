@@ -22,7 +22,7 @@ class StorePurchaseOrderRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'number' => 'required|string',
+            'submission_number' => 'required|string',
             'order_date' => 'required|date',
             'details' => 'nullable|array|min:1',
             'details.*.product_id' => 'required|uuid',

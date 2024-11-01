@@ -37,7 +37,7 @@ class PurchaseOrder extends Model
             ->count();
         $no++;
 
-        $this->attributes['number'] = implode('/', [$no, 0, 'ADMIN', date('m'), date('Y')]);
+        $this->attributes['submission_number'] = implode('/', [$no, 0, 'ADMIN', date('m'), date('Y')]);
     }
 
     public function supplier(): BelongsTo
