@@ -29,6 +29,16 @@ Route::get('/pengajuan', function () {
     return Inertia::render('Pengajuan');
 })->name('pengajuan');
 
+Route::get('/page/{page}', function ($page) {
+    $items = \App\Models\RfqDetail::leftJoin('products', 'rfq_details.product_id', '=', 'products.id')
+        ->leftJoin('tags', 'products.tag', '=', 'tags.slug')
+        ->selectRaw('tags.tag_name, SUM(rfq_details.quantity) as total_quantity')
+        ->groupBy('tags.id')
+        ->get();
+
+    return Inertia::render('Static/'.$page, ['rfqs' => []]);
+})->name('page');
+
 Route::get('/book', function () {
     return Inertia::render('Book');
 })->name('book');

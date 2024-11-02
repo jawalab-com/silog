@@ -71,5 +71,12 @@ class JetstreamServiceProvider extends ServiceProvider
             'create',
             'update',
         ])->description('Editor users have the ability to read, create, and update.');
+
+        Jetstream::role('divisi-lain', 'Divisi Lain', [
+            'create',
+            'read',
+            'update',
+            'delete',
+        ])->description('Divisi Lain users have full access and control over the application.');
     }
 }

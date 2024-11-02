@@ -153,9 +153,11 @@ watch(() => newProduct.value.product_id, async (newVal) => {
                             <tr>
                                 <th class="px-4 py-3">Kategori</th>
                                 <th class="px-4 py-3">Barang</th>
-                                <th class="px-4 py-3">Jumlah</th>
                                 <th class="px-4 py-3">Stok</th>
+                                <th class="px-4 py-3">Jumlah</th>
                                 <th class="px-4 py-3">Satuan</th>
+                                <th class="px-4 py-3">Harga</th>
+                                <th class="px-4 py-3">Subtotal</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -163,9 +165,21 @@ watch(() => newProduct.value.product_id, async (newVal) => {
                                 class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
                                 <td class="px-4 py-1">{{ item.tag_name }}</td>
                                 <td class="px-4 py-1">{{ item.product_name }}</td>
-                                <td class="px-4 py-1">{{ item.quantity }}</td>
                                 <td class="px-4 py-1">{{ item.stock }}</td>
-                                <td class="px-4 py-1"> {{ item.unit_name }} </td>
+                                <td class="px-4 py-1">{{ item.quantity }}</td>
+                                <td class="px-4 py-1">{{ item.unit_name }}</td>
+                                <td class="px-4 py-1">
+                                    <TextInput class="py-1" type="number" v-model="item.unit_price" step="0.01" />
+                                </td>
+                                <td class="px-4 py-1">
+                                    <p class="py-1">
+                                        <TextInput class="py-1" type="hidden" v-model="item.total_price" />
+                                        {{
+                                            item.total_price = isNaN(item.quantity * item.unit_price) ? 0.00 :
+                                                (item.quantity * item.unit_price).toFixed(0)
+                                        }}
+                                    </p>
+                                </td>
                             </tr>
                         </tbody>
                     </table>

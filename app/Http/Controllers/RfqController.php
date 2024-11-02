@@ -96,6 +96,8 @@ class RfqController extends Controller
             $data['products'][$key]['tag_name'] = Tag::where('slug', $detail->product->tag)->first()->tag_name;
             $data['products'][$key]['unit_name'] = $detail->unit?->unit_name;
             $data['products'][$key]['stock'] = $detail->product->inventory?->quantity ?? 0;
+            $data['products'][$key]['unit_price'] = $detail->unit_price;
+            $data['products'][$key]['total_price'] = $detail->total_price;
         }
 
         $tags = array_unique($tags);
