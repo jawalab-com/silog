@@ -10,7 +10,7 @@ const props = defineProps({
     rfq: Object,
     tagSuppliers: Array,
     rfqStatus: Array,
-    suppliers: Object,
+    suppliers: Array,
 });
 
 const form = useForm({
@@ -94,9 +94,14 @@ watch(() => newProduct.value.product_id, async (newVal) => {
     <AppLayout :title="title">
         <Card>
             <template #header class="flex">
-                <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-                    {{ title }}
-                </h2>
+                <div class="flex justify-between w-full">
+                    <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+                        {{ title }}
+                    </h2>
+                    <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+                        Status: {{ rfq.status.toUpperCase() }}
+                    </h2>
+                </div>
             </template>
 
             <form @submit.prevent="saveAction">
@@ -129,12 +134,14 @@ watch(() => newProduct.value.product_id, async (newVal) => {
                             <tr v-for="(item, index) in form.suppliers" :key="index" class="">
                                 <td class="px-4 py-1">{{ item.tag.tag_name }}</td>
                                 <td class="px-4 py-1">
-                                    <Select id="supplier_id" v-model="item.supplier_id" class="py-1 px-2">
+                                    <Select v-if="rfq.status === rfqStatus['PENDING']" id="supplier_id"
+                                        v-model="item.supplier_id" class="py-1 px-2">
                                         <option v-for="supplier in tagSuppliers[item.tag.slug]" :value="supplier.id"
                                             :key="supplier.id">
                                             {{ supplier.supplier_name }}
                                         </option>
                                     </Select>
+                                    <span v-else>{{ item.supplier.supplier_name }}</span>
                                 </td>
                             </tr>
                         </tbody>
@@ -169,7 +176,10 @@ watch(() => newProduct.value.product_id, async (newVal) => {
                                 <td class="px-4 py-1">{{ item.quantity }}</td>
                                 <td class="px-4 py-1">{{ item.unit_name }}</td>
                                 <td class="px-4 py-1">
-                                    <TextInput class="py-1" type="number" v-model="item.unit_price" step="0.01" />
+                                    <TextInput class="py-1"
+                                        :type="rfqStatus['PENDING'] === rfq.status ? 'number' : 'hidden'"
+                                        v-model="item.unit_price" step="0.01" />
+                                    {{ rfqStatus['PENDING'] === rfq.status ? '' : item.unit_price }}
                                 </td>
                                 <td class="px-4 py-1">
                                     <p class="py-1">
@@ -214,7 +224,9 @@ watch(() => newProduct.value.product_id, async (newVal) => {
                         <Button color="red" @click="form.status = rfqStatus['REJECTED']" type="submit">
                             Tolak
                         </Button>
-                        <Button color="green" @click="form.status = rfqStatus['APPROVED']" type="submit" class="ml-2">
+                        <Button color="green"
+                            @click="form.status = rfq.status === rfqStatus['PENDING'] ? rfqStatus['VERIFIED'] : rfqStatus['APPROVED']"
+                            type="submit" class="ml-2">
                             Terima
                         </Button>
                     </div>

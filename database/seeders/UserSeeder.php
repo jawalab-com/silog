@@ -19,6 +19,7 @@ class UserSeeder extends Seeder
         User::factory()->withPersonalTeam()->create([
             'name' => 'Test User',
             'email' => 'test@example.com',
+            'division' => 'Divisi Logistik',
         ]);
     }
 }

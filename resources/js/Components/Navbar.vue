@@ -47,7 +47,9 @@ const logout = () => {
                         Demo App
                     </span>
                 </a>
+                <span class="text-lg font-semibold dark:text-white">{{ $page.props.auth.user.division }}</span>
                 <button id="teamDropdownNavbarLink" data-dropdown-toggle="teamDropdownNavbar" class="
+                            hidden
                             flex
                             items-center
                             justify-between
@@ -378,6 +380,12 @@ const logout = () => {
                             API Tokens
                             </Link>
                         </li>
+                    </ul>
+                    <ul class="py-1 text-gray-700 dark:text-gray-300" aria-labelledby="dropdown">
+                        <Link :href="route('teams.show', $page.props.auth.user.current_team)"
+                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">
+                        Team Settings
+                        </Link>
                     </ul>
                     <ul class="py-1 text-gray-700 dark:text-gray-300" aria-labelledby="dropdown">
                         <li>

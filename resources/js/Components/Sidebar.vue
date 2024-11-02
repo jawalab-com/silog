@@ -51,15 +51,21 @@ const isLog = true;
                     <li>
                         <Link :href="route('purchase-orders.index')"
                             class="flex items-center p-2 font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
-                        <span class="ml-3">Purchase Order</span>
+                        <span class="ml-3">Purchasing</span>
                         </Link>
                     </li>
                     <li>
+                        <Link :href="route('page', { page: 'UnderConstruction' })"
+                            class="flex items-center p-2 font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+                        <span class="ml-3">Keuangan</span>
+                        </Link>
+                    </li>
+                    <!-- <li>
                         <Link :href="route('sales-orders.index')"
                             class="flex items-center p-2 font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
                         <span class="ml-3">Sales Order</span>
                         </Link>
-                    </li>
+                    </li> -->
                     <li class="pt-0 mt-5 space-y-1 border-t border-gray-200 dark:border-gray-700 text-base"></li>
                     <li>
                         <Link :href="route('products.index')"

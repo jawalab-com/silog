@@ -6,6 +6,7 @@ enum RfqStatus: string
 {
     case DRAFT = 'draft';
     case PENDING = 'pending';
+    case VERIFIED = 'verified';
     case APPROVED = 'approved';
     case REJECTED = 'rejected';
     case CANCELED = 'canceled';
@@ -27,6 +28,7 @@ enum RfqStatus: string
         return match ($this) {
             self::DRAFT => $lang === 'id' ? 'Draf' : 'Draft',
             self::PENDING => $lang === 'id' ? 'Menunggu' : 'Pending',
+            self::VERIFIED => $lang === 'id' ? 'Terverifikasi' : 'Verified',
             self::APPROVED => $lang === 'id' ? 'Disetujui' : 'Approved',
             self::REJECTED => $lang === 'id' ? 'Ditolak' : 'Rejected',
             self::CANCELED => $lang === 'id' ? 'Dibatalkan' : 'Canceled',

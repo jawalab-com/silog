@@ -21,6 +21,7 @@ const form = useForm({
     status: props.rfq?.status || '',
     comment: props.rfq?.comment || '',
     products: props.rfq?.products || [],
+    suppliers: props.rfq?.suppliers || [],
 });
 
 const newProduct = ref({
