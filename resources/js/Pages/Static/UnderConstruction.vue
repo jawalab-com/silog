@@ -13,7 +13,3 @@ import AppLayout from '@/Layouts/AppLayout.vue';
         </div>
     </AppLayout>
 </template>
-
-<style>
-/* Tambahkan gaya tambahan di sini jika diperlukan */
-</style>

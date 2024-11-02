@@ -13,6 +13,7 @@ import { FwbButtonGroup } from 'flowbite-vue';
 
 const props = defineProps({
     formType: String,
+    rfqStatus: Object,
     rfqs: Array,
 });
 
@@ -73,7 +74,9 @@ const deleteAction = async (id) => {
         <DataTable :data="data" :columns="columns">
             <template v-slot:actionColumn="{ item, columns, index }">
                 <fwb-button-group>
-                    <Button color="yellow" class="p-0 py-1" :href="route('rfqs.edit', { id: item.id })">
+                    <Button
+                        v-if="['Divisi Lain'].includes($page.props.auth.user.division) && [rfqStatus['PENDING']].includes(item.status)"
+                        color="yellow" class="p-0 py-1" :href="route('rfqs.edit', { id: item.id })">
                         <Icon name="pencil" class="w-4.5 h-4.5" />
                     </Button>
                     <Button color="green" class="p-0 py-1" :href="route('rfqs.show', { id: item.id })">

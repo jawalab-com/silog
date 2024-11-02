@@ -34,6 +34,7 @@ class RfqController extends Controller
             ->get();
 
         return Inertia::render('Rfqs/Index', [
+            'rfqStatus' => RfqStatus::toArray(),
             'rfqs' => $rfqs,
         ]);
     }

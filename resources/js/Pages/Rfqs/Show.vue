@@ -134,14 +134,17 @@ watch(() => newProduct.value.product_id, async (newVal) => {
                             <tr v-for="(item, index) in form.suppliers" :key="index" class="">
                                 <td class="px-4 py-1">{{ item.tag.tag_name }}</td>
                                 <td class="px-4 py-1">
-                                    <Select v-if="rfq.status === rfqStatus['PENDING']" id="supplier_id"
-                                        v-model="item.supplier_id" class="py-1 px-2">
+                                    <!-- <Select
+                                        v-if="['Pimpinan Gudang'].includes($page.props.auth.user.division) && rfqStatus['PENDING'] === rfq.status"
+                                        id="supplier_id" v-model="item.supplier_id" class="py-1 px-2">
                                         <option v-for="supplier in tagSuppliers[item.tag.slug]" :value="supplier.id"
                                             :key="supplier.id">
                                             {{ supplier.supplier_name }}
                                         </option>
                                     </Select>
-                                    <span v-else>{{ item.supplier.supplier_name }}</span>
+                                    <span v-else>: -->
+                                    {{ item.supplier.supplier_name }}
+                                    <!-- </span> -->
                                 </td>
                             </tr>
                         </tbody>
@@ -176,10 +179,15 @@ watch(() => newProduct.value.product_id, async (newVal) => {
                                 <td class="px-4 py-1">{{ item.quantity }}</td>
                                 <td class="px-4 py-1">{{ item.unit_name }}</td>
                                 <td class="px-4 py-1">
-                                    <TextInput class="py-1"
-                                        :type="rfqStatus['PENDING'] === rfq.status ? 'number' : 'hidden'"
-                                        v-model="item.unit_price" step="0.01" />
-                                    {{ rfqStatus['PENDING'] === rfq.status ? '' : item.unit_price }}
+                                    <!-- <template v-if="
+                                        (['Pimpinan Gudang'].includes($page.props.auth.user.division) && [rfqStatus['PENDING']].includes(rfq.status))
+                                    ">
+                                        <TextInput class="py-1" type="number" v-model="item.unit_price" step="0.01" />
+                                    </template>
+                                    <template v-else> -->
+                                    {{ item.unit_price }}
+                                    <TextInput class="py-1" type="hidden" v-model="item.unit_price" step="0.01" />
+                                    <!-- </template> -->
                                 </td>
                                 <td class="px-4 py-1">
                                     <p class="py-1">
@@ -212,15 +220,16 @@ watch(() => newProduct.value.product_id, async (newVal) => {
                         placeholder="Berikan komentar untuk menuliskan alasan penolakan jika diperlukan..."></textarea>
                 </div>
 
-                <p class="text-base leading-relaxed text-gray-800 dark:text-gray-200 text-right mt-2">
+                <!-- <p class="text-base leading-relaxed text-gray-800 dark:text-gray-200 text-right mt-2">
                     Klik "Terima" untuk menyetujui atau "Tolak" untuk Menolak.
-                </p>
+                </p> -->
 
                 <div class="flex justify-between mt-2">
                     <Button color="gray" @click="goBack" type="button">
                         Kembali
                     </Button>
-                    <div>
+                    <div
+                        v-if="($page.props.auth.user.division === 'Pimpinan Gudang' && rfq.status === rfqStatus['PENDING'])">
                         <Button color="red" @click="form.status = rfqStatus['REJECTED']" type="submit">
                             Tolak
                         </Button>

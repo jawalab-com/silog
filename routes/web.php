@@ -39,6 +39,14 @@ Route::get('/page/{page}', function ($page) {
     return Inertia::render('Static/'.$page, ['rfqs' => []]);
 })->name('page');
 
+Route::get('/updaterole/{role}', function ($role) {
+    $user = auth()->user();
+    $user->division = $role;
+    $user->save();
+
+    // return redirect()->route('dashboard');
+})->name('updaterole');
+
 Route::get('/book', function () {
     return Inertia::render('Book');
 })->name('book');
