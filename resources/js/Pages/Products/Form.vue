@@ -23,6 +23,7 @@ const form = useForm({
     product_description: props.product?.product_description || '',
     price: props.product?.price || 0,
     minimum_quantity: props.product?.minimum_quantity || 0,
+    verified: props.product?.verified || false,
 });
 
 const title = (!!props.product ? 'Edit' : 'Tambah') + ' Product';
@@ -100,6 +101,13 @@ const saveAction = () => {
                         <InputLabel for="product_description" value="Deskripsi" />
                         <TextInput id="product_description" v-model="form.product_description" />
                         <InputError :message="form.errors.product_description" />
+                    </div>
+
+                    <div class="flex items-center">
+                        <input checked id="verified" type="checkbox" v-model="form.verified"
+                            class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+                        <InputLabel for="verified" value="Terverifikasi" class="ml-2" />
+                        <InputError :message="form.errors.verified" />
                     </div>
 
                     <!-- <div>

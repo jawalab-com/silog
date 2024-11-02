@@ -7,81 +7,56 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import { AutoComplete, Breadcrumb, Button, Card, DataTable, Icon, InputError, InputLabel, Select, TextInput } from '@/Components';
 
 const props = defineProps({
-    formType: String,
-    purchaseOrder: Object,
-    suppliers: Object,
+    rfq: Object,
+    units: Array,
 });
 
 const form = useForm({
-    _method: props.purchaseOrder.id ? 'put' : 'post',
-    form_type: props.formType,
-    supplier_id: props.purchaseOrder?.supplier_id || '',
-    user_id: props.purchaseOrder?.user_id || '',
-    submission_number: props.purchaseOrder?.submission_number,
-    po_number: props.purchaseOrder?.po_number,
-    order_date: props.purchaseOrder?.order_date || new Date().toISOString().split('T')[0],
-    status: props.purchaseOrder?.status || '',
-    total_amount: props.purchaseOrder?.total_amount || '',
-    details: props.purchaseOrder?.details || [],
+    _method: props.rfq.id ? 'put' : 'post',
+    // supplier_id: props.rfq?.supplier_id || '',
+    user_id: props.rfq?.user_id || '',
+    rfq_number: props.rfq?.rfq_number,
+    request_date: props.rfq?.request_date || new Date().toISOString().split('T')[0],
+    total_amount: props.rfq?.total_amount || '',
+    status: props.rfq?.status || '',
+    comment: props.rfq?.comment || '',
+    products: props.rfq?.products || [],
 });
-
-const satuanOptions = [
-    { value: 'unit', label: 'Unit' },
-    { value: 'lusin', label: 'Lusin' },
-    { value: 'kodi', label: 'Kodi' },
-    { value: 'rim', label: 'Rim' },
-    { value: 'kg', label: 'Kg' },
-    { value: 'gram', label: 'Gram' },
-    { value: 'liter', label: 'Liter' },
-    { value: 'ml', label: 'Mililiter' },
-    { value: 'm', label: 'Meter' },
-    { value: 'cm', label: 'Centimeter' },
-    { value: 'inch', label: 'Inci' },
-    { value: 'm3', label: 'Meter Kubik' },
-    { value: 'pack', label: 'Pack' },
-    { value: 'bottle', label: 'Botol' },
-    { value: 'can', label: 'Kaleng' },
-    { value: 'gallon', label: 'Galon' },
-    { value: 'sack', label: 'Karung' },
-    { value: 'carton', label: 'Dus/Karton' },
-    { value: 'set', label: 'Set' },
-    { value: 'gross', label: 'Gross' },
-];
 
 const newProduct = ref({
     product_id: '',
-    product_label: '',
+    product_name: '',
     quantity: 1,
-    unit: 'unit',
+    unit_id: 1,
 });
 
 const productDetails = ref(null);
 
 const addRow = () => {
-    form.details.push({
+    form.products.push({
         product_id: newProduct.value.product_id,
-        product_label: newProduct.value.product_label,
+        product_name: newProduct.value.product_name,
         quantity: newProduct.value.quantity,
-        unit: newProduct.value.unit
+        unit_id: newProduct.value.unit_id
     });
 };
 
 const removeRow = (index) => {
-    form.details.splice(index, 1);
+    form.products.splice(index, 1);
 };
 
-const title = (!!props.purchaseOrder ? 'Edit' : 'Tambah') + (props.formType == 'submission' ? ' Pengajuan' : ' Purchase Order');
+const title = (!!props.rfq.id ? 'Edit' : 'Tambah') + ' Pengajuan Barang';
 const breadcrumbs = [
     { name: 'Home', href: route('dashboard') },
-    { name: 'Purchase Order', href: route('purchase-orders.index') },
-    { name: !!props.purchaseOrder ? 'Edit' : 'Tambah', href: '#' },
+    { name: 'Purchase Order', href: route('rfqs.index') },
+    { name: !!props.rfq ? 'Edit' : 'Tambah', href: '#' },
 ];
 
 const saveAction = () => {
-    if (!!props.purchaseOrder.id) {
-        form.put(route("purchase-orders.update", props.purchaseOrder.id));
+    if (!!props.rfq.id) {
+        form.put(route("rfqs.update", props.rfq.id));
     } else {
-        form.post(route("purchase-orders.store"));
+        form.post(route("rfqs.store"));
     }
 };
 
@@ -116,7 +91,18 @@ watch(() => newProduct.value.product_id, async (newVal) => {
 
             <form @submit.prevent="saveAction">
                 <div class="grid grid-cols-2 gap-2">
-                    <div v-if="formType == 'purchase-order'">
+                    <div>
+                        <InputLabel for="rfq_number" value="Nomor Pengajuan" />
+                        <TextInput id="rfq_number" v-model="form.rfq_number" disabled />
+                        <InputError :message="form.errors.rfq_number" />
+                    </div>
+
+                    <div>
+                        <InputLabel for="request_date" value="Tanggal Pengajuan" />
+                        <TextInput type="date" id="request_date" v-model="form.request_date" />
+                        <InputError :message="form.errors.request_date" />
+                    </div>
+                    <!-- <div>
                         <InputLabel for="supplier_id" value="Supplier" />
                         <Select id="supplier_id" v-model="form.supplier_id">
                             <option v-for="supplier in suppliers" :value="supplier.id" :key="supplier.id">
@@ -124,25 +110,7 @@ watch(() => newProduct.value.product_id, async (newVal) => {
                             </option>
                         </Select>
                         <InputError :message="form.errors.supplier_id" />
-                    </div>
-
-                    <div>
-                        <InputLabel for="submission_number" value="Nomor Pengajuan" />
-                        <TextInput id="submission_number" v-model="form.submission_number" disabled />
-                        <InputError :message="form.errors.submission_number" />
-                    </div>
-
-                    <div>
-                        <InputLabel for="po_number" value="Nomor PO" />
-                        <TextInput id="po_number" v-model="form.po_number" disabled />
-                        <InputError :message="form.errors.po_number" />
-                    </div>
-
-                    <div>
-                        <InputLabel for="order_date" value="Tanggal Pengajuan" />
-                        <TextInput type="date" id="order_date" v-model="form.order_date" />
-                        <InputError :message="form.errors.order_date" />
-                    </div>
+                    </div> -->
                 </div>
 
                 <div class="card-header px-4 py-2 border-b border-gray-200 dark:border-gray-700"></div>
@@ -152,10 +120,10 @@ watch(() => newProduct.value.product_id, async (newVal) => {
                 <div class="grid grid-cols-4 gap-4">
                     <div>
                         <InputLabel for="product_id" value="Barang" />
-                        <AutoComplete v-model="newProduct.product_id" :label="newProduct.product_label"
-                            @update:label="newProduct.product_label = $event" apiUrl="/api/products/suggestions" />
-                        <!-- <AutoComplete v-model="newProduct.product_id" :label="newProduct.product_label"
-                            @update:label="newProduct.product_label = $event" api-url="/api/products/suggestions">
+                        <AutoComplete v-model="newProduct.product_id" :label="newProduct.product_name"
+                            @update:label="newProduct.product_name = $event" apiUrl="/api/products/suggestions" />
+                        <!-- <AutoComplete v-model="newProduct.product_id" :label="newProduct.product_name"
+                            @update:label="newProduct.product_name = $event" api-url="/api/products/suggestions">
                             <template #suggestion-item="{ suggestion, highlighted }">
                                 <li :class="['cursor-pointer px-4 py-2 flex items-center', { 'bg-blue-200': highlighted }]"
                                     @click="$emit('click', suggestion)" @mousedown="$emit('mousedown', suggestion)">
@@ -198,7 +166,7 @@ watch(() => newProduct.value.product_id, async (newVal) => {
                     <p class="dark:text-white mt-2">{{ productDetails?.product_description }}&nbsp;</p>
                 </div>
 
-                <!-- Display product details returned from the API -->
+                <!-- Display product products returned from the API -->
                 <!-- <div v-if="productDetails" class="mt-2 text-dark dark:text-white">
                     <p>ID: {{ productDetails.id }}</p>
                     <p>Kategori: {{ productDetails.tag }}</p>
@@ -217,18 +185,17 @@ watch(() => newProduct.value.product_id, async (newVal) => {
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="(item, index) in form.details" :key="index"
+                            <tr v-for="(item, index) in form.products" :key="index"
                                 class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                                <td class="px-4 py-1">{{ item.product_label }}</td>
+                                <td class="px-4 py-1">{{ item.product_name }}</td>
                                 <td class="px-4 py-1">
                                     <TextInput class="py-1" type="number" v-model="item.quantity" />
                                 </td>
                                 <td class="px-4 py-1">
                                     <!-- <TextInput class="py-1" type="text" v-model="item.unit" /> -->
-                                    <Select v-model="item.unit">
-                                        <option v-for="option in satuanOptions" :value="option.value"
-                                            :key="option.value">
-                                            {{ option.label }}
+                                    <Select v-model="item.unit_id">
+                                        <option v-for="option in units" :value="option.id" :key="option.id">
+                                            {{ option.unit_name }}
                                         </option>
                                     </Select>
                                 </td>
@@ -241,7 +208,7 @@ watch(() => newProduct.value.product_id, async (newVal) => {
                             </tr>
                         </tbody>
                     </table>
-                    <InputError :message="form.errors.details" />
+                    <InputError :message="form.errors.products" />
                 </div>
 
                 <div class="flex justify-between mt-2">

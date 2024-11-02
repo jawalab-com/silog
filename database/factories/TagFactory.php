@@ -16,12 +16,12 @@ class TagFactory extends Factory
      */
     public function definition(): array
     {
-        $slug = fake()->unique()->slug(2);
+        $slug = fake()->unique()->lexify('kategori-??');
         $name = ucfirst(str_replace('-', ' ', $slug));
 
         return [
             'tag_name' => $name,
-            'tag_description' => fake()->sentence(),
+            'tag_description' => fake()->sentence(3),
             'slug' => $slug,
         ];
     }

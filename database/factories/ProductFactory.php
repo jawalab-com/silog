@@ -83,6 +83,7 @@ class ProductFactory extends Factory
             },
             'product_description' => fake()->sentence(),
             'price' => fake()->randomFloat(2, 0, 1000),
+            'verified' => fake()->boolean(),
             'created_at' => fake()->dateTimeBetween('-1 year', 'now'),
             'updated_at' => fake()->dateTimeBetween('-1 year', 'now'),
         ];

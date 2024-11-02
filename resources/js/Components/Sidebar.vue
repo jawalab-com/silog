@@ -43,7 +43,7 @@ const isLog = true;
                 </li>
                 <template v-if="isLog">
                     <li>
-                        <Link :href="route('purchase-orders.index', { formType: 'submission' })"
+                        <Link :href="route('rfqs.index')"
                             class="flex items-center p-2 font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
                         <span class="ml-3">Pengajuan</span>
                         </Link>
@@ -77,6 +77,12 @@ const isLog = true;
                         <Link :href="route('tags.index')"
                             class="flex items-center p-2 font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
                         <span class="ml-3">Kategori</span>
+                        </Link>
+                    </li>
+                    <li>
+                        <Link :href="route('units.index')"
+                            class="flex items-center p-2 font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+                        <span class="ml-3">Satuan</span>
                         </Link>
                     </li>
                     <li>

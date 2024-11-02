@@ -21,6 +21,7 @@ class Product extends Model
         'product_description',
         'price',
         'minimum_quantity',
+        'verified',
     ];
 
     public function tag()
