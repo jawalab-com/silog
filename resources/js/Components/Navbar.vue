@@ -78,10 +78,6 @@ const logout = () => {
                 <div id="role"
                     class="z-10 hidden font-normal bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700 dark:divide-gray-600">
                     <div class="py-1">
-                        <!-- <Link :href="route('updaterole', { role: 'Divisi Logistik' })"
-                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">
-                        Divisi Logistik
-                        </Link> -->
                         <Link :href="route('updaterole', { role: 'Divisi Lain' })"
                             class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">
                         Divisi Lain
@@ -90,14 +86,22 @@ const logout = () => {
                             class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">
                         Pimpinan Gudang
                         </Link>
-                        <!-- <Link :href="route('updaterole', { role: 'Admin Gudang' })"
+                        <Link :href="route('updaterole', { role: 'Admin Gudang' })"
                             class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">
                         Admin Gudang
+                        </Link>
+                        <Link :href="route('updaterole', { role: 'Purchasing' })"
+                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">
+                        Purchasing
                         </Link>
                         <Link :href="route('updaterole', { role: 'Pimpinan STP' })"
                             class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">
                         Pimpinan STP
-                        </Link> -->
+                        </Link>
+                        <Link :href="route('updaterole', { role: 'Keuangan' })"
+                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">
+                        Keuangan
+                        </Link>
                     </div>
                 </div>
                 <!-- ========================  -->

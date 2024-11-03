@@ -16,7 +16,14 @@ return new class extends Migration
             $table->foreignUuid('user_id')->constrained('users')->onDelete('cascade')->onUpdate('cascade');
             $table->string('rfq_number')->unique();
             $table->date('request_date');
+            $table->date('allocation_date')->nullable();
+            $table->string('title')->nullable();
             $table->decimal('total_amount', 10, 2)->default(0);
+            $table->boolean('verified_1')->nullable();
+            $table->boolean('verified_2')->nullable();
+            $table->boolean('verified_3')->nullable();
+            $table->boolean('verified_4')->nullable();
+            $table->boolean('payment_status')->default(false);
             $table->string('status');
             $table->text('comment')->nullable();
             $table->timestamps();

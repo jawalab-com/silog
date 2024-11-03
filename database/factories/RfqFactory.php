@@ -25,6 +25,8 @@ class RfqFactory extends Factory
             },
             'rfq_number' => implode('/', [fake()->randomNumber(3, true), 0, 'ADMIN', date('m'), date('Y')]),
             'request_date' => fake()->date,
+            'allocation_date' => fake()->date,
+            'title' => fake()->sentence,
             'total_amount' => fake()->randomFloat(2, 0, 10000000),
             'status' => fake()->randomElement(array_column(RfqStatus::cases(), 'value')),
             'comment' => fake()->sentence,

@@ -8,8 +8,8 @@ import { AutoComplete, Breadcrumb, Button, Card, DataTable, Icon, InputError, In
 
 const props = defineProps({
     rfq: Object,
-    tagSuppliers: Array,
-    rfqStatus: Array,
+    tagSuppliers: Object,
+    rfqStatus: Object,
     suppliers: Array,
 });
 
@@ -20,6 +20,7 @@ const form = useForm({
     rfq_number: props.rfq?.rfq_number,
     request_date: props.rfq?.request_date || new Date().toISOString().split('T')[0],
     total_amount: props.rfq?.total_amount || '',
+    verified: null,
     status: props.rfq?.status || '',
     comment: props.rfq?.comment || '',
     products: props.rfq?.products || [],
@@ -112,8 +113,18 @@ watch(() => newProduct.value.product_id, async (newVal) => {
                     </div>
 
                     <div>
+                        <InputLabel for="order_date" value="Perihal" />
+                        <p class="dark:text-white mt-2">{{ rfq.title }}</p>
+                    </div>
+
+                    <div>
                         <InputLabel for="order_date" value="Tanggal Pengajuan" />
                         <p class="dark:text-white mt-2">{{ rfq.request_date }}</p>
+                    </div>
+
+                    <div>
+                        <InputLabel for="order_date" value="Tanggal Peruntukan" />
+                        <p class="dark:text-white mt-2">{{ rfq.allocation_date }}</p>
                     </div>
                 </div>
 
@@ -163,11 +174,11 @@ watch(() => newProduct.value.product_id, async (newVal) => {
                             <tr>
                                 <th class="px-4 py-3">Kategori</th>
                                 <th class="px-4 py-3">Barang</th>
-                                <th class="px-4 py-3">Stok</th>
-                                <th class="px-4 py-3">Jumlah</th>
+                                <th class="px-4 py-3 text-right">Stok</th>
+                                <th class="px-4 py-3 text-right">Jumlah</th>
                                 <th class="px-4 py-3">Satuan</th>
-                                <th class="px-4 py-3">Harga</th>
-                                <th class="px-4 py-3">Subtotal</th>
+                                <th class="px-4 py-3 text-right">Harga</th>
+                                <th class="px-4 py-3 text-right">Subtotal</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -175,10 +186,10 @@ watch(() => newProduct.value.product_id, async (newVal) => {
                                 class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
                                 <td class="px-4 py-1">{{ item.tag_name }}</td>
                                 <td class="px-4 py-1">{{ item.product_name }}</td>
-                                <td class="px-4 py-1">{{ item.stock }}</td>
-                                <td class="px-4 py-1">{{ item.quantity }}</td>
+                                <td class="px-4 py-1 text-right pr-4">{{ item.stock }}</td>
+                                <td class="px-4 py-1 text-right pr-4">{{ item.quantity }}</td>
                                 <td class="px-4 py-1">{{ item.unit_name }}</td>
-                                <td class="px-4 py-1">
+                                <td class="px-4 py-1 text-right pr-4">
                                     <!-- <template v-if="
                                         (['Pimpinan Gudang'].includes($page.props.auth.user.division) && [rfqStatus['PENDING']].includes(rfq.status))
                                     ">
@@ -189,12 +200,12 @@ watch(() => newProduct.value.product_id, async (newVal) => {
                                     <TextInput class="py-1" type="hidden" v-model="item.unit_price" step="0.01" />
                                     <!-- </template> -->
                                 </td>
-                                <td class="px-4 py-1">
+                                <td class="px-4 py-1 text-right pr-4">
                                     <p class="py-1">
                                         <TextInput class="py-1" type="hidden" v-model="item.total_price" />
                                         {{
                                             item.total_price = isNaN(item.quantity * item.unit_price) ? 0.00 :
-                                                (item.quantity * item.unit_price).toFixed(0)
+                                                (item.quantity * item.unit_price).toFixed(2)
                                         }}
                                     </p>
                                 </td>
@@ -228,14 +239,24 @@ watch(() => newProduct.value.product_id, async (newVal) => {
                     <Button color="gray" @click="goBack" type="button">
                         Kembali
                     </Button>
-                    <div
-                        v-if="($page.props.auth.user.division === 'Pimpinan Gudang' && rfq.status === rfqStatus['PENDING'])">
-                        <Button color="red" @click="form.status = rfqStatus['REJECTED']" type="submit">
+                    <div v-if="
+                        ($page.props.auth.user.division === 'Pimpinan Gudang' && rfq.verified_1 == null) ||
+                        ($page.props.auth.user.division === 'Admin Gudang' && rfq.verified_1 != null && rfq.verified_2 == null) ||
+                        ($page.props.auth.user.division === 'Purchasing Gudang' && rfq.verified_2 != null && rfq.verified_3 == null) ||
+                        ($page.props.auth.user.division === 'Pimpinan STP' && rfq.verified_3 != null && rfq.verified_4 == null)
+                    ">
+                        <!-- <Button color="red" @click="form.status = rfqStatus['REJECTED']" type="submit">
                             Tolak
                         </Button>
                         <Button color="green"
                             @click="form.status = rfq.status === rfqStatus['PENDING'] ? rfqStatus['VERIFIED'] : rfqStatus['APPROVED']"
                             type="submit" class="ml-2">
+                            Terima
+                        </Button> -->
+                        <Button color="red" @click="form.verified = 0" type="submit">
+                            Tolak
+                        </Button>
+                        <Button color="green" @click="form.verified = 1" type="submit" class="ml-2">
                             Terima
                         </Button>
                     </div>

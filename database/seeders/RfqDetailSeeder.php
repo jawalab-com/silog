@@ -2,17 +2,17 @@
 
 namespace Database\Seeders;
 
-use App\Models\Rfq;
+use App\Models\RfqDetail;
 use Illuminate\Database\Seeder;
 
-class RfqSeeder extends Seeder
+class RfqDetailSeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
-        Rfq::truncate();
-        Rfq::factory()->count(5)->create();
+        RfqDetail::truncate();
+        RfqDetail::factory()->count(30)->create();
     }
 }

@@ -1,6 +1,6 @@
 <script setup>
 import { useForm, Link } from '@inertiajs/vue3';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import Card from '@/Components/Card.vue';
 import InputLabel from '@/Components/InputLabel.vue';
@@ -24,9 +24,15 @@ const form = useForm({
     price: props.product?.price || 0,
     minimum_quantity: props.product?.minimum_quantity || 0,
     verified: props.product?.verified || false,
+    inventory: {
+        quantity: props.product?.inventory?.quantity || 0,
+        new_quantity: props.product?.inventory?.quantity || 0,
+    },
 });
 
-const title = (!!props.product ? 'Edit' : 'Tambah') + ' Product';
+const changeStock = ref(false);
+
+const title = (!!props.product.id ? 'Edit' : 'Tambah') + ' Product';
 const breadcrumbs = [
     { name: 'Home', href: route('dashboard') },
     { name: 'Product', href: route('products.index') },
@@ -116,6 +122,38 @@ const saveAction = () => {
                         <InputError :message="form.errors.price" />
                     </div> -->
                 </div>
+
+                <div class="card-header px-4 pb-2 pt-8 border-b border-gray-200 dark:border-gray-700"></div>
+
+                <div class="flex items-center my-4">
+                    <input id="changeStock" type="checkbox" v-model="changeStock"
+                        class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+                    <InputLabel for="changeStock" value="Ubah Stok" class="ml-2" />
+                    <InputError :message="form.errors.changeStock" />
+                </div>
+
+                <div v-if="changeStock">
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <InputLabel for="quantity" value="Stok Semula" class="ml-2" />
+                            <TextInput disabled id="quantity" v-model="form.inventory.quantity" />
+                            <InputError :message="form.errors.quantity" />
+                        </div>
+
+                        <div>
+                            <InputLabel for="quantity" value="Stok setelah diubah" class="ml-2" />
+                            <TextInput type="number" id="quantity" v-model="form.inventory.new_quantity" />
+                            <InputError :message="form.errors.quantity" />
+                        </div>
+
+                        <div>
+                            <InputLabel for="proof" value="Upload Bukti" class="ml-2" />
+                            <TextInput type="file" id="proof" v-model="form.proof" />
+                            <InputError :message="form.errors.proof" />
+                        </div>
+                    </div>
+                </div>
+
                 <template #footer>
                     <div class="flex justify-end">
                         <Button color="gray" class="mr-2" @click="back">

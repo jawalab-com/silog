@@ -118,7 +118,7 @@ const setSortKey = (key) => {
                         <template v-for="(column, key) in columns" :key="key">
                             <td class="px-4 py-3"
                                 :class="`text-${column.align || 'left'} ${column.align === 'right' ? 'pr-8' : ''}`">
-                                {{ item[column.name] }}
+                                <p v-html="item[column.name]"></p>
                             </td>
                         </template>
                     </slot>

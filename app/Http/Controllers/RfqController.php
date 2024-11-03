@@ -161,6 +161,25 @@ class RfqController extends Controller
         //     ['action' => 'someAction']
         // );
         $data = $request->validated();
+        $verified = $request->input('verified', null);
+        if (! empty($verified)) {
+            switch (auth()->user()->division) {
+                case 'Pimpinan Gudang':
+                    $data['verified_1'] = $verified;
+                    break;
+                case 'Admin Gudang':
+                    $data['verified_2'] = $verified;
+                    break;
+                case 'Purchasing':
+                    $data['verified_3'] = $verified;
+                    break;
+                case 'Pimpinan STP':
+                    $data['verified_4'] = $verified;
+                    break;
+                default:
+                    break;
+            }
+        }
         $data['status'] = $request->input('status', RfqStatus::PENDING);
         if ($request->form_type === 'purchase-order') {
             $data['user_id'] = auth()->id();

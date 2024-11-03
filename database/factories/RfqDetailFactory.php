@@ -18,17 +18,20 @@ class RfqDetailFactory extends Factory
      */
     public function definition(): array
     {
+        $quantity = fake()->numberBetween(1, 10);
+        $unitPrice = fake()->randomFloat(2, 1000, 100000);
+
         return [
-            'id' => fake()->uuid,
-            'purchase_order_id' => function () {
+            'rfq_id' => function () {
                 return Rfq::inRandomOrder()->first()->id;
             },
             'product_id' => function () {
                 return Product::inRandomOrder()->first()->id;
             },
             'quantity' => fake()->numberBetween(1, 10),
-            'unit_price' => fake()->randomFloat(2, 1, 100),
-            'total_price' => fake()->randomFloat(2, 10, 1000),
+            'unit_id' => $quantity,
+            'unit_price' => $unitPrice,
+            'total_price' => $quantity * $unitPrice,
             'created_at' => fake()->dateTimeBetween('-1 year', 'now'),
             'updated_at' => fake()->dateTimeBetween('-1 year', 'now'),
         ];

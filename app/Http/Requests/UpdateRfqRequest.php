@@ -24,6 +24,9 @@ class UpdateRfqRequest extends FormRequest
         return [
             // 'suppliers' => 'required|json',
             'request_date' => 'required|date',
+            'allocation_date' => 'nullable|date',
+            'title' => 'nullable|string',
+            'verified' => 'nullable|boolean',
             // 'status' => 'required|string',
             'comment' => 'nullable|string',
             'suppliers' => 'nullable|array',

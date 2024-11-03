@@ -17,6 +17,8 @@ const form = useForm({
     user_id: props.rfq?.user_id || '',
     rfq_number: props.rfq?.rfq_number,
     request_date: props.rfq?.request_date || new Date().toISOString().split('T')[0],
+    allocation_date: props.rfq?.allocation_date || new Date().toISOString().split('T')[0],
+    title: props.rfq?.title || '',
     total_amount: props.rfq?.total_amount || '',
     status: props.rfq?.status || '',
     comment: props.rfq?.comment || '',
@@ -99,9 +101,21 @@ watch(() => newProduct.value.product_id, async (newVal) => {
                     </div>
 
                     <div>
+                        <InputLabel for="title" value="Perihal" />
+                        <TextInput type="text" id="title" v-model="form.title" />
+                        <InputError :message="form.errors.title" />
+                    </div>
+
+                    <div>
                         <InputLabel for="request_date" value="Tanggal Pengajuan" />
                         <TextInput type="date" id="request_date" v-model="form.request_date" />
                         <InputError :message="form.errors.request_date" />
+                    </div>
+
+                    <div>
+                        <InputLabel for="allocation_date" value="Tanggal Peruntukan" />
+                        <TextInput type="date" id="allocation_date" v-model="form.allocation_date" />
+                        <InputError :message="form.errors.allocation_date" />
                     </div>
                     <!-- <div>
                         <InputLabel for="supplier_id" value="Supplier" />

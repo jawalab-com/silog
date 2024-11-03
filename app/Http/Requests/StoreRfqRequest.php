@@ -24,6 +24,8 @@ class StoreRfqRequest extends FormRequest
         return [
             'rfq_number' => 'required|string|unique:rfqs,rfq_number',
             'request_date' => 'required|date',
+            'allocation_date' => 'nullable|date',
+            'title' => 'nullable|string',
             'products' => 'required|array|min:1',
         ];
     }

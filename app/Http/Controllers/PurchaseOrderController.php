@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Enums\OrderStatus;
+use App\Enums\RfqStatus;
 use App\Http\Requests\StorePurchaseOrderRequest;
 use App\Http\Requests\UpdatePurchaseOrderRequest;
 use App\Models\InventoryTransaction;
 use App\Models\PurchaseOrder;
+use App\Models\Rfq;
 use App\Models\Supplier;
 use App\Models\Tag;
 use Illuminate\Http\Request;
@@ -20,20 +22,24 @@ class PurchaseOrderController extends Controller
      */
     public function index(Request $request)
     {
-        $formType = $request->input('formType', 'purchase-order');
-        if ($formType == 'purchase-order') {
-            $statuses = [OrderStatus::SUBMISSION_APPROVED, OrderStatus::COMPLETED, OrderStatus::CANCELLED, OrderStatus::REFUNDED];
-        } else {
-            $statuses = [OrderStatus::SUBMISSION_PENDING, OrderStatus::SUBMISSION_APPROVED, OrderStatus::SUBMISSION_REJECTED];
-        }
-        $purchaseOrders = PurchaseOrder::whereIn('status', $statuses)
-            ->with('supplier')
+        // $formType = $request->input('formType', 'purchase-order');
+        // if ($formType == 'purchase-order') {
+        //     $statuses = [OrderStatus::SUBMISSION_APPROVED, OrderStatus::COMPLETED, OrderStatus::CANCELLED, OrderStatus::REFUNDED];
+        // } else {
+        //     $statuses = [OrderStatus::SUBMISSION_PENDING, OrderStatus::SUBMISSION_APPROVED, OrderStatus::SUBMISSION_REJECTED];
+        // }
+        // $purchaseOrders = PurchaseOrder::whereIn('status', $statuses)
+        //     ->with('supplier')
+        //     ->with('user')
+        //     ->orderBy('order_date', 'desc')
+        //     ->get();
+        $purchaseOrders = Rfq::whereIn('status', [RfqStatus::VERIFIED])
+            // ->with('supplier')
             ->with('user')
-            ->orderBy('order_date', 'desc')
+            ->orderBy('request_date', 'desc')
             ->get();
 
         return Inertia::render('PurchaseOrders/Index', [
-            'formType' => $formType,
             'purchaseOrders' => $purchaseOrders,
         ]);
     }

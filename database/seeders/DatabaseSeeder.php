@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             ProductSeeder::class,
             SupplierSeeder::class,
             RfqSeeder::class,
+            RfqDetailSeeder::class,
             PurchaseOrderSeeder::class,
         ]);
     }

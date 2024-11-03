@@ -1,21 +1,20 @@
 <script setup>
-import { ref, computed, watch } from 'vue';
-import { Link, useForm } from '@inertiajs/vue3';
-import Tooltip from '@/Components/Tooltip.vue';
-import Swal from 'sweetalert2';
-import AppLayout from '@/Layouts/AppLayout.vue';
-import Card from '@/Components/Card.vue';
-import Pagination from '@/Components/Pagination.vue';
-import SuccessButton from '@/Components/SuccessButton.vue';
-import ActionButton from '@/Components/ActionButton.vue';
+import { ref, computed } from 'vue';
+import { useForm, usePage } from '@inertiajs/vue3';
+import { AppLayout } from '@/Layouts';
 import { Breadcrumb, Button, DataTable, Icon } from '@/Components';
 import { FwbButtonGroup } from 'flowbite-vue';
+import SuccessButton from '@/Components/SuccessButton.vue';
 
 const props = defineProps({
     formType: String,
     rfqStatus: Object,
     rfqs: Array,
 });
+
+// Accessing page properties using usePage
+const page = usePage();
+const userDivision = page.props.auth.user.division; // Access user division from page props
 
 const title = 'Pengajuan Barang';
 const breadcrumbs = [
@@ -27,35 +26,21 @@ const columns = [
     { name: 'rfq_number', label: 'Nomor Pengajuan' },
     { name: 'request_date', label: 'Tanggal Pengajuan' },
     { name: 'user_name', label: 'Pengaju' },
+    { name: 'verified', label: 'Status Verifikasi' },
+    userDivision === 'Keuangan' ? { name: 'payment_status', label: 'Status Pembayaran' } : null,
     { name: 'status', label: 'Status' },
     { name: 'comment', label: 'Komentar' },
-];
+].filter(Boolean);
 
 const data = props.rfqs.map(item => ({
     ...item,
     user_name: item.user.name,
+    comment: item.comment.length > 30 ? item.comment.substring(0, 30) + '...' : item.comment,
+    verified: `Pimpinan Gudang: ${item.verified_1 === 1 ? '✔️' : item.verified_1 === 0 ? '❌' : '-'}<br/>` +
+        `Admin Gudang: ${item.verified_2 === 1 ? '✔️' : item.verified_2 === 0 ? '❌' : '-'}<br/>` +
+        `Purchasing: ${item.verified_3 === 1 ? '✔️' : item.verified_3 === 0 ? '❌' : '-'}<br/>` +
+        `Pimpinan STP: ${item.verified_4 === 1 ? '✔️' : item.verified_4 === 0 ? '❌' : '-'}`,
 }));
-
-
-// Delete purchaseOrder with confirmation
-const deleteAction = async (id) => {
-    const result = await Swal.fire({
-        title: 'Are you sure?',
-        text: "You won't be able to revert this!",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
-        confirmButtonText: 'Yes, delete it!',
-    });
-
-    if (result.isConfirmed) {
-        uniqueKey.value++;
-        form.delete(route("rfqs.destroy", id), {
-            preserveScroll: true,
-        });
-    }
-};
 </script>
 
 <template>
@@ -64,7 +49,8 @@ const deleteAction = async (id) => {
             <Breadcrumb :title="title" :breadcrumbs="breadcrumbs" />
         </template>
 
-        <div class="flex flex-wrap space-y-4 sm:space-y-0 items-center justify-between pb-4">
+        <div class="flex flex-wrap space-y-4 sm:space-y-0 items-center justify-between pb-4"
+            v-if="['Divisi Lain'].includes($page.props.auth.user.division)">
             <SuccessButton :href="route('rfqs.create', { formType: formType })">
                 <Icon name="plus" class="mr-2" />
                 Tambah {{ title }}

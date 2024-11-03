@@ -16,7 +16,7 @@ const props = defineProps({
     purchaseOrders: Array,
 });
 
-const title = props.formType == 'submission' ? 'Pengajuan' : 'Purchase Order';
+const title = props.formType == 'submission' ? 'Pengajuan' : 'Purchasing';
 const breadcrumbs = [
     { name: 'Home', href: route('dashboard') },
     { name: title, href: '#' },
@@ -31,27 +31,26 @@ const orderStatus = [
     { value: 'REFUNDED', label: 'Dikembalikan' },
 ];
 
-const columns = props.formType == 'submission' ? [
-    { name: 'submission_number', label: 'Nomor Pengajuan' },
-    { name: 'order_date', label: 'Tanggal Pengajuan' },
+const columns = [
+    { name: 'rfq_number', label: 'Nomor Pengajuan' },
+    // { name: 'po_number', label: 'Nomor PO' },
+    // { name: 'supplier_name', label: 'Supplier' },
+    { name: 'request_date', label: 'Tanggal Pengajuan' },
     { name: 'user_name', label: 'Pengaju' },
-    { name: 'status', label: 'Status' },
-    { name: 'comment', label: 'Komentar' },
-] : [
-    { name: 'submission_number', label: 'Nomor Pengajuan' },
-    { name: 'po_number', label: 'Nomor PO' },
-    { name: 'supplier_name', label: 'Supplier' },
-    { name: 'order_date', label: 'Tanggal Pengajuan' },
-    { name: 'user_name', label: 'Pengaju' },
-    { name: 'status', label: 'Status' },
     { name: 'total_amount', label: 'Total', align: 'right' },
+    { name: 'verifikasi', label: 'Verifikasi' },
+    { name: 'payment_status', label: 'Status Pembayaran' },
+    { name: 'status', label: 'Status' },
 ];
 
 const data = props.purchaseOrders.map(item => ({
     ...item,
     supplier_name: item.supplier?.supplier_name || '',
     user_name: item.user.name,
-    status: orderStatus.find(status => status.value === item.status)?.label || item.status,
+    // status: orderStatus.find(status => status.value === item.status)?.label || item.status,
+    verifikasi: "Pimpinan Gudang: ✔️<br/>Admin Gudang: ✔️<br/>Purchasing: ❌<br/>Pimpinan STP: ✔️",
+    payment_status: "Belum Lunas",
+    status: "Pending",
 }));
 
 
