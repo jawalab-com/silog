@@ -28,7 +28,7 @@ const columns = [
 ];
 const data = props.products.map(item => ({
     ...item,
-    tag_name: item.tag.tag_name,
+    tag_name: item.tag?.tag_name,
     brand_name: item.brand.brand_name,
     quantity: item.inventory?.quantity || 0,
     verified: item.verified ? '✔️' : '❌',

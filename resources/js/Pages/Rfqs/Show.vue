@@ -5,6 +5,7 @@ import axios from 'axios';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import { AutoComplete, Breadcrumb, Button, Card, DataTable, Icon, InputError, InputLabel, Select, TextInput } from '@/Components';
+import utils from '@/utils';
 
 const props = defineProps({
     rfq: Object,
@@ -128,39 +129,42 @@ watch(() => newProduct.value.product_id, async (newVal) => {
                     </div>
                 </div>
 
-                <div class="card-header px-4 py-2 border-b border-gray-200 dark:border-gray-700"></div>
-                <h2 class="font-semibold text-lg text-gray-800 dark:text-gray-200 leading-tight my-4">
-                    Supplier
-                </h2>
+                <div
+                    v-if="(rfq.verified_3) || (rfq.verified_2 && ['Purchasing'].includes($page.props.auth.user.division))">
+                    <div class="card-header px-4 py-2 border-b border-gray-200 dark:border-gray-700"></div>
+                    <h2 class="font-semibold text-lg text-gray-800 dark:text-gray-200 leading-tight my-4">
+                        Supplier
+                    </h2>
 
-                <div class="relative overflow-x-auto overflow-y-hidden sm:rounded-lg mt-2">
-                    <table class="w-full text-sm text-left rtl:text-right text-gray-700 dark:text-gray-300">
-                        <!-- <thead class="text-xs text-gray-700 uppercase dark:text-gray-300">
+                    <div class="relative overflow-x-auto overflow-y-hidden sm:rounded-lg mt-2">
+                        <table class="w-full text-sm text-left rtl:text-right text-gray-700 dark:text-gray-300">
+                            <!-- <thead class="text-xs text-gray-700 uppercase dark:text-gray-300">
                             <tr>
                                 <th class="px-4 py-3">Kategori</th>
                                 <th class="px-4 py-3">Supplier</th>
                             </tr>
                         </thead> -->
-                        <tbody>
-                            <tr v-for="(item, index) in form.suppliers" :key="index" class="">
-                                <td class="px-4 py-1">{{ item.tag.tag_name }}</td>
-                                <td class="px-4 py-1">
-                                    <!-- <Select
-                                        v-if="['Pimpinan Gudang'].includes($page.props.auth.user.division) && rfqStatus['PENDING'] === rfq.status"
-                                        id="supplier_id" v-model="item.supplier_id" class="py-1 px-2">
-                                        <option v-for="supplier in tagSuppliers[item.tag.slug]" :value="supplier.id"
-                                            :key="supplier.id">
-                                            {{ supplier.supplier_name }}
-                                        </option>
-                                    </Select>
-                                    <span v-else>: -->
-                                    {{ item.supplier.supplier_name }}
-                                    <!-- </span> -->
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <InputError :message="form.errors.suppliers" />
+                            <tbody>
+                                <tr v-for="(item, index) in form.suppliers" :key="index" class="">
+                                    <td class="px-4 py-1">{{ item.tag.tag_name }}</td>
+                                    <td class="px-4 py-1">
+                                        <Select
+                                            v-if="rfq.verified_2 && ['Purchasing'].includes($page.props.auth.user.division)"
+                                            id="supplier_id" v-model="item.supplier_id" class="py-1 px-2">
+                                            <option v-for="supplier in tagSuppliers[item.tag.slug]" :value="supplier.id"
+                                                :key="supplier.id">
+                                                {{ supplier.supplier_name }}
+                                            </option>
+                                        </Select>
+                                        <span v-else>:
+                                            {{ item.supplier.supplier_name }}
+                                        </span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <InputError :message="form.errors.suppliers" />
+                    </div>
                 </div>
 
                 <div class="card-header px-4 py-2 border-b border-gray-200 dark:border-gray-700"></div>
@@ -174,11 +178,14 @@ watch(() => newProduct.value.product_id, async (newVal) => {
                             <tr>
                                 <th class="px-4 py-3">Kategori</th>
                                 <th class="px-4 py-3">Barang</th>
-                                <th class="px-4 py-3 text-right">Stok</th>
+                                <th v-if="(['Admin Gudang', 'Purchasing', 'Pimpinan STP'].includes($page.props.auth.user.division))"
+                                    class="px-4 py-3 text-center" colspan="2">Stok</th>
                                 <th class="px-4 py-3 text-right">Jumlah</th>
                                 <th class="px-4 py-3">Satuan</th>
-                                <th class="px-4 py-3 text-right">Harga</th>
-                                <th class="px-4 py-3 text-right">Subtotal</th>
+                                <th v-if="(['Admin Gudang', 'Purchasing', 'Pimpinan STP'].includes($page.props.auth.user.division))"
+                                    class="px-4 py-3 text-right">Harga</th>
+                                <th v-if="(['Admin Gudang', 'Purchasing', 'Pimpinan STP'].includes($page.props.auth.user.division))"
+                                    class="px-4 py-3 text-right">Subtotal</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -186,26 +193,47 @@ watch(() => newProduct.value.product_id, async (newVal) => {
                                 class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
                                 <td class="px-4 py-1">{{ item.tag_name }}</td>
                                 <td class="px-4 py-1">{{ item.product_name }}</td>
-                                <td class="px-4 py-1 text-right pr-4">{{ item.stock }}</td>
+                                <td v-if="(['Admin Gudang', 'Purchasing', 'Pimpinan STP'].includes($page.props.auth.user.division))"
+                                    class="px-4 py-1 text-right pr-4">
+                                    {{ item.stock }}
+                                </td>
+                                <td v-if="(['Admin Gudang', 'Purchasing', 'Pimpinan STP'].includes($page.props.auth.user.division))"
+                                    class="px-0 py-1 text-right">
+                                    <span v-if="item.stock - item.quantity >= 0"
+                                        class="ml-2 bg-green-100 text-green-800 text-xs font-medium me-2 px-1.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300">
+                                        Tersedia
+                                    </span>
+                                    <span v-else-if="item.stock > 0"
+                                        class="ml-2 bg-yellow-100 text-yellow-800 text-xs font-medium me-2 px-1.5 py-0.5 rounded dark:bg-yellow-900 dark:text-yellow-300">
+                                        Kurang
+                                    </span>
+                                    <span v-else
+                                        class="ml-2 bg-red-100 text-red-800 text-xs font-medium me-2 px-1.5 py-0.5 rounded dark:bg-red-900 dark:text-red-300">
+                                        Habis
+                                    </span>
+                                </td>
                                 <td class="px-4 py-1 text-right pr-4">{{ item.quantity }}</td>
                                 <td class="px-4 py-1">{{ item.unit_name }}</td>
-                                <td class="px-4 py-1 text-right pr-4">
-                                    <!-- <template v-if="
-                                        (['Pimpinan Gudang'].includes($page.props.auth.user.division) && [rfqStatus['PENDING']].includes(rfq.status))
+                                <td v-if="(['Admin Gudang', 'Purchasing', 'Pimpinan STP'].includes($page.props.auth.user.division))"
+                                    class="px-4 py-1 text-right pr-4">
+                                    <template v-if="
+                                        (rfq.verified_2 && ['Purchasing'].includes($page.props.auth.user.division))
                                     ">
                                         <TextInput class="py-1" type="number" v-model="item.unit_price" step="0.01" />
                                     </template>
-                                    <template v-else> -->
-                                    {{ item.unit_price }}
-                                    <TextInput class="py-1" type="hidden" v-model="item.unit_price" step="0.01" />
-                                    <!-- </template> -->
+                                    <template v-else>
+                                        {{ utils.formatDecimal(item.unit_price) }}
+                                        <TextInput class="py-1" type="hidden" v-model="item.unit_price" step="0.01" />
+                                    </template>
                                 </td>
-                                <td class="px-4 py-1 text-right pr-4">
+                                <td v-if="(['Admin Gudang', 'Purchasing', 'Pimpinan STP'].includes($page.props.auth.user.division))"
+                                    class="px-4 py-1 text-right pr-4">
                                     <p class="py-1">
                                         <TextInput class="py-1" type="hidden" v-model="item.total_price" />
                                         {{
-                                            item.total_price = isNaN(item.quantity * item.unit_price) ? 0.00 :
-                                                (item.quantity * item.unit_price).toFixed(2)
+                                            utils.formatDecimal(item.total_price = isNaN(item.quantity * item.unit_price) ?
+                                                0.00 :
+                                                (item.quantity * item.unit_price).toFixed(2))
                                         }}
                                     </p>
                                 </td>
@@ -242,7 +270,7 @@ watch(() => newProduct.value.product_id, async (newVal) => {
                     <div v-if="
                         ($page.props.auth.user.division === 'Pimpinan Gudang' && rfq.verified_1 == null) ||
                         ($page.props.auth.user.division === 'Admin Gudang' && rfq.verified_1 != null && rfq.verified_2 == null) ||
-                        ($page.props.auth.user.division === 'Purchasing Gudang' && rfq.verified_2 != null && rfq.verified_3 == null) ||
+                        ($page.props.auth.user.division === 'Purchasing' && rfq.verified_2 != null && rfq.verified_3 == null) ||
                         ($page.props.auth.user.division === 'Pimpinan STP' && rfq.verified_3 != null && rfq.verified_4 == null)
                     ">
                         <!-- <Button color="red" @click="form.status = rfqStatus['REJECTED']" type="submit">
@@ -263,5 +291,6 @@ watch(() => newProduct.value.product_id, async (newVal) => {
                 </div>
             </form>
         </Card>
+        <div class="h-40"></div>
     </AppLayout>
 </template>

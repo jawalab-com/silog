@@ -106,6 +106,9 @@ class RfqController extends Controller
         $rfq->rfqSuppliers()->whereNotIn('tag', $tags)->delete();
         foreach ($tags as $tag) {
             $supplier = Supplier::where('tag', $tag)->first();
+            if (! $supplier) {
+                dd($tag);
+            }
             if (! $rfq->rfqSuppliers()->where('tag', $tag)->first()) {
                 $rfq->rfqSuppliers()->create(['tag' => $tag, 'supplier_id' => $supplier->id]);
             }

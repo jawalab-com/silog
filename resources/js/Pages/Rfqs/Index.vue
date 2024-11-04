@@ -25,17 +25,18 @@ const breadcrumbs = [
 const columns = [
     { name: 'rfq_number', label: 'Nomor Pengajuan' },
     { name: 'request_date', label: 'Tanggal Pengajuan' },
+    { name: 'allocation_date', label: 'Tanggal Digunakan' },
     { name: 'user_name', label: 'Pengaju' },
+    { name: 'title', label: 'Perihal' },
     { name: 'verified', label: 'Status Verifikasi' },
     userDivision === 'Keuangan' ? { name: 'payment_status', label: 'Status Pembayaran' } : null,
     { name: 'status', label: 'Status' },
-    { name: 'comment', label: 'Komentar' },
 ].filter(Boolean);
 
 const data = props.rfqs.map(item => ({
     ...item,
     user_name: item.user.name,
-    comment: item.comment.length > 30 ? item.comment.substring(0, 30) + '...' : item.comment,
+    comment: (item.comment?.length || 0) > 30 ? item.comment.substring(0, 30) + '...' : item.comment,
     verified: `Pimpinan Gudang: ${item.verified_1 === 1 ? '✔️' : item.verified_1 === 0 ? '❌' : '-'}<br/>` +
         `Admin Gudang: ${item.verified_2 === 1 ? '✔️' : item.verified_2 === 0 ? '❌' : '-'}<br/>` +
         `Purchasing: ${item.verified_3 === 1 ? '✔️' : item.verified_3 === 0 ? '❌' : '-'}<br/>` +
