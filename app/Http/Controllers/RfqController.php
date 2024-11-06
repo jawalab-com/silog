@@ -177,6 +177,9 @@ class RfqController extends Controller
                     $data['verified_3'] = $verified;
                     break;
                 case 'Pimpinan STP':
+                    if ($verified && $rfq->verified_3) {
+                        $data['verified_3'] = null;
+                    }
                     $data['verified_4'] = $verified;
                     break;
                 default:
