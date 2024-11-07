@@ -23,14 +23,20 @@ class UpdateRfqRequest extends FormRequest
     {
         return [
             // 'suppliers' => 'required|json',
-            'request_date' => 'required|date',
+            'request_date' => 'nullable|date',
             'allocation_date' => 'nullable|date',
             'title' => 'nullable|string',
             'verified' => 'nullable|boolean',
             // 'status' => 'required|string',
             'comment' => 'nullable|string',
             'suppliers' => 'nullable|array',
-            'products' => 'required|array|min:1',
+            // 'suppliers.*.tag' => 'nullable|string',
+            // 'suppliers.*.supplier_id' => 'nullable|uuid',
+            // 'suppliers.*.discount' => 'nullable|numeric|min:0',
+            // 'suppliers.*.tax' => 'nullable|numeric|min:0',
+            // 'suppliers.*.file_proof_path' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:10240',
+            // 'suppliers.*.file_receipt_path' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:10240',
+            'products' => 'nullable|array|min:1',
         ];
     }
 }

@@ -16,10 +16,20 @@ class UserSeeder extends Seeder
         User::truncate();
         // User::factory(10)->withPersonalTeam()->create();
 
-        User::factory()->withPersonalTeam()->create([
+        $owner = User::factory()->withPersonalTeam()->create([
             'name' => 'Test User',
             'email' => 'test@example.com',
-            'division' => 'Divisi Logistik',
         ]);
+
+        $team = $owner->ownedTeams()->first();
+        $roles = ['pengaju', 'pimpinan-gudang', 'admin-gudang', 'purchasing', 'pejabat-teknis', 'pimpinan', 'keuangan'];
+        foreach ($roles as $role) {
+            $user = User::factory()->create([
+                'name' => ucfirst($role).' User',
+                'email' => $role.'@example.com',
+            ]);
+            $user->teams()->attach($team, ['role' => $role]);
+            $user->switchTeam($team);
+        }
     }
 }

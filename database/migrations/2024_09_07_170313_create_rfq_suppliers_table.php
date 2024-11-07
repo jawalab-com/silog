@@ -16,6 +16,14 @@ return new class extends Migration
             $table->foreignUuid('rfq_id')->constrained('rfqs')->onDelete('cascade')->onUpdate('cascade');
             $table->string('tag');
             $table->foreignUuid('supplier_id');
+            $table->decimal('discount', 10, 2)->nullable();
+            $table->decimal('tax', 10, 2)->nullable();
+            $table->decimal('transportation', 10, 2)->nullable();
+            $table->string('file_proof')->nullable();
+            $table->string('file_invoice')->nullable();
+            $table->string('file_receipt')->nullable();
+            $table->datetime('date_sent')->nullable();
+            $table->datetime('date_received')->nullable();
             $table->timestamps();
         });
     }

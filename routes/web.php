@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\SocialiteController;
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PurchaseOrderController;
+use App\Http\Controllers\PurchaseRequisitionController;
 use App\Http\Controllers\RfqController;
 use App\Http\Controllers\RoomTypeController;
 use App\Http\Controllers\SalesOrderController;
@@ -49,10 +50,12 @@ Route::get('/page/{page}', function ($page) {
 
 Route::get('/updaterole/{role}', function ($role) {
     $user = auth()->user();
-    $user->division = $role;
-    $user->save();
-
-    // return redirect()->route('dashboard');
+    $team = $user->allTeams()->find($user->currentTeam->id);
+    if ($team) {
+        $user->teams()->updateExistingPivot($team->id, [
+            'role' => $role,
+        ]);
+    }
 })->name('updaterole');
 
 Route::get('/book', function () {
@@ -93,5 +96,6 @@ Route::middleware([
         'rfqs' => RfqController::class,
         'tags' => TagController::class,
         'units' => UnitController::class,
+        'purchase-requisitions' => PurchaseRequisitionController::class,
     ]);
 });

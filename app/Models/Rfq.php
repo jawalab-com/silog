@@ -25,6 +25,10 @@ class Rfq extends Model
         'verified_2',
         'verified_3',
         'verified_4',
+        'verified_1_user_id',
+        'verified_2_user_id',
+        'verified_3_user_id',
+        'verified_4_user_id',
         'payment_status',
         'status',
         'comment',
@@ -47,6 +51,26 @@ class Rfq extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function verified_1User(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'verified_1_user_id');
+    }
+
+    public function verified_2User(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'verified_1_user_id');
+    }
+
+    public function verified_3User(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'verified_1_user_id');
+    }
+
+    public function verified_4User(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'verified_1_user_id');
     }
 
     public function rfqDetails(): HasMany

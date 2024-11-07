@@ -1,9 +1,12 @@
 <script setup>
-import { Head, Link, router } from '@inertiajs/vue3';
+import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
 
 defineProps({});
+
+const page = usePage();
+const role = (page.props.auth.user.all_teams.find(team => team.id === page.props.auth.user.current_team_id)).membership?.role || 'owner';
 
 const switchToTeam = (team) => {
     router.put(route('current-team.update'), {
@@ -48,7 +51,25 @@ const logout = () => {
                     </span>
                 </a>
                 <!-- ========================  -->
-                <button id="roleLink" data-dropdown-toggle="role" class="
+                <span v-if="role === 'owner'" class="
+                            flex
+                            items-center
+                            justify-between
+                            text-lg
+                            font-semibold
+                            w-full
+                            py-1
+                            px-3
+                            rounded
+                            md:border-0
+                            md:w-auto
+                            dark:text-white
+                            dark:focus:text-white
+                            dark:border-gray-700
+                        ">
+                    Owner
+                </span>
+                <button v-else id="roleLink" data-dropdown-toggle="role" class="
                             flex
                             items-center
                             justify-between
@@ -68,7 +89,9 @@ const logout = () => {
                             dark:border-gray-700
                             dark:hover:bg-gray-700
                         ">
-                    {{ $page.props.auth.user.division }}
+                    {{
+                        role.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())
+                    }}
                     <svg class="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
                         viewBox="0 0 10 6">
                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -78,29 +101,11 @@ const logout = () => {
                 <div id="role"
                     class="z-10 hidden font-normal bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700 dark:divide-gray-600">
                     <div class="py-1">
-                        <Link :href="route('updaterole', { role: 'Divisi Lain' })"
+                        <Link
+                            v-for="role in ['pengaju', 'pimpinan-gudang', 'admin-gudang', 'purchasing', 'pejabat-teknis', 'pimpinan', 'keuangan']"
+                            :key="role" :href="route('updaterole', { role: role })"
                             class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">
-                        Divisi Lain
-                        </Link>
-                        <Link :href="route('updaterole', { role: 'Pimpinan Gudang' })"
-                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">
-                        Pimpinan Gudang
-                        </Link>
-                        <Link :href="route('updaterole', { role: 'Admin Gudang' })"
-                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">
-                        Admin Gudang
-                        </Link>
-                        <Link :href="route('updaterole', { role: 'Purchasing' })"
-                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">
-                        Purchasing
-                        </Link>
-                        <Link :href="route('updaterole', { role: 'Pimpinan STP' })"
-                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">
-                        Pimpinan STP
-                        </Link>
-                        <Link :href="route('updaterole', { role: 'Keuangan' })"
-                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">
-                        Keuangan
+                        {{ role.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) }}
                         </Link>
                     </div>
                 </div>

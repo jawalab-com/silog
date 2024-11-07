@@ -6,27 +6,32 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class PurchaseOrderDetail extends Model
+class PurchaseRequisitionLine extends Model
 {
     use HasFactory;
     use HasUuids;
 
     protected $fillable = [
-        'purchase_order_id',
+        'purchase_requisition_id',
         'product_id',
+        'unit_id',
         'quantity',
-        'received_quantity',
         'price_unit',
         'amount',
     ];
 
-    public function purchaseOrder()
+    public function purchaseRequisition()
     {
-        return $this->belongsTo(PurchaseOrder::class);
+        return $this->belongsTo(PurchaseRequisition::class);
     }
 
     public function product()
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function unit()
+    {
+        return $this->belongsTo(Unit::class);
     }
 }

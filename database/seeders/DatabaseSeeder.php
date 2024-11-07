@@ -19,9 +19,9 @@ class DatabaseSeeder extends Seeder
             BrandSeeder::class,
             ProductSeeder::class,
             SupplierSeeder::class,
-            RfqSeeder::class,
-            RfqDetailSeeder::class,
-            PurchaseOrderSeeder::class,
+            // RfqSeeder::class,
+            // RfqDetailSeeder::class,
+            // PurchaseOrderSeeder::class,
         ]);
     }
 }

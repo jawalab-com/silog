@@ -12,9 +12,8 @@ const props = defineProps({
     rfqs: Array,
 });
 
-// Accessing page properties using usePage
 const page = usePage();
-const userDivision = page.props.auth.user.division; // Access user division from page props
+const role = (page.props.auth.user.all_teams.find(team => team.id === page.props.auth.user.current_team_id)).membership?.role || 'owner';
 
 const title = 'Pengajuan Barang';
 const breadcrumbs = [
@@ -29,7 +28,7 @@ const columns = [
     { name: 'user_name', label: 'Pengaju' },
     { name: 'title', label: 'Perihal' },
     { name: 'verified', label: 'Status Verifikasi' },
-    userDivision === 'Keuangan' ? { name: 'payment_status', label: 'Status Pembayaran' } : null,
+    role === 'keuangan' ? { name: 'payment_status', label: 'Status Pembayaran' } : null,
     { name: 'status', label: 'Status' },
 ].filter(Boolean);
 
@@ -45,6 +44,10 @@ const data = props.rfqs.map(item => ({
 }));
 </script>
 
+<script>
+
+
+</script>
 <template>
     <AppLayout :title="title">
         <template #header>
@@ -52,7 +55,7 @@ const data = props.rfqs.map(item => ({
         </template>
 
         <div class="flex flex-wrap space-y-4 sm:space-y-0 items-center justify-between pb-4"
-            v-if="['Divisi Lain'].includes($page.props.auth.user.division)">
+            v-if="['pengaju'].includes(role)">
             <SuccessButton :href="route('rfqs.create', { formType: formType })">
                 <Icon name="plus" class="mr-2" />
                 Tambah {{ title }}
@@ -62,8 +65,7 @@ const data = props.rfqs.map(item => ({
         <DataTable :data="data" :columns="columns">
             <template v-slot:actionColumn="{ item, columns, index }">
                 <fwb-button-group>
-                    <Button
-                        v-if="['Divisi Lain'].includes($page.props.auth.user.division) && [rfqStatus['PENDING']].includes(item.status)"
+                    <Button v-if="['pengaju'].includes(role) && [rfqStatus['PENDING']].includes(item.status)"
                         color="yellow" class="p-0 py-1" :href="route('rfqs.edit', { id: item.id })">
                         <Icon name="pencil" class="w-4.5 h-4.5" />
                     </Button>

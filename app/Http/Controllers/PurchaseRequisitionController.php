@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\RfqStatus;
-use App\Http\Requests\StoreRfqRequest;
-use App\Http\Requests\UpdateRfqRequest;
-use App\Models\Rfq;
+use App\Http\Requests\StorePurchaseRequisitionRequest;
+use App\Http\Requests\UpdatePurchaseRequisitionRequest;
+use App\Models\PurchaseRequisition;
 use App\Models\Supplier;
 use App\Models\Tag;
 use App\Models\Unit;
@@ -14,7 +13,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
-class RfqController extends Controller
+class PurchaseRequisitionController extends Controller
 {
     protected $logService;
 
@@ -28,14 +27,12 @@ class RfqController extends Controller
      */
     public function index(Request $request)
     {
-        $rfqs = Rfq::whereIn('status', array_column(RfqStatus::cases(), 'value'))
-            ->with(['user', 'verified_1User', 'verified_2User', 'verified_3User', 'verified_4User'])
-            ->orderBy('request_date', 'desc')
+        $prs = PurchaseRequisition::with('user')
+            ->orderBy('date_created', 'desc')
             ->get();
 
-        return Inertia::render('Rfqs/Index', [
-            'rfqStatus' => RfqStatus::toArray(),
-            'rfqs' => $rfqs,
+        return Inertia::render('PurchaseRequisitions/Index', [
+            'prs' => $prs,
         ]);
     }
 
@@ -47,33 +44,34 @@ class RfqController extends Controller
         $suppliers = Supplier::orderBy('supplier_name')->get();
         $tags = Tag::orderBy('tag_name')->get();
         $units = Unit::orderBy('unit_name')->get();
-        $rfq = new Rfq;
-        $rfq->generateNumber();
+        $pr = new PurchaseRequisition;
+        $pr->name = $pr->generateName();
 
-        return Inertia::render('Rfqs/Form', [
+        return Inertia::render('PurchaseRequisitions/Form', [
             'tags' => $tags,
             'units' => $units,
-            'rfq' => $rfq,
+            'pr' => $pr,
         ]);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreRfqRequest $request)
+    public function store(StorePurchaseRequisitionRequest $request)
     {
-        $data = $request->validated();
+        $data = $request->all();
+        $data['name'] = PurchaseRequisition::generateName();
         $data['user_id'] = auth()->id();
-        $data['status'] = RfqStatus::PENDING;
+        $data['state'] = 'pending';
         $data['total_amount'] = 0;
         try {
-            $rfq = Rfq::create($data);
-            foreach ($data['products'] as $key => $detail) {
-                $rfq->rfqDetails()->create($detail);
+            $pr = PurchaseRequisition::create($data);
+            foreach ($data['lines'] as $key => $detail) {
+                $pr->purchaseRequisitionLines()->create($detail);
             }
 
-            return redirect()->route('rfqs.index')
-                ->with('success', 'Rfq created successfully.');
+            return redirect()->route('purchase-requisitions.index')
+                ->with('success', 'PurchaseRequisition created successfully.');
         } catch (\Exception $e) {
             throw $e;
 
@@ -85,12 +83,12 @@ class RfqController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Rfq $rfq, Request $request): Response
+    public function show(PurchaseRequisition $pr, Request $request): Response
     {
         $suppliers = Supplier::orderBy('supplier_name')->get();
         $tags = [];
-        $data = $rfq->toArray();
-        foreach ($rfq->rfqDetails()->orderBy('tag')->get() as $key => $detail) {
+        $data = $pr->toArray();
+        foreach ($pr->purchaseRequisitionLines()->orderBy('tag')->get() as $key => $detail) {
             $tags[] = $detail->product->tag;
             $data['products'][$key] = $detail->toArray();
             $data['products'][$key]['product_name'] = $detail->product?->product_name;
@@ -103,14 +101,14 @@ class RfqController extends Controller
 
         $tags = array_unique($tags);
         $tagSuppliers = [];
-        $rfq->rfqSuppliers()->whereNotIn('tag', $tags)->delete();
+        $pr->prSuppliers()->whereNotIn('tag', $tags)->delete();
         foreach ($tags as $tag) {
             $supplier = Supplier::where('tag', $tag)->first();
             if (! $supplier) {
                 dd($tag);
             }
-            if (! $rfq->rfqSuppliers()->where('tag', $tag)->first()) {
-                $rfq->rfqSuppliers()->create(['tag' => $tag, 'supplier_id' => $supplier->id]);
+            if (! $pr->prSuppliers()->where('tag', $tag)->first()) {
+                $pr->prSuppliers()->create(['tag' => $tag, 'supplier_id' => $supplier->id]);
             }
             $tagSuppliers[$tag] = Supplier::where('tag', $tag)->get();
         }
@@ -120,42 +118,42 @@ class RfqController extends Controller
         //     return $tag['slug'];
         // }, $tags);
 
-        $data['suppliers'] = $rfq->rfqSuppliers()->with(['tag', 'supplier'])->get()->toArray();
+        $data['suppliers'] = $pr->prSuppliers()->with(['tag', 'supplier'])->get()->toArray();
 
-        return Inertia::render('Rfqs/Show', [
+        return Inertia::render('PurchaseRequisitions/Show', [
             'suppliers' => $suppliers,
             'tagSuppliers' => $tagSuppliers,
-            'rfqStatus' => RfqStatus::toArray(),
-            'rfq' => $data,
+            'prStatus' => PurchaseRequisitionStatus::toArray(),
+            'pr' => $data,
         ]);
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Rfq $rfq, Request $request)
+    public function edit(PurchaseRequisition $pr, Request $request)
     {
+        dd($request);
         // $suppliers = Supplier::orderBy('supplier_name')->get();
         $tags = Tag::orderBy('tag_name')->get();
         $units = Unit::orderBy('unit_name')->get();
-        $data = $rfq->toArray();
-        foreach ($rfq->rfqDetails()->get() as $key => $detail) {
-            $data['products'][$key] = $detail->toArray();
-            $data['products'][$key]['product_name'] = $detail->product?->product_name;
+        $data = $pr->toArray();
+        foreach ($pr->purchaseRequisitionLines()->get() as $key => $detail) {
+            $data['lines'][$key] = $detail->toArray();
+            $data['lines'][$key]['product_name'] = $detail->product?->product_name;
         }
 
-        return Inertia::render('Rfqs/Form', [
-            // 'suppliers' => $suppliers,
+        return Inertia::render('PurchaseRequisitions/Form', [
             'tags' => $tags,
             'units' => $units,
-            'rfq' => $data,
+            'pr' => $data,
         ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateRfqRequest $request, Rfq $rfq)
+    public function update(UpdatePurchaseRequisitionRequest $request, PurchaseRequisition $pr)
     {
         // $this->logService->createLogEntry(
         //     'error',
@@ -163,72 +161,50 @@ class RfqController extends Controller
         //     'error',
         //     ['action' => 'someAction']
         // );
-        $data = $request->validated();
-        foreach ($data['suppliers'] as $i => $supplierData) {
-            if (isset($supplierData['file_proof_path'])) {
-                $path = $supplierData['file_proof_path']->store('uploads', 'public');
-                $data['suppliers'][$i]['file_proof'] = $path;
-            }
-            if (isset($supplierData['file_invoice_path'])) {
-                $path = $supplierData['file_invoice_path']->store('uploads', 'public');
-                $data['suppliers'][$i]['file_invoice'] = $path;
-            }
-            if (isset($supplierData['file_receipt_path'])) {
-                $path = $supplierData['file_receipt_path']->store('uploads', 'public');
-                $data['suppliers'][$i]['file_receipt'] = $path;
-            }
-        }
-
+        $data = $request->all();
         $verified = $request->input('verified', null);
         if (! empty($verified)) {
-            switch (auth()->user()->teamRole(auth()->user()->currentTeam)->name) {
+            switch (auth()->user()->division) {
                 case 'pimpinan-gudang':
                     $data['verified_1'] = $verified;
-                    $data['verified_1_user_id'] = auth()->id();
                     break;
                 case 'admin-gudang':
                     $data['verified_2'] = $verified;
-                    $data['verified_2_user_id'] = auth()->id();
                     break;
                 case 'purchasing':
                     $data['verified_3'] = $verified;
-                    $data['verified_3_user_id'] = auth()->id();
                     break;
                 case 'Pimpinan STP':
-                    if ($verified && $rfq->verified_3) {
-                        $data['verified_3'] = null;
-                    }
                     $data['verified_4'] = $verified;
-                    $data['verified_4_user_id'] = auth()->id();
                     break;
                 default:
                     break;
             }
         }
-        $data['status'] = $request->input('status', RfqStatus::PENDING);
+        $data['status'] = $request->input('status', PurchaseRequisitionStatus::PENDING);
         if ($request->form_type === 'purchase-order') {
             $data['user_id'] = auth()->id();
             $data['total_amount'] = 0;
         }
 
         try {
-            $rfq->update($data);
+            $pr->update($data);
             if ($request->has('products')) {
 
                 // Products
-                $rfq->rfqDetails()->delete();
+                $pr->purchaseRequisitionLines()->delete();
                 foreach ($data['products'] as $key => $detail) {
-                    $rfq->rfqDetails()->create($detail);
+                    $pr->purchaseRequisitionLines()->create($detail);
                     switch ($data['status']) {
-                        case RfqStatus::PENDING->value:
+                        case PurchaseRequisitionStatus::PENDING->value:
                             $quantityChange = 0;
                             $note = 'Input data pengajuan pembelian';
                             break;
-                        case RfqStatus::APPROVED->value:
+                        case PurchaseRequisitionStatus::APPROVED->value:
                             $quantityChange = $detail['quantity'];
                             $note = 'Pengajuan pembelian disetujui';
                             break;
-                        case RfqStatus::REJECTED->value:
+                        case PurchaseRequisitionStatus::REJECTED->value:
                             $quantityChange = 0;
                             $note = 'Pembelian ditolak';
                             break;
@@ -241,20 +217,13 @@ class RfqController extends Controller
 
                 // Suppliers
                 foreach ($data['suppliers'] as $key => $s) {
-                    $s['tag'] = $s['tag']['slug'];
-                    $s = array_filter($s, function ($value) {
-                        return ! is_null($value);
-                    });
-                    unset($s['file_proof_path']);
-                    unset($s['file_invoice_path']);
-                    unset($s['file_receipt_path']);
-                    $rfq->rfqSuppliers()
-                        ->where('tag', $s['tag'])
-                        ->update($s);
+                    $pr->prSuppliers()
+                        ->where('tag', $s['tag']['slug'])
+                        ->update(['supplier_id' => $s['supplier_id']]);
                 }
             }
 
-            return redirect()->route('rfqs.index', ['formType' => $request->form_type])
+            return redirect()->route('purchase-requisitions.index', ['formType' => $request->form_type])
                 ->with('success', 'Data updated successfully.');
         } catch (\Exception $e) {
             throw $e;
@@ -267,11 +236,11 @@ class RfqController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Rfq $rfq)
+    public function destroy(PurchaseRequisition $pr)
     {
-        $rfq->delete();
+        $pr->delete();
 
-        return redirect()->route('rfqs.index')
+        return redirect()->route('purchase-requisitions.index')
             ->with('success', 'Data deleted successfully.');
     }
 }
