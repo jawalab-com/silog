@@ -31,10 +31,22 @@ class RfqController extends Controller
      */
     public function index(Request $request)
     {
+        $role = auth()->user()->teamRole(auth()->user()->currentTeam)->key;
+
         $rfqs = Rfq::whereIn('status', array_column(RfqStatus::cases(), 'value'))
-            ->with(['user', 'verified_1User', 'verified_2User', 'verified_3User', 'verified_4User'])
+            ->with(['user', 'verified_1User', 'verified_2User', 'verified_3User', 'verified_4User', 'rfqDetails'])
             ->orderBy('request_date', 'desc')
-            ->get();
+            ->get()
+            ->map(function ($rfq) {
+                $rfq->total_amount = $rfq->rfqDetails->sum(function ($detail) {
+                    return $detail->unit_price * $detail->quantity;
+                });
+
+                return $rfq;
+            })
+            ->filter(function ($rfq) use ($role) {
+                return $role == 'pimpinan' ? $rfq->total_amount >= 5000000 : ($role == 'pejabat-teknis' ? $rfq->total_amount < 5000000 : $rfq->total_amount > 0);
+            });
 
         return Inertia::render('Rfqs/Index', [
             'rfqStatus' => RfqStatus::toArray(),
@@ -184,7 +196,7 @@ class RfqController extends Controller
 
         $verified = $request->input('verified', null);
         if (! empty($verified)) {
-            switch (auth()->user()->teamRole(auth()->user()->currentTeam)->name) {
+            switch (auth()->user()->teamRole(auth()->user()->currentTeam)->key) {
                 case 'pimpinan-gudang':
                     $data['verified_1'] = $verified;
                     $data['verified_1_user_id'] = auth()->id();
@@ -199,7 +211,14 @@ class RfqController extends Controller
                     $rfq->rfqSuppliers()
                         ->update(['date_sent' => date('Y-m-d'), 'sent' => true]);
                     break;
-                case 'Pimpinan STP':
+                case 'pejabat-teknis':
+                    if ($verified && $rfq->verified_3) {
+                        $data['verified_3'] = null;
+                    }
+                    $data['verified_4'] = $verified;
+                    $data['verified_4_user_id'] = auth()->id();
+                    break;
+                case 'pimpinan':
                     if ($verified && $rfq->verified_3) {
                         $data['verified_3'] = null;
                     }
@@ -294,9 +313,9 @@ class RfqController extends Controller
                 'reference_id' => $rfqSupplier->po_number,
                 'transaction_date' => $product->created_at,
                 'user_id' => auth()->id(),
-                'note' => 'Barang ditambah dari penerimaan Purchase Order No. '.
+                'note' => 'Barang ditambah melalui penerimaan Purchase Order No. '.
                     $rfqSupplier->po_number.
-                    ' dan Pengajuan No. '.
+                    ' dari Pengajuan No. '.
                     $rfq->rfq_number,
             ]);
             $inv = Inventory::where('product_id', $product->product_id)->first();

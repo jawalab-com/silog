@@ -96,7 +96,8 @@ watch(() => newProduct.value.product_id, async (newVal) => {
                 <div class="grid grid-cols-2 gap-2">
                     <div>
                         <InputLabel for="rfq_number" value="Nomor Pengajuan" />
-                        <TextInput id="rfq_number" v-model="form.rfq_number" disabled />
+                        <p class="dark:text-white mt-2">{{ form.rfq_number }}</p>
+                        <TextInput type="hidden" id="rfq_number" v-model="form.rfq_number" />
                         <InputError :message="form.errors.rfq_number" />
                     </div>
 
@@ -108,7 +109,8 @@ watch(() => newProduct.value.product_id, async (newVal) => {
 
                     <div>
                         <InputLabel for="request_date" value="Tanggal Pengajuan" />
-                        <TextInput type="date" id="request_date" v-model="form.request_date" />
+                        <p class="dark:text-white mt-2">{{ form.request_date }}</p>
+                        <TextInput type="hidden" id="request_date" v-model="form.request_date" />
                         <InputError :message="form.errors.request_date" />
                     </div>
 
