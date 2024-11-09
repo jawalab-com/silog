@@ -48,7 +48,7 @@ const isLog = true;
                         <span class="ml-3">Pengajuan</span>
                         </Link>
                     </li>
-                    <li>
+                    <!-- <li>
                         <Link :href="route('purchase-orders.index')"
                             class="flex items-center p-2 font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
                         <span class="ml-3">Purchasing</span>
@@ -59,7 +59,7 @@ const isLog = true;
                             class="flex items-center p-2 font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
                         <span class="ml-3">Keuangan</span>
                         </Link>
-                    </li>
+                    </li> -->
                     <!-- <li>
                         <Link :href="route('sales-orders.index')"
                             class="flex items-center p-2 font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
@@ -211,7 +211,7 @@ const isLog = true;
                     </a>
                 </li> -->
             </ul>
-            <ul class="pt-5 mt-5 space-y-1 border-t border-gray-200 dark:border-gray-700 text-base">
+            <ul class="pt-5 mt-5 space-y-1 border-t border-gray-200 dark:border-gray-700 text-base hidden">
                 <li>
                     <a :href="route('telescope')" :active="route().current('brands.*')" target="_blank"
                         class="flex items-center p-2 font-medium text-gray-900 rounded-lg transition duration-75 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white group">

@@ -138,11 +138,32 @@ let total = 0;
                         Mohon segera diproses dan dikirimkan ke alamat kami secepatnya. Terima kasih atas kerjasamanya.
                     </p>
 
-                    <p>Mengetahui,</p>
-                    <br />
-                    <br />
-                    <br />
-                    <p class="font-semibold">Febriansyah Dipokusumo Heryawan</p>
+                    <div class="flex justify-between mt-6">
+                        <div class="text-center">
+                            <p>Mengetahui,</p>
+                            <br />
+                            <br />
+                            <br />
+                            <p class="font-semibold">Nama Satu</p>
+                            <p>Direktur</p>
+                        </div>
+                        <div class="text-center">
+                            <p>Disetujui,</p>
+                            <br />
+                            <br />
+                            <br />
+                            <p class="font-semibold">Nama Dua</p>
+                            <p>Manager</p>
+                        </div>
+                        <div class="text-center">
+                            <p>Diterima,</p>
+                            <br />
+                            <br />
+                            <br />
+                            <p class="font-semibold">Nama Tiga</p>
+                            <p>Supplier</p>
+                        </div>
+                    </div>
                 </div>
             </div>
 

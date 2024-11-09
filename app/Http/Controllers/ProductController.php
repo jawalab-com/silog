@@ -123,7 +123,7 @@ class ProductController extends Controller
         $tags = Tag::orderBy('tag_name')->get();
 
         return Inertia::render('Products/Form', [
-            'product' => $product->with('inventory')->first(),
+            'product' => $product->with('inventory')->where('id', $product->id)->first(),
             'brands' => $brands,
             'tags' => $tags,
         ]);
