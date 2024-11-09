@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class StockOpname extends Model
 {
@@ -16,8 +17,9 @@ class StockOpname extends Model
         'product_id',
         'initial_stock',
         'final_stock',
-        'opname_date',
+        'date_opname',
         'proof',
+        'comment',
     ];
 
     public function user(): BelongsTo

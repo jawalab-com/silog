@@ -5,7 +5,10 @@ namespace App\Http\Controllers;
 use App\Enums\RfqStatus;
 use App\Http\Requests\StoreRfqRequest;
 use App\Http\Requests\UpdateRfqRequest;
+use App\Models\Inventory;
+use App\Models\InventoryTransaction;
 use App\Models\Rfq;
+use App\Models\RfqDetail;
 use App\Models\Supplier;
 use App\Models\Tag;
 use App\Models\Unit;
@@ -193,6 +196,8 @@ class RfqController extends Controller
                 case 'purchasing':
                     $data['verified_3'] = $verified;
                     $data['verified_3_user_id'] = auth()->id();
+                    $rfq->rfqSuppliers()
+                        ->update(['date_sent' => date('Y-m-d'), 'sent' => true]);
                     break;
                 case 'Pimpinan STP':
                     if ($verified && $rfq->verified_3) {
@@ -242,6 +247,11 @@ class RfqController extends Controller
                 // Suppliers
                 foreach ($data['suppliers'] as $key => $s) {
                     $s['tag'] = $s['tag']['slug'];
+                    $no = RfqDetail::whereYear('request_date', date('Y'))
+                        ->whereMonth('request_date', date('m'))
+                        ->count() + 1;
+                    $supplier_name = Supplier::find($s['supplier_id'])->supplier_name;
+                    $s['po_number'] = implode('/', [$no, $supplier_name, date('m'), date('Y')]);
                     $s = array_filter($s, function ($value) {
                         return ! is_null($value);
                     });
@@ -262,6 +272,77 @@ class RfqController extends Controller
             return redirect()->back()
                 ->with('error', 'Failed to store data. Please try again.');
         }
+    }
+
+    public function received(Request $request, Rfq $rfq, string $tag)
+    {
+        // try {
+        $rfqSupplier = $rfq->rfqSuppliers()->where('tag', $tag)->first();
+        if ($rfqSupplier) {
+            $rfqSupplier->update(['received' => true, 'date_received' => date('Y-m-d')]);
+        }
+
+        $rfqDetails = $rfq->rfqDetails()->with('product')->whereHas('product', function ($query) use ($tag) {
+            $query->where('tag', $tag);
+        })->get();
+
+        foreach ($rfqDetails as $product) {
+            InventoryTransaction::create([
+                'product_id' => $product->product_id,
+                'quantity_change' => $product->quantity,
+                'transaction_type' => 'RECEIVED_PRODUCT',
+                'reference_id' => $rfqSupplier->po_number,
+                'transaction_date' => $product->created_at,
+                'user_id' => auth()->id(),
+                'note' => 'Barang ditambah dari penerimaan Purchase Order No. '.
+                    $rfqSupplier->po_number.
+                    ' dan Pengajuan No. '.
+                    $rfq->rfq_number,
+            ]);
+            $inv = Inventory::where('product_id', $product->product_id)->first();
+            Inventory::updateOrCreate(
+                ['product_id' => $product->product_id],
+                ['quantity' => ($inv->quantity ?? 0) + $product->quantity]
+            );
+        }
+
+        return response()->json(['message' => 'Success'], 200);
+        // } catch (\Exception $e) {
+        //     return response()->json(['message' => 'Failed'], 500);
+        // }
+    }
+
+    public function paid(Request $request, Rfq $rfq, string $tag)
+    {
+        try {
+            $rfqSupplier = $rfq->rfqSuppliers()->where('tag', $tag)->first();
+            if ($rfqSupplier) {
+                $rfqSupplier->update(['paid' => true]);
+            }
+
+            return response()->json(['message' => 'Success'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Failed'], 500);
+        }
+    }
+
+    public function poPrint(Request $request, Rfq $rfq, string $tag)
+    {
+        // try {
+        // $rfq = $rfq->where('rfq_number', $rfq->rfq_number)->first();
+        $supplier = $rfq->rfqSuppliers()->with(['supplier'])->where('tag', $tag)->first();
+        $products = $rfq->rfqDetails()->with(['product', 'unit'])->whereHas('product', function ($query) use ($tag) {
+            $query->where('tag', $tag);
+        })->get();
+
+        return Inertia::render('Rfqs/Print', [
+            'rfq' => $rfq,
+            'supplier' => $supplier,
+            'products' => $products,
+        ]);
+        // } catch (\Exception $e) {
+        //     return response()->json(['message' => 'Failed'], 500);
+        // }
     }
 
     /**

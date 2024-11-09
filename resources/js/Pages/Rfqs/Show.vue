@@ -34,6 +34,7 @@ const form = useForm({
         rfq_id: supplier.rfq_id || '',
         tag: supplier.tag || '',
         supplier_id: supplier.supplier_id || '',
+        po_number: supplier.po_number || '',
         discount: supplier.discount || '',
         tax: supplier.tax || '',
         transportation: supplier.transportation || '',
@@ -44,7 +45,9 @@ const form = useForm({
         file_invoice_path: null,
         file_receipt_path: null,
         date_sent: supplier.date_sent || '',
-        date_received: supplier.date_received || ''
+        date_received: supplier.date_received || '',
+        received: supplier.received || false,
+        paid: supplier.paid || false,
     })) || [],
 });
 
@@ -87,6 +90,37 @@ const saveAction = () => {
             },
             forceFormData: true,
         });
+    } catch (error) {
+        console.error('An unexpected error occurred:', error);
+    }
+};
+
+const setReceived = (tag, index) => {
+    try {
+        axios.post(route("rfqs.received", { rfq: props.rfq.id, tag: tag }))
+            .then(response => {
+                form.suppliers[index].received = true;
+                form.suppliers[index].date_received = new Date().toISOString().split('T')[0];
+                console.log('Purchase order updated successfully');
+            })
+            .catch(errors => {
+                console.error('Failed to update received status:', errors);
+            });
+    } catch (error) {
+        console.error('An unexpected error occurred:', error);
+    }
+};
+
+const setPaid = (tag, index) => {
+    try {
+        axios.post(route("rfqs.paid", { rfq: props.rfq.id, tag: tag }))
+            .then(response => {
+                form.suppliers[index].paid = true;
+                console.log('Purchase order updated successfully');
+            })
+            .catch(errors => {
+                console.error('Failed to update paid status:', errors);
+            });
     } catch (error) {
         console.error('An unexpected error occurred:', error);
     }
@@ -159,55 +193,87 @@ watch(() => newProduct.value.product_id, async (newVal) => {
                             <tbody>
                                 <template v-for="(item, index) in form.suppliers" :key="index">
                                     <tr>
-                                        <td class="px-4 py-0.5">{{ item.tag.tag_name }}</td>
-                                        <td class="px-4 py-0.5" colspan="3">
-                                            <Select
-                                                v-if="(rfq.verified_2 && !rfq.verified_3 && ['purchasing'].includes(role))"
-                                                v-model="item.supplier_id" class="py-1 px-2">
-                                                <option v-for="supplier in tagSuppliers[item.tag.slug]"
-                                                    :value="supplier.id" :key="supplier.id">
-                                                    {{ supplier.supplier_name }}
-                                                </option>
-                                            </Select>
-                                            <span
-                                                v-else-if="(rfq.verified_2 && rfq.verified_3 && ['purchasing'].includes(role))">
-                                                {{ tagSuppliers[item.tag.slug].find(supplier => supplier.id ===
-                                                    item.supplier_id)?.supplier_name }}
-                                            </span>
-                                            <span v-else>:
-                                                {{ item.supplier.supplier_name }}
-                                            </span>
+                                        <td v-if="rfq.verified_3" class="px-4 py-0.5" colspan="7">
+                                            No. PO: {{ item.po_number }}
                                         </td>
-                                        <td :colspan="role === 'purchasing' && !rfq.verified_3 ? '3' : '2'">
+                                    </tr>
+                                    <tr>
+                                        <td class="px-4 py-0.5">
+                                            <div class="flex">
+                                                <p class="w-72">{{ item.tag.tag_name }}</p>
+                                                <p class="w-72 pl-2">
+                                                    <Select
+                                                        v-if="(rfq.verified_2 && !rfq.verified_3 && ['purchasing'].includes(role))"
+                                                        v-model="item.supplier_id" class="py-1 px-2">
+                                                        <option v-for="supplier in tagSuppliers[item.tag.slug]"
+                                                            :value="supplier.id" :key="supplier.id">
+                                                            {{ supplier.supplier_name }}
+                                                        </option>
+                                                    </Select>
+                                                    <span
+                                                        v-else-if="(rfq.verified_2 && rfq.verified_3 && ['purchasing', 'keuangan'].includes(role))">
+                                                        Supplier:
+                                                        {{
+                                                            tagSuppliers[item.tag.slug].find(supplier => supplier.id ===
+                                                                item.supplier_id)?.supplier_name
+                                                        }}
+                                                    </span>
+                                                    <span v-else>:
+                                                        {{ item.supplier.supplier_name }}
+                                                    </span>
+                                                </p>
+                                            </div>
+                                        </td>
+                                        <td class="" :colspan="role === 'purchasing' && !rfq.verified_3 ? '2' : '1'">
                                             <div class="flex">
                                                 <div class="flex items-center me-4"
                                                     v-if="role === 'purchasing' && rfq.verified_3">
-                                                    <Button color="gray" @click="form.verified = 1" type="submit"
-                                                        class="py-1">
+                                                    <p v-if="item.received" class="text-green-500 font-semibold">
+                                                        &#10003; Diterima
+                                                    </p>
+                                                    <Button v-else color="gray"
+                                                        @click="setReceived(item.tag.slug, index)" type="button"
+                                                        class="py-1 px-1">
                                                         Diterima
                                                     </Button>
                                                 </div>
                                                 <div class="flex items-center me-4"
                                                     v-if="role === 'keuangan' && rfq.verified_3">
-                                                    <Button color="gray" @click="form.verified = 1" type="submit"
-                                                        class="py-1">
-                                                        Dibayar
+                                                    <p v-if="item.paid" class="text-green-500 font-semibold">
+                                                        &#10003; Lunas
+                                                    </p>
+                                                    <Button v-else color="gray" @click="setPaid(item.tag.slug, index)"
+                                                        type="button" class="py-1">
+                                                        Lunas
                                                     </Button>
+                                                </div>
+                                                <div class="flex items-center me-4"
+                                                    v-if="['purchasing', 'keuangan'].includes(role) && rfq.verified_3">
+                                                    <a v-if="item.file_invoice" target="_blank"
+                                                        :href="route('rfqs.po.print', { rfq: rfq.id, tag: item.tag.slug })"
+                                                        class="text-blue-700 dark:text-blue-300 hover:underline">
+                                                        Lihat PO
+                                                    </a>
                                                 </div>
                                             </div>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td class="px-4 py-0.5">Diskon</td>
                                         <td class="px-4 py-0.5">
-                                            <TextInput v-if="role === 'purchasing' && !rfq.verified_3" class="py-1 px-2"
-                                                type="number" v-model="item.discount" />
-                                            <span class="text-md" v-else>{{ item.discount }}</span>
-                                        </td>
-                                        <td class="px-4 py-0.5">Tanggal Dikirim</td>
-                                        <td class="px-4 py-0.5">
-                                            {{ item.date_sent }}
-                                            <TextInput class="py-1 px-2" type="hidden" v-model="item.date_sent" />
+                                            <div class="flex">
+                                                <p class="w-20">Diskon</p>
+                                                <p class="w-32">
+                                                    <TextInput v-if="role === 'purchasing' && !rfq.verified_3"
+                                                        class="py-1 px-2" type="number" v-model="item.discount" />
+                                                    <span class="text-md" v-else>{{ item.discount }}</span>
+                                                </p>
+                                                <p class="w-32 ps-2">Tanggal Dikirim</p>
+                                                <p>
+                                                    {{ item.date_sent }}
+                                                    <TextInput class="py-1 px-2" type="hidden"
+                                                        v-model="item.date_sent" />
+                                                </p>
+                                            </div>
                                         </td>
                                         <td class="px-4 py-0.5">Bukti</td>
                                         <td class="px-4 py-0.5" v-if="role === 'purchasing' && !rfq.verified_3">
@@ -218,22 +284,28 @@ watch(() => newProduct.value.product_id, async (newVal) => {
                                         </td>
                                         <td v-if="item.file_proof" class="px-4 py-0.5">
                                             <a v-if="item.file_invoice" :href="`/storage/${item.file_proof}`"
+                                                target="_blank"
                                                 class="text-blue-700 dark:text-blue-300 hover:underline">
                                                 Lihat File
                                             </a>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td class="px-4 py-0.5">Pajak %</td>
                                         <td class="px-4 py-0.5">
-                                            <TextInput v-if="role === 'purchasing' && !rfq.verified_3" class="py-1 px-2"
-                                                type="number" v-model="item.tax" />
-                                            <span class="text-md" v-else>{{ item.tax }}</span>
-                                        </td>
-                                        <td class="px-4 py-0.5">Tanggal Diterima</td>
-                                        <td class="px-4 py-0.5">
-                                            {{ item.date_received }}
-                                            <TextInput class="py-1 px-2" type="hidden" v-model="item.date_received" />
+                                            <div class="flex">
+                                                <p class="w-20">Pajak %</p>
+                                                <p class="w-32">
+                                                    <TextInput v-if="role === 'purchasing' && !rfq.verified_3"
+                                                        class="py-1 px-2" type="number" v-model="item.tax" />
+                                                    <span class="text-md" v-else>{{ item.tax }}</span>
+                                                </p>
+                                                <p class="w-32 ps-2">Tanggal Diterima</p>
+                                                <p>
+                                                    {{ item.date_received }}
+                                                    <TextInput class="py-1 px-2" type="hidden"
+                                                        v-model="item.date_received" />
+                                                </p>
+                                            </div>
                                         </td>
                                         <td class="px-4 py-0.5">Invoice</td>
                                         <td class="px-4 py-0.5" v-if="role === 'purchasing' && !rfq.verified_3">
@@ -250,18 +322,24 @@ watch(() => newProduct.value.product_id, async (newVal) => {
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td class="px-4 py-0.5">Transport</td>
                                         <td class="px-4 py-0.5">
-                                            <TextInput v-if="role === 'purchasing' && !rfq.verified_3" class="py-1 px-2"
-                                                type="number" v-model="item.transportation" />
-                                            <span class="text-md" v-else>{{ item.transportation }}</span>
-                                        </td>
-                                        <td class="px-4 py-0.5">Lama Pengiriman</td>
-                                        <td class="px-4 py-0.5">
-                                            <span class="text-xl">{{ item.date_sent && item.date_received ?
-                                                Math.ceil((new
-                                                    Date(item.date_received) - new Date(item.date_sent)) / (1000 * 60 * 60 *
-                                                        24)) + ' hari' : '-' }}</span>
+                                            <div class="flex">
+                                                <p class="w-20">Transport</p>
+                                                <p class="w-32">
+                                                    <TextInput v-if="role === 'purchasing' && !rfq.verified_3"
+                                                        class="py-1 px-2" type="number" v-model="item.transportation" />
+                                                    <span class="text-md" v-else>{{ item.transportation }}</span>
+                                                </p>
+                                                <p class="w-32 ps-2">Lama Pengiriman</p>
+                                                <p>
+                                                    {{ item.date_sent && item.date_received ?
+                                                        Math.ceil((new
+                                                            Date(item.date_received) - new Date(item.date_sent)) / (1000 * 60 *
+                                                                60 * 24)) + ' hari' : '-' }}
+                                                    <TextInput class="py-1 px-2" type="hidden"
+                                                        v-model="item.date_sent" />
+                                                </p>
+                                            </div>
                                         </td>
                                         <td class="px-4 py-0.5">Nota</td>
                                         <td class="px-4 py-0.5" v-if="role === 'purchasing' && !rfq.verified_3">
@@ -420,14 +498,22 @@ watch(() => newProduct.value.product_id, async (newVal) => {
                             <tr>
                                 <th class="px-4 py-3">Kategori</th>
                                 <th class="px-4 py-3">Barang</th>
-                                <th v-if="(['admin-gudang', 'purchasing', 'Pimpinan STP'].includes(role))"
+                                <th v-if="(['admin-gudang', 'purchasing', 'pimpinan'].includes(role))"
                                     class="px-4 py-3 text-center" colspan="2">Stok</th>
                                 <th class="px-4 py-3 text-right">Jumlah</th>
+                                <th v-if="(['admin-gudang', 'purchasing', 'pimpinan'].includes(role) && rfq.verified_3)"
+                                    class="px-4 py-3 text-right">
+                                    Jumlah Tervalidasi
+                                </th>
                                 <th class="px-4 py-3">Satuan</th>
-                                <th v-if="(['admin-gudang', 'purchasing', 'Pimpinan STP'].includes(role))"
-                                    class="px-4 py-3 text-right">Harga</th>
-                                <th v-if="(['admin-gudang', 'purchasing', 'Pimpinan STP'].includes(role))"
-                                    class="px-4 py-3 text-right">Subtotal</th>
+                                <th v-if="(['admin-gudang', 'purchasing', 'pimpinan'].includes(role))"
+                                    class="px-4 py-3 text-right">
+                                    Harga
+                                </th>
+                                <th v-if="(['admin-gudang', 'purchasing', 'pimpinan'].includes(role))"
+                                    class="px-4 py-3 text-right">
+                                    Subtotal
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
@@ -435,11 +521,11 @@ watch(() => newProduct.value.product_id, async (newVal) => {
                                 class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
                                 <td class="px-4 py-1">{{ item.tag_name }}</td>
                                 <td class="px-4 py-1">{{ item.product_name }}</td>
-                                <td v-if="(['admin-gudang', 'purchasing', 'Pimpinan STP'].includes(role))"
+                                <td v-if="(['admin-gudang', 'purchasing', 'pimpinan'].includes(role))"
                                     class="px-4 py-1 text-right pr-4">
                                     {{ item.stock }}
                                 </td>
-                                <td v-if="(['admin-gudang', 'purchasing', 'Pimpinan STP'].includes(role))"
+                                <td v-if="(['admin-gudang', 'purchasing', 'pimpinan'].includes(role))"
                                     class="px-0 py-1 text-right">
                                     <span v-if="item.stock - item.quantity >= 0"
                                         class="ml-2 bg-green-100 text-green-800 text-xs font-medium me-2 px-1.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300">
@@ -455,8 +541,21 @@ watch(() => newProduct.value.product_id, async (newVal) => {
                                     </span>
                                 </td>
                                 <td class="px-4 py-1 text-right pr-4">{{ item.quantity }}</td>
+                                <td v-if="(['admin-gudang', 'purchasing', 'pimpinan'].includes(role) && rfq.verified_3)"
+                                    class="px-4 py-3 text-right">
+                                    <template v-if="
+                                        (rfq.verified_2 && ['purchasing'].includes(role)) && form.suppliers.find(supplier => supplier.tag.slug ===
+                                            item.product.tag).received
+                                    ">
+                                        <TextInput class="py-1" type="number" v-model="item.quantity_verified"
+                                            step="0.01" />
+                                    </template>
+                                    <template v-else>
+
+                                    </template>
+                                </td>
                                 <td class="px-4 py-1">{{ item.unit_name }}</td>
-                                <td v-if="(['admin-gudang', 'purchasing', 'Pimpinan STP'].includes(role))"
+                                <td v-if="(['admin-gudang', 'purchasing', 'pimpinan'].includes(role))"
                                     class="px-4 py-1 text-right pr-4">
                                     <template v-if="
                                         (rfq.verified_2 && ['purchasing'].includes(role)) && !rfq.verified_4 && !rfq.verified_3
@@ -468,7 +567,7 @@ watch(() => newProduct.value.product_id, async (newVal) => {
                                         <TextInput class="py-1" type="hidden" v-model="item.unit_price" step="0.01" />
                                     </template>
                                 </td>
-                                <td v-if="(['admin-gudang', 'purchasing', 'Pimpinan STP'].includes(role))"
+                                <td v-if="(['admin-gudang', 'purchasing', 'pimpinan'].includes(role))"
                                     class="px-4 py-1 text-right pr-4">
                                     <p class="py-1">
                                         <TextInput class="py-1" type="hidden" v-model="item.total_price" />
@@ -478,6 +577,29 @@ watch(() => newProduct.value.product_id, async (newVal) => {
                                                 (item.quantity * item.unit_price).toFixed(2))
                                         }}
                                     </p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="px-4 py-3">&nbsp;</td>
+                                <td class="px-4 py-3">&nbsp;</td>
+                                <td v-if="(['admin-gudang', 'purchasing', 'pimpinan'].includes(role))"
+                                    class="px-4 py-3 text-center" colspan="2">&nbsp;</td>
+                                <td class="px-4 py-3 text-right">&nbsp;</td>
+                                <th v-if="(['admin-gudang', 'purchasing', 'pimpinan'].includes(role) && rfq.verified_3)"
+                                    class="px-4 py-3 text-right">
+                                    &nbsp;
+                                </th>
+                                <td class="px-4 py-3">&nbsp;</td>
+                                <td v-if="(['admin-gudang', 'purchasing', 'pimpinan'].includes(role))"
+                                    class="px-4 py-3 text-right">
+                                    TOTAL
+                                </td>
+                                <td v-if="(['admin-gudang', 'purchasing', 'pimpinan'].includes(role))"
+                                    class="px-4 py-3 text-right">
+                                    {{
+                                        utils.formatDecimal(form.products.reduce((sum, item) => sum + (item.unit_price *
+                                            item.quantity), 0).toFixed(2))
+                                    }}
                                 </td>
                             </tr>
                         </tbody>
@@ -513,7 +635,7 @@ watch(() => newProduct.value.product_id, async (newVal) => {
                         (role === 'pimpinan-gudang' && rfq.verified_1 == null) ||
                         (role === 'admin-gudang' && rfq.verified_1 != null && rfq.verified_2 == null) ||
                         (role === 'purchasing' && rfq.verified_2 != null && rfq.verified_3 == null) ||
-                        (role === 'Pimpinan STP' && rfq.verified_3 != null && rfq.verified_4 == null)
+                        (role === 'pimpinan' && rfq.verified_3 != null && rfq.verified_4 == null)
                     ">
                         <!-- <Button color="red" @click="form.status = rfqStatus['REJECTED']" type="submit">
                             Tolak
@@ -533,6 +655,6 @@ watch(() => newProduct.value.product_id, async (newVal) => {
                 </div>
             </form>
         </Card>
-        <div class="h-40"></div>
+        <div class="h-60"></div>
     </AppLayout>
 </template>

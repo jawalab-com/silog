@@ -71,8 +71,7 @@ const deleteAction = async (id) => {
                     <Button color="yellow" class="p-0 py-1" :href="route('products.edit', item.id)">
                         <Icon name="pencil" class="w-4.5 h-4.5" />
                     </Button>
-                    <Button color="purple" class="p-0 py-1"
-                        :href="route('stock-opnames.create', { product_id: item.id })" title="Ubah Stock">
+                    <Button color="purple" class="p-0 py-1" :href="route('products.edit', item.id)" title="Ubah Stock">
                         <Icon name="archive" class="w-4.5 h-4.5" />
                     </Button>
                     <Button color="green" class="p-0 py-1" :href="route('products.show', item.id)">

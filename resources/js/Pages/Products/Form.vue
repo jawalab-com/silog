@@ -76,13 +76,13 @@ const saveAction = () => {
                     </template> -->
 
                     <div>
-                        <InputLabel for="product_name" value="Name" />
+                        <InputLabel for="product_name" value="Nama" />
                         <TextInput id="product_name" v-model="form.product_name" />
                         <InputError :message="form.errors.product_name" />
                     </div>
 
                     <div>
-                        <InputLabel for="brand_id" value="Brand" />
+                        <InputLabel for="brand_id" value="Merk" />
                         <Select id="brand_id" v-model="form.brand_id">
                             <option value="">Pilih Brand</option>
                             <option v-for="brand in brands" :key="brand.id" :value="brand.id">
@@ -93,7 +93,7 @@ const saveAction = () => {
                     </div>
 
                     <div>
-                        <InputLabel for="tag" value="Tag" />
+                        <InputLabel for="tag" value="Kategori" />
                         <Select id="tag" v-model="form.tag">
                             <option value="">Pilih Brand</option>
                             <option v-for="tag in tags" :key="tag.slug" :value="tag.slug">
@@ -104,7 +104,7 @@ const saveAction = () => {
                     </div>
 
                     <div>
-                        <InputLabel for="product_description" value="Deskripsi" />
+                        <InputLabel for="product_description" value="Spesifikasi" />
                         <TextInput id="product_description" v-model="form.product_description" />
                         <InputError :message="form.errors.product_description" />
                     </div>
@@ -123,7 +123,7 @@ const saveAction = () => {
                     </div> -->
                 </div>
 
-                <div class="card-header px-4 pb-2 pt-8 border-b border-gray-200 dark:border-gray-700"></div>
+                <!-- <div class="card-header px-4 pb-2 pt-8 border-b border-gray-200 dark:border-gray-700"></div>
 
                 <div class="flex items-center my-4">
                     <input id="changeStock" type="checkbox" v-model="changeStock"
@@ -152,7 +152,7 @@ const saveAction = () => {
                             <InputError :message="form.errors.proof" />
                         </div>
                     </div>
-                </div>
+                </div> -->
 
                 <template #footer>
                     <div class="flex justify-end">

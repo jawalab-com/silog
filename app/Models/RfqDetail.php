@@ -15,6 +15,7 @@ class RfqDetail extends Model
         'rfq_id',
         'product_id',
         'quantity',
+        'quantity_verified',
         'unit_id',
         'unit_price',
         'total_price',

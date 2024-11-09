@@ -8,6 +8,7 @@ use App\Http\Controllers\PurchaseRequisitionController;
 use App\Http\Controllers\RfqController;
 use App\Http\Controllers\RoomTypeController;
 use App\Http\Controllers\SalesOrderController;
+use App\Http\Controllers\StockOpnameController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\TagController;
 use App\Http\Controllers\UnitController;
@@ -75,8 +76,11 @@ if (App::environment('local')) {
     });
 }
 
-Route::get('auth/redirect/{provider}', [SocialiteController::class, 'redirectToProvider'])->name('auth.redirect');
-Route::get('auth/callback/{provider}', [SocialiteController::class, 'handleProviderCallback'])->name('auth.callback');
+Route::get('/auth/redirect/{provider}', [SocialiteController::class, 'redirectToProvider'])->name('auth.redirect');
+Route::get('/auth/callback/{provider}', [SocialiteController::class, 'handleProviderCallback'])->name('auth.callback');
+Route::post('/rfqs/{rfq}/{tag}/received', [RfqController::class, 'received'])->name('rfqs.received');
+Route::post('/rfqs/{rfq}/{tag}/paid', [RfqController::class, 'paid'])->name('rfqs.paid');
+Route::get('/rfqs/{rfq}/{tag}/po-print', [RfqController::class, 'poPrint'])->name('rfqs.po.print');
 
 Route::middleware([
     'auth:sanctum',
@@ -89,6 +93,7 @@ Route::middleware([
     Route::resources([
         'brands' => BrandController::class,
         'products' => ProductController::class,
+        'stock-opnames' => StockOpnameController::class,
         'room-types' => RoomTypeController::class,
         'suppliers' => SupplierController::class,
         'purchase-orders' => PurchaseOrderController::class,
