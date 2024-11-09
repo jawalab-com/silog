@@ -23,7 +23,7 @@ const form = useForm({
     product_description: props.product?.product_description || '',
     price: props.product?.price || 0,
     minimum_quantity: props.product?.minimum_quantity || 0,
-    verified: props.product?.verified || false,
+    verified: !!props.product?.verified,
     inventory: {
         quantity: props.product?.inventory?.quantity || 0,
         new_quantity: props.product?.inventory?.quantity || 0,
