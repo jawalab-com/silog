@@ -34,6 +34,8 @@ const columns = [
     { name: 'status', label: 'Status' },
 ].filter(Boolean);
 
+console.log(props.rfqs[0]);
+
 const data = props.rfqs.map(item => ({
     ...item,
     total_amount: utils.formatCurrency(item.total_amount),

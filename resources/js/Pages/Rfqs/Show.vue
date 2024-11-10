@@ -218,7 +218,7 @@ watch(() => newProduct.value.product_id, async (newVal) => {
                                                 <p class="w-72 pl-2">
                                                     Supplier:
                                                     <Select
-                                                        v-if="(rfq.verified_2 && !rfq.verified_3 && ['purchasing'].includes(role) && !item.date_sent)"
+                                                        v-if="(rfq.verified_2 && !rfq.verified_3 && ['purchasing'].includes(role) && !item.date_sent && !rfq.verified_4)"
                                                         v-model="item.supplier_id" class="py-1 px-2">
                                                         <option v-for="supplier in tagSuppliers[item.tag.slug]"
                                                             :value="supplier.id" :key="supplier.id">

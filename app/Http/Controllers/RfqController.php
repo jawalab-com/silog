@@ -55,6 +55,8 @@ class RfqController extends Controller
                 }
             });
 
+        $rfqs = $rfqs->values()->all();
+
         return Inertia::render('Rfqs/Index', [
             'rfqStatus' => RfqStatus::toArray(),
             'rfqs' => $rfqs,
@@ -209,7 +211,16 @@ class RfqController extends Controller
                     $data['verified_1_user_id'] = auth()->id();
                     break;
                 case 'admin-gudang':
-                    if ($rfq->verified_4 && $rfq->status === RfqStatus::DIPROSES) {
+                    $count_available = $rfq->rfqDetails()->join('inventories', 'rfq_details.product_id', '=', 'inventories.product_id')
+                        ->whereRaw('inventories.quantity - rfq_details.quantity >= 0')->count();
+                    $count_requested = $rfq->rfqDetails()->count();
+
+                    if (empty($rfq->verified_4) && $count_available === $count_requested) {
+                        $data['status'] = RfqStatus::SIAP_DIAMBIL->value;
+                        $data['verified_2'] = null;
+                        $data['verified_3'] = true;
+                        $data['verified_4'] = true;
+                    } elseif ($rfq->verified_4 && ($rfq->status === RfqStatus::DIPROSES || $rfq->status === RfqStatus::SIAP_DIAMBIL)) {
                         foreach ($rfq->rfqDetails()->get() as $product) {
                             $rfqSupplier = $rfq->rfqSuppliers()->where('tag', $product->product->tag)->first();
                             InventoryTransaction::create([
@@ -230,7 +241,8 @@ class RfqController extends Controller
                                 ['quantity' => ($inv->quantity ?? 0) - $product->quantity]
                             );
                         }
-                        $data['status'] = RfqStatus::SIAP_DIAMBIL->value;
+                        $data['verified_2'] = $rfq->status === RfqStatus::DIPROSES ? null : true;
+                        $data['status'] = $rfq->status === RfqStatus::DIPROSES ? RfqStatus::SIAP_DIAMBIL->value : RfqStatus::SELESAI->value;
                     } else {
                         if ($rfq->status === RfqStatus::SIAP_DIAMBIL) {
                             $data['status'] = RfqStatus::SELESAI->value;
@@ -240,10 +252,11 @@ class RfqController extends Controller
                     }
                     break;
                 case 'purchasing':
-                    // $data['verified_3'] = $verified;
-                    // $data['verified_3_user_id'] = auth()->id();
+                    $data['verified_3'] = $verified;
+                    $data['verified_3_user_id'] = auth()->id();
                     if ($rfq->verified_4) {
                         $rfq->rfqSuppliers()
+                            ->where('sent', false)
                             ->update(['date_sent' => date('Y-m-d'), 'sent' => true]);
                         $data['status'] = 'sedang-dalam-pengiriman';
                     }

@@ -72,7 +72,8 @@ let total = 0;
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="(product, index) in products" :key="index">
+                            <tr v-for="(product, index) in products.filter(product => product.quantity > 0)"
+                                :key="index">
                                 <td class="px-2 py-1 border border-gray-300 text-sm">
                                     {{ product.product.product_name }}
                                 </td>
