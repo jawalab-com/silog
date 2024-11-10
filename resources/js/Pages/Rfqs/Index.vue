@@ -5,6 +5,7 @@ import { AppLayout } from '@/Layouts';
 import { Breadcrumb, Button, DataTable, Icon } from '@/Components';
 import { FwbButtonGroup } from 'flowbite-vue';
 import SuccessButton from '@/Components/SuccessButton.vue';
+import utils from '@/utils';
 
 const props = defineProps({
     formType: String,
@@ -35,6 +36,7 @@ const columns = [
 
 const data = props.rfqs.map(item => ({
     ...item,
+    total_amount: utils.formatCurrency(item.total_amount),
     user_name: item.user.name,
     comment: (item.comment?.length || 0) > 30 ? item.comment.substring(0, 30) + '...' : item.comment,
     verified: `Pimpinan Gudang: ${item.verified_1 === 1 ? '✔️' : item.verified_1 === 0 ? '❌' : '-'}<br/>` +

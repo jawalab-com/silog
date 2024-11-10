@@ -81,6 +81,8 @@ Route::get('/auth/callback/{provider}', [SocialiteController::class, 'handleProv
 Route::post('/rfqs/{rfq}/{tag}/received', [RfqController::class, 'received'])->name('rfqs.received');
 Route::post('/rfqs/{rfq}/{tag}/paid', [RfqController::class, 'paid'])->name('rfqs.paid');
 Route::get('/rfqs/{rfq}/{tag}/po-print', [RfqController::class, 'poPrint'])->name('rfqs.po.print');
+Route::get('/rfqs/to-rfq', [RfqController::class, 'toRfq'])->name('rfqs.torfq');
+Route::post('/rfqs/{rfq}/{product_id}/tolak', [RfqController::class, 'tolak'])->name('rfqs.tolak');
 
 Route::middleware([
     'auth:sanctum',

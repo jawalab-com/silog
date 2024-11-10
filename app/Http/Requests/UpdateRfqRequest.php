@@ -37,6 +37,7 @@ class UpdateRfqRequest extends FormRequest
             // 'suppliers.*.file_proof_path' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:10240',
             // 'suppliers.*.file_receipt_path' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:10240',
             'products' => 'nullable|array|min:1',
+            'status' => 'nullable|string',
         ];
     }
 }

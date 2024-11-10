@@ -38,3 +38,7 @@ router.on("success", (event) => {
     // on each router load
     initFlowbite();
 });
+
+router.on("navigate", (event) => {
+    initFlowbite();
+});

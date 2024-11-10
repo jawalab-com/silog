@@ -20,7 +20,7 @@ const columns = [
     { name: 'brand_name', label: 'Merk' },
     { name: 'tag_name', label: 'Tag' },
     { name: 'product_description', label: 'Deskripsi Barang' },
-    { name: 'minimum_quantity', label: 'Stok Minimum', align: 'right' },
+    // { name: 'minimum_quantity', label: 'Stok Minimum', align: 'right' },
     { name: 'quantity', label: 'Jumlah Stok', align: 'right' },
     { name: 'verified', label: 'Terverifikasi', align: 'center' },
     // { name: 'price', label: 'Harga', align: 'right' },
