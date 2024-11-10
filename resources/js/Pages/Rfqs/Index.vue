@@ -44,7 +44,7 @@ const data = props.rfqs.map(item => ({
     verified: `Pimpinan Gudang: ${item.verified_1 === 1 ? '✔️' : item.verified_1 === 0 ? '❌' : '-'}<br/>` +
         `Admin Gudang: ${item.verified_2 === 1 ? '✔️' : item.verified_2 === 0 ? '❌' : '-'}<br/>` +
         `Purchasing: ${item.verified_3 === 1 ? '✔️' : item.verified_3 === 0 ? '❌' : '-'}<br/>` +
-        `Pimpinan STP: ${item.verified_4 === 1 ? '✔️' : item.verified_4 === 0 ? '❌' : '-'}`,
+        `Pimpinan: ${item.verified_4 === 1 ? '✔️' : item.verified_4 === 0 ? '❌' : '-'}`,
     payment_status: item.payment_status ? 'Lunas' : 'Belum Lunas',
 }));
 </script>

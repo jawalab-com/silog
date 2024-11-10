@@ -222,25 +222,27 @@ class RfqController extends Controller
                         $data['verified_4'] = true;
                         $data['payment_status'] = true;
                     } elseif ($rfq->verified_4 && ($rfq->status === RfqStatus::DIPROSES || $rfq->status === RfqStatus::SIAP_DIAMBIL)) {
-                        foreach ($rfq->rfqDetails()->get() as $product) {
-                            $rfqSupplier = $rfq->rfqSuppliers()->where('tag', $product->product->tag)->first();
-                            InventoryTransaction::create([
-                                'product_id' => $product->product_id,
-                                'quantity_change' => -$product->quantity,
-                                'transaction_type' => 'DIAMBIL',
-                                'reference_id' => $rfqSupplier->po_number,
-                                'transaction_date' => $product->created_at,
-                                'user_id' => auth()->id(),
-                                'note' => 'Barang diambil melalui penerimaan Purchase Order No. '.
-                                    $rfqSupplier->po_number.
-                                    ' dari Pengajuan No. '.
-                                    $rfq->rfq_number,
-                            ]);
-                            $inv = Inventory::where('product_id', $product->product_id)->first();
-                            Inventory::updateOrCreate(
-                                ['product_id' => $product->product_id],
-                                ['quantity' => ($inv->quantity ?? 0) - $product->quantity]
-                            );
+                        if ($rfq->status === RfqStatus::DIPROSES) {
+                            foreach ($rfq->rfqDetails()->get() as $product) {
+                                $rfqSupplier = $rfq->rfqSuppliers()->where('tag', $product->product->tag)->first();
+                                InventoryTransaction::create([
+                                    'product_id' => $product->product_id,
+                                    'quantity_change' => -$product->quantity,
+                                    'transaction_type' => 'DIAMBIL',
+                                    'reference_id' => $rfqSupplier->po_number,
+                                    'transaction_date' => $product->created_at,
+                                    'user_id' => auth()->id(),
+                                    'note' => 'Barang diambil melalui penerimaan Purchase Order No. '.
+                                        $rfqSupplier->po_number.
+                                        ' dari Pengajuan No. '.
+                                        $rfq->rfq_number,
+                                ]);
+                                $inv = Inventory::where('product_id', $product->product_id)->first();
+                                Inventory::updateOrCreate(
+                                    ['product_id' => $product->product_id],
+                                    ['quantity' => ($inv->quantity ?? 0) - $product->quantity]
+                                );
+                            }
                         }
                         $data['verified_2'] = $rfq->status === RfqStatus::DIPROSES ? null : true;
                         $data['status'] = $rfq->status === RfqStatus::DIPROSES ? RfqStatus::SIAP_DIAMBIL->value : RfqStatus::SELESAI->value;
