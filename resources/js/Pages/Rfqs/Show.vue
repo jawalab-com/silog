@@ -665,7 +665,7 @@ watch(() => newProduct.value.product_id, async (newVal) => {
                 </p> -->
 
                 <div class="flex justify-between mt-2">
-                    <Button color="gray" @click="goBack" type="button">
+                    <Button color="gray" :href="route('rfqs.index')" type="button">
                         Kembali
                     </Button>
                     <div v-if="

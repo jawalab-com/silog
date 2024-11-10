@@ -1,7 +1,10 @@
 <script setup>
-import { Link } from '@inertiajs/vue3';
+import { usePage, Link } from '@inertiajs/vue3';
 
 defineProps({});
+
+const page = usePage();
+const role = (page.props.auth.user.all_teams.find(team => team.id === page.props.auth.user.current_team_id)).membership?.role || 'owner';
 
 const isLog = true;
 
@@ -73,25 +76,25 @@ const isLog = true;
                         <span class="ml-3">Barang</span>
                         </Link>
                     </li>
-                    <li>
+                    <li v-if="role != 'pengaju'">
                         <Link :href="route('brands.index')"
                             class="flex items-center p-2 font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
                         <span class="ml-3">Merk</span>
                         </Link>
                     </li>
-                    <li>
+                    <li v-if="role != 'pengaju'">
                         <Link :href="route('tags.index')"
                             class="flex items-center p-2 font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
                         <span class="ml-3">Kategori</span>
                         </Link>
                     </li>
-                    <li>
+                    <li v-if="role != 'pengaju'">
                         <Link :href="route('units.index')"
                             class="flex items-center p-2 font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
                         <span class="ml-3">Satuan</span>
                         </Link>
                     </li>
-                    <li>
+                    <li v-if="role != 'pengaju'">
                         <Link :href="route('suppliers.index')"
                             class="flex items-center p-2 font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
                         <span class="ml-3">Supplier</span>
@@ -282,7 +285,7 @@ const isLog = true;
                 </li>
             </ul>
         </div>
-        <div
+        <div style="display:none;"
             class="hidden absolute bottom-0 left-0 justify-center p-4 space-x-4 w-full lg:flex bg-white dark:bg-gray-800 z-20">
             <a href="#"
                 class="inline-flex justify-center p-2 text-gray-500 rounded cursor-pointer dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-600">

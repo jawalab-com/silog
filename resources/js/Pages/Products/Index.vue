@@ -1,5 +1,5 @@
 <script setup>
-import { useForm } from '@inertiajs/vue3';
+import { useForm, usePage } from '@inertiajs/vue3';
 import { AppLayout } from '@/Layouts';
 import { Breadcrumb, Button, DataTable, Icon } from '@/Components';
 import { FwbButtonGroup } from 'flowbite-vue';
@@ -9,6 +9,8 @@ const props = defineProps({
 });
 
 const form = useForm({});
+const page = usePage();
+const role = (page.props.auth.user.all_teams.find(team => team.id === page.props.auth.user.current_team_id)).membership?.role || 'owner';
 
 const title = 'Barang';
 const breadcrumbs = [
@@ -21,11 +23,12 @@ const columns = [
     { name: 'tag_name', label: 'Tag' },
     { name: 'product_description', label: 'Deskripsi Barang' },
     // { name: 'minimum_quantity', label: 'Stok Minimum', align: 'right' },
-    { name: 'quantity', label: 'Jumlah Stok', align: 'right' },
+    role !== 'pengaju' ? { name: 'quantity', label: 'Jumlah Stok', align: 'right' } : null,
     { name: 'verified', label: 'Terverifikasi', align: 'center' },
     // { name: 'price', label: 'Harga', align: 'right' },
     // { name: 'updated_at', label: 'Tanggal Update', align: 'right' },
-];
+].filter(Boolean);
+
 const data = props.products.map(item => ({
     ...item,
     tag_name: item.tag?.tag_name,
@@ -68,14 +71,16 @@ const deleteAction = async (id) => {
         <DataTable :data="data" :columns="columns">
             <template v-slot:actionColumn="{ item, columns, index }">
                 <fwb-button-group>
-                    <Button color="yellow" class="p-0 py-1" :href="route('products.edit', item.id)">
+                    <Button v-if="!(item.verified == '✔️' && role == 'pengaju')" color="yellow" class="p-0 py-1"
+                        :href="route('products.edit', item.id)">
                         <Icon name="pencil" class="w-4.5 h-4.5" />
                     </Button>
-                    <Button color="purple" class="p-0 py-1"
+                    <Button v-if="role != 'pengaju'" color="purple" class="p-0 py-1"
                         :href="route('stock-opnames.create', { product_id: item.id })" title="Ubah Stock">
                         <Icon name="archive" class="w-4.5 h-4.5" />
                     </Button>
-                    <Button color="green" class="p-0 py-1" :href="route('products.show', item.id)">
+                    <Button v-if="role != 'pengaju'" color="green" class="p-0 py-1"
+                        :href="route('products.show', item.id)">
                         <Icon name="info" class="w-4.5 h-4.5" />
                     </Button>
                     <!-- <Button color="red" class="p-0 py-1" @click="deleteAction(item.id)">

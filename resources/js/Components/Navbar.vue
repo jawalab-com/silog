@@ -182,7 +182,7 @@ const logout = () => {
                 </div>
 
             </div>
-            <div class="flex items-center lg:order-2">
+            <!-- <div class="flex items-center lg:order-2">
                 <form action="#" method="GET" class="hidden md:block md:pl-2">
                     <label for="topbar-search" class="sr-only">Search</label>
                     <div class="relative md:w-64 md:w-96">
@@ -199,7 +199,7 @@ const logout = () => {
                             placeholder="Search" />
                     </div>
                 </form>
-            </div>
+            </div> -->
             <div class="flex items-center lg:order-2">
                 <button type="button" data-drawer-toggle="drawer-navigation" aria-controls="drawer-navigation"
                     class="p-2 mr-1 text-gray-500 rounded-lg md:hidden hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-700 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600">
@@ -213,7 +213,7 @@ const logout = () => {
                 </button>
                 <!-- Notifications -->
                 <button type="button" data-dropdown-toggle="notification-dropdown"
-                    class="p-2 mr-1 text-gray-500 rounded-lg hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-700 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600">
+                    class="hidden p-2 mr-1 text-gray-500 rounded-lg hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-700 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600">
                     <span class="sr-only">View notifications</span>
                     <!-- Bell icon -->
                     <svg aria-hidden="true" class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"

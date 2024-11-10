@@ -1,5 +1,5 @@
 <script setup>
-import { useForm, Link } from '@inertiajs/vue3';
+import { useForm, usePage, Link } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import Card from '@/Components/Card.vue';
@@ -15,6 +15,9 @@ const props = defineProps({
     brands: Array,
     tags: Array,
 });
+
+const page = usePage();
+const role = (page.props.auth.user.all_teams.find(team => team.id === page.props.auth.user.current_team_id)).membership?.role || 'owner';
 
 const form = useForm({
     product_name: props.product?.product_name || '',
@@ -109,7 +112,7 @@ const saveAction = () => {
                         <InputError :message="form.errors.product_description" />
                     </div>
 
-                    <div class="flex items-center">
+                    <div class="flex items-center" v-if="role != 'pengaju'">
                         <input checked id="verified" type="checkbox" v-model="form.verified"
                             class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
                         <InputLabel for="verified" value="Terverifikasi" class="ml-2" />

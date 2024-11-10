@@ -220,6 +220,7 @@ class RfqController extends Controller
                         $data['verified_2'] = null;
                         $data['verified_3'] = true;
                         $data['verified_4'] = true;
+                        $data['payment_status'] = true;
                     } elseif ($rfq->verified_4 && ($rfq->status === RfqStatus::DIPROSES || $rfq->status === RfqStatus::SIAP_DIAMBIL)) {
                         foreach ($rfq->rfqDetails()->get() as $product) {
                             $rfqSupplier = $rfq->rfqSuppliers()->where('tag', $product->product->tag)->first();
@@ -391,6 +392,10 @@ class RfqController extends Controller
             $rfqSupplier = $rfq->rfqSuppliers()->where('tag', $tag)->first();
             if ($rfqSupplier) {
                 $rfqSupplier->update(['paid' => true]);
+            }
+
+            if ($rfq->rfqSuppliers()->count() == $rfq->rfqSuppliers()->where('paid', true)->count()) {
+                $rfq->update(['payment_status' => true]);
             }
 
             return response()->json(['message' => 'Success'], 200);
