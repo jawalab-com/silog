@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             BrandSeeder::class,
             ProductSeeder::class,
             SupplierSeeder::class,
+            ProductUnitConversionSeeder::class,
             // RfqSeeder::class,
             // RfqDetailSeeder::class,
             // PurchaseOrderSeeder::class,

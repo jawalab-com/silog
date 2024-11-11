@@ -8,6 +8,7 @@ use App\Models\Brand;
 use App\Models\InventoryTransaction;
 use App\Models\Product;
 use App\Models\Tag;
+use App\Models\Unit;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -56,6 +57,7 @@ class ProductController extends Controller
             'product' => new Product,
             'brands' => $brands,
             'tags' => $tags,
+            'units' => Unit::orderBy('unit_name')->get(),
         ]);
     }
 
@@ -66,6 +68,11 @@ class ProductController extends Controller
     {
         try {
             $product = Product::create($request->validated());
+            $unit_conversions = $request->validated()['unit_conversions'];
+            $product->unitConversions()->delete();
+            foreach ($unit_conversions as $unit_conversion) {
+                $product->unitConversions()->create($unit_conversion);
+            }
             $productAttribute = [
                 'nama' => $product->product_name,
                 'merk' => $product->brand->brand_name,
@@ -123,9 +130,10 @@ class ProductController extends Controller
         $tags = Tag::orderBy('tag_name')->get();
 
         return Inertia::render('Products/Form', [
-            'product' => $product->with('inventory')->where('id', $product->id)->first(),
+            'product' => $product->with(['inventory', 'unitConversions.fromUnit', 'unitConversions.toUnit'])->where('id', $product->id)->first(),
             'brands' => $brands,
             'tags' => $tags,
+            'units' => Unit::orderBy('unit_name')->get(),
         ]);
     }
 
@@ -141,6 +149,11 @@ class ProductController extends Controller
             'spesifikasi' => $product->description,
         ];
         $product->update($request->validated());
+        $unit_conversions = $request->validated()['unit_conversions'];
+        $product->unitConversions()->delete();
+        foreach ($unit_conversions as $unit_conversion) {
+            $product->unitConversions()->create($unit_conversion);
+        }
         $updatedProduct = Product::find($product->id);
         $updatedProductAttribute = [
             'nama' => $updatedProduct->product_name,

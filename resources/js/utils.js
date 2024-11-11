@@ -25,6 +25,16 @@ const utils = {
         return new Intl.NumberFormat(options.locale, options).format(amount);
     },
 
+    generateSlug: function (text) {
+        return text
+            .toString() // Convert to string
+            .toLowerCase() // Convert to lowercase
+            .trim() // Trim whitespace from both ends
+            .replace(/\s+/g, "-") // Replace spaces with dashes
+            .replace(/[^\w\-]+/g, "") // Remove all non-word characters
+            .replace(/\-\-+/g, "-"); // Replace multiple dashes with a single dash
+    },
+
     image: {
         // Returns a random placeholder image URL
         placeholder: function (width = 300, height = 300) {

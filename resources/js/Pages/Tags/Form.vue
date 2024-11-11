@@ -12,6 +12,7 @@ const props = defineProps({
 const form = useForm({
     tag_name: props.tag?.tag_name,
     tag_description: props.tag?.tag_description,
+    slug: props.tag?.slug,
 });
 
 const title = (!!props.tag ? 'Edit' : 'Tambah') + ' Kategori Produk';
@@ -24,6 +25,7 @@ const breadcrumbs = [
 const back = () => window.history.back();
 
 const saveAction = () => {
+    form.slug = utils.generateSlug(form.tag_name);
     if (!!props.tag) {
         form.put(route("tags.update", props.tag.id));
     } else {

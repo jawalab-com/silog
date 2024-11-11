@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Team;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -14,6 +15,8 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         User::truncate();
+        Team::truncate();
+        \DB::table('team_user')->truncate();
         // User::factory(10)->withPersonalTeam()->create();
 
         $owner = User::factory()->withPersonalTeam()->create([

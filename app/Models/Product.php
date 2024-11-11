@@ -22,6 +22,7 @@ class Product extends Model
         'price',
         'minimum_quantity',
         'verified',
+        'unit_id',
     ];
 
     public function tag()
@@ -42,5 +43,15 @@ class Product extends Model
     public function inventoryTransactions(): HasMany
     {
         return $this->hasMany(InventoryTransaction::class);
+    }
+
+    public function unit()
+    {
+        return $this->belongsTo(Unit::class, 'default_unit_id');
+    }
+
+    public function unitConversions()
+    {
+        return $this->hasMany(ProductUnitConversion::class);
     }
 }

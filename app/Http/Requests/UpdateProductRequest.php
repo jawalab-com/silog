@@ -26,9 +26,11 @@ class UpdateProductRequest extends FormRequest
             'brand_id' => 'required|exists:brands,id',
             'tag' => 'nullable|string',
             'product_description' => 'nullable|string',
-            'price' => 'required|numeric|min:0',
+            'price' => 'nullable|numeric|min:0',
             'minimum_quantity' => 'required|integer|min:0',
             'verified' => 'required|boolean',
+            'unit_id' => 'required|exists:units,id',
+            'unit_conversions' => 'nullable|array',
         ];
     }
 }
