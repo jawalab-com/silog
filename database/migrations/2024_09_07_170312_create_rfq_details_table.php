@@ -18,6 +18,7 @@ return new class extends Migration
             $table->integer('quantity');
             $table->integer('quantity_verified')->nullable();
             $table->foreignId('unit_id')->nullable()->constrained('units')->onDelete('cascade')->onUpdate('cascade');
+            $table->decimal('estimation_price', 10, 2)->default(0);
             $table->decimal('unit_price', 10, 2)->default(0);
             $table->decimal('total_price', 10, 2)->default(0);
             $table->timestamps();

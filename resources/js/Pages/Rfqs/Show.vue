@@ -220,7 +220,7 @@ watch(() => newProduct.value.product_id, async (newVal) => {
                                                     <Select
                                                         v-if="(rfq.verified_2 && !rfq.verified_3 && ['purchasing'].includes(role) && !item.date_sent && !rfq.verified_4)"
                                                         v-model="item.supplier_id" class="py-1 px-2">
-                                                        <option>Ga Tau</option>
+                                                        <option value="">Ga Tau</option>
                                                         <option v-for="supplier in tagSuppliers[item.tag.slug]"
                                                             :value="supplier.id" :key="supplier.id">
                                                             {{ supplier.supplier_name }}
@@ -296,12 +296,13 @@ watch(() => newProduct.value.product_id, async (newVal) => {
                                                 </p>
                                             </div>
                                         </td>
-                                        <td class="px-4 py-0.5">
+                                        <td class="px-4 py-0.5" v-if="(item.supplier_id && item.supplier_id !== '')">
                                             Bukti
                                         </td>
                                         <!-- <td class="px-4 py-0.5"
                                             v-if="role === 'purchasing' && !item.file_invoice && rfq.verified_4"> -->
-                                        <td class="px-4 py-0.5" v-if="role === 'purchasing' && !item.file_proof">
+                                        <td class="px-4 py-0.5"
+                                            v-if="role === 'purchasing' && !item.file_proof && (item.supplier_id && item.supplier_id !== '')">
                                             <input
                                                 class="h-8 block w-full text-xs text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
                                                 id="small_size" type="file"

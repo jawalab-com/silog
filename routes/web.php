@@ -5,6 +5,7 @@ use App\Http\Controllers\BrandController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PurchaseOrderController;
 use App\Http\Controllers\PurchaseRequisitionController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RfqController;
 use App\Http\Controllers\RoomTypeController;
 use App\Http\Controllers\SalesOrderController;
@@ -83,6 +84,7 @@ Route::post('/rfqs/{rfq}/{tag}/paid', [RfqController::class, 'paid'])->name('rfq
 Route::get('/rfqs/{rfq}/{tag}/po-print', [RfqController::class, 'poPrint'])->name('rfqs.po.print');
 Route::get('/rfqs/to-rfq', [RfqController::class, 'toRfq'])->name('rfqs.torfq');
 Route::post('/rfqs/{rfq}/{product_id}/tolak', [RfqController::class, 'tolak'])->name('rfqs.tolak');
+Route::get('/auth/redirect/{provider}', [SocialiteController::class, 'redirectToProvider'])->name('auth.redirect');
 
 Route::middleware([
     'auth:sanctum',
@@ -104,5 +106,6 @@ Route::middleware([
         'tags' => TagController::class,
         'units' => UnitController::class,
         'purchase-requisitions' => PurchaseRequisitionController::class,
+        'reports' => ReportController::class,
     ]);
 });

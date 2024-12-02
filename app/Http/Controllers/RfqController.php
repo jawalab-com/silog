@@ -47,9 +47,9 @@ class RfqController extends Controller
             })
             ->filter(function ($rfq) use ($role) {
                 if ($role == 'pimpinan') {
-                    return $rfq->total_amount >= 5000000;
+                    return $rfq->total_amount >= 1000000;
                 } elseif ($role == 'pejabat-teknis') {
-                    return $rfq->total_amount < 5000000;
+                    return $rfq->total_amount < 1000000;
                 } else {
                     return true;
                 }
