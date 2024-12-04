@@ -17,6 +17,24 @@ const props = defineProps({
 
 const page = usePage();
 const role = (page.props.auth.user.all_teams.find(team => team.id === page.props.auth.user.current_team_id)).membership?.role || 'owner';
+// const allAvailable = computed(() => form.products.filter(item => item.stock - item.quantity >= 0).length == form.products.length);
+const actionLabel = computed(() => {
+    const allAvailable = form.products.filter(item => item.stock - item.quantity >= 0).length == form.products.length;
+
+    if (role === 'purchasing' && props.rfq.verified_4) {
+        return 'Kunci';
+    }
+
+    if (role === 'admin-gudang' && props.rfq.verified_1) {
+        return allAvailable ? 'Kirim ke pengaju' : 'Kirim ke purchasing';
+    }
+
+    if (this.rfq.status === 'siap-diambil') {
+        return 'Selesai';
+    }
+
+    return 'Terima';
+});
 
 const form = useForm({
     _method: props.rfq.id ? 'put' : 'post',
@@ -719,10 +737,7 @@ watch(() => newProduct.value.product_id, async (newVal) => {
                             Tolak
                         </Button>
                         <Button color="green" @click="form.verified = 1" type="submit" class="ml-2">
-                            {{ role === 'purchasing' && rfq.verified_4 ? 'Kunci'
-                                :
-                                (rfq.status == 'siap-diambil' ? 'Selesai' : 'Terima')
-                            }}
+                            {{ actionLabel }}
                         </Button>
                         <!-- <Button color="blue" @click="form.verified = null" type="submit" class="ml-2">
                             Simpan
