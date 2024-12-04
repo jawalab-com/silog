@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('stock_opnames', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('user_id')->constrained()->onDelete('cascade')->onUpdate('cascade');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade')->onUpdate('cascade');
             $table->foreignUuid('product_id')->constrained()->onDelete('cascade')->onUpdate('cascade');
             $table->integer('initial_stock');
             $table->integer('final_stock');

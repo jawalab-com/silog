@@ -188,6 +188,7 @@ class RfqController extends Controller
         //     ['action' => 'someAction']
         // );
         $data = $request->validated();
+
         foreach ($data['suppliers'] as $i => $supplierData) {
             if (isset($supplierData['file_proof_path'])) {
                 $path = $supplierData['file_proof_path']->store('uploads', 'public');

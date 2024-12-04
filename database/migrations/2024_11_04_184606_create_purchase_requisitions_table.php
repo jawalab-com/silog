@@ -18,8 +18,8 @@ return new class extends Migration
             $table->date('date_created')->nullable();
             $table->date('date_deadline')->nullable();
             $table->string('state')->default('draft'); // draft, pending, rfq, purchase, done, cancel
-            $table->foreignUuid('department_id')->nullable()->constrained()->onDelete('cascade')->onUpdate('cascade');
-            $table->foreignUuid('user_id')->constrained()->onDelete('cascade')->onUpdate('cascade');
+            $table->foreignId('department_id')->nullable()->constrained()->onDelete('cascade')->onUpdate('cascade');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade')->onUpdate('cascade');
             $table->timestamps();
         });
     }

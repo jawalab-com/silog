@@ -29,7 +29,7 @@ return new class extends Migration
             $table->foreignId('verified_4_user_id')->nullable()->constrained('users')->onDelete('cascade')->onUpdate('cascade');
             $table->boolean('payment_status')->default(false);
             $table->string('status');
-            $table->text('comment')->nullable();
+            $table->json('comments')->nullable();
             $table->timestamps();
         });
     }

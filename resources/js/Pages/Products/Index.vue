@@ -1,11 +1,12 @@
 <script setup>
-import { useForm, usePage } from '@inertiajs/vue3';
+import { useForm, usePage, Link } from '@inertiajs/vue3';
 import { AppLayout } from '@/Layouts';
 import { Breadcrumb, Button, DataTable, Icon } from '@/Components';
 import { FwbButtonGroup } from 'flowbite-vue';
 
 const props = defineProps({
     products: Array,
+    inventorySummary: Array,
 });
 
 const form = useForm({});
@@ -22,7 +23,7 @@ const columns = [
     { name: 'brand_name', label: 'Merk' },
     { name: 'tag_name', label: 'Tag' },
     { name: 'product_description', label: 'Deskripsi Barang' },
-    // { name: 'minimum_quantity', label: 'Stok Minimum', align: 'right' },
+    { name: 'minimum_quantity', label: 'Stok Minimum', align: 'right' },
     role !== 'pengaju' ? { name: 'quantity', label: 'Jumlah Stok', align: 'right' } : null,
     { name: 'verified', label: 'Terverifikasi', align: 'center' },
     // { name: 'price', label: 'Harga', align: 'right' },
@@ -66,6 +67,21 @@ const deleteAction = async (id) => {
                 </template>
                 Tambah
             </Button>
+        </div>
+
+        <div class="mb-2">
+            <Link :href="route('products.index', { stock_status: 'available' })"
+                class="bg-green-100 text-green-800 text-md font-medium me-2 px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300">
+            Tersedia ({{ inventorySummary.available_count }})
+            </Link>
+            <Link :href="route('products.index', { stock_status: 'less' })"
+                class="bg-yellow-100 text-yellow-800 text-md font-medium me-2 px-2.5 py-0.5 rounded dark:bg-yellow-900 dark:text-yellow-300">
+            Kurang ({{ inventorySummary.less_count }})
+            </Link>
+            <Link :href="route('products.index', { stock_status: 'empty' })"
+                class="bg-red-100 text-red-800 text-md font-medium me-2 px-2.5 py-0.5 rounded dark:bg-red-900 dark:text-red-300">
+            Habis ({{ inventorySummary.empty_count }})
+            </Link>
         </div>
 
         <DataTable :data="data" :columns="columns">

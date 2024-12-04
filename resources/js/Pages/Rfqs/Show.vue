@@ -111,19 +111,27 @@ const setReceived = (tag, index) => {
 };
 
 const setTolak = (product_id, index) => {
-    try {
-        axios.post(route("rfqs.tolak", { rfq: props.rfq.id, product_id: product_id }))
-            .then(response => {
-                form.products[index].quantity = 0;
-                console.log('Purchase order updated successfully');
-            })
-            .catch(errors => {
-                console.error('Failed to update received status:', errors);
-            });
-    } catch (error) {
-        console.error('An unexpected error occurred:', error);
+    const result = utils.confirm({
+        title: "Hapus Data",
+        text: "Apakah Anda yakin ingin menghapus data ini? Tindakan ini tidak dapat dibatalkan!",
+    });
+
+    if (result.isConfirmed) {
+        try {
+            axios.post(route("rfqs.tolak", { rfq: props.rfq.id, product_id: product_id }))
+                .then(response => {
+                    form.products[index].quantity = 0;
+                    console.log('Purchase order updated successfully');
+                })
+                .catch(errors => {
+                    console.error('Failed to update received status:', errors);
+                });
+        } catch (error) {
+            console.error('An unexpected error occurred:', error);
+        }
     }
 };
+
 
 const setPaid = (tag, index) => {
     try {
@@ -597,11 +605,13 @@ watch(() => newProduct.value.product_id, async (newVal) => {
                                     <template v-if="
                                         (rfq.verified_2 && ['purchasing'].includes(role)) && !rfq.verified_4 && !rfq.verified_3
                                     ">
-                                        <TextInput class="py-1" type="number" v-model="item.unit_price" step="0.01" />
+                                        <TextInput class="py-1" type="number" v-model="item.estimation_price"
+                                            step="0.01" />
                                     </template>
                                     <template v-else>
-                                        {{ utils.formatDecimal(item.unit_price) }}
-                                        <TextInput class="py-1" type="hidden" v-model="item.unit_price" step="0.01" />
+                                        {{ utils.formatDecimal(item.estimation_price) }}
+                                        <TextInput class="py-1" type="hidden" v-model="item.estimation_price"
+                                            step="0.01" />
                                     </template>
                                 </td>
                                 <td v-if="(['purchasing', 'pimpinan'].includes(role))"
@@ -676,6 +686,7 @@ watch(() => newProduct.value.product_id, async (newVal) => {
                     <label for="message" class="block my-2 text-sm font-medium text-gray-900 dark:text-white">
                         Komentar (opsional)
                     </label>
+                    <x-comments::index :model="$post" />
                     <textarea v-model="form.comment" id="message" rows="4"
                         class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                         placeholder="Berikan komentar untuk menuliskan alasan penolakan jika diperlukan..."></textarea>
@@ -713,6 +724,9 @@ watch(() => newProduct.value.product_id, async (newVal) => {
                                 (rfq.status == 'siap-diambil' ? 'Selesai' : 'Terima')
                             }}
                         </Button>
+                        <!-- <Button color="blue" @click="form.verified = null" type="submit" class="ml-2">
+                            Simpan
+                        </Button> -->
                     </div>
                 </div>
             </form>

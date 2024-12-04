@@ -20,10 +20,45 @@ class ProductController extends Controller
      */
     public function index(Request $request)
     {
-        $products = Product::with(['brand', 'tag', 'inventory'])->orderBy('product_name')->get();
+        $stockStatus = $request->input('stock_status', 'all');
+
+        $inventorySummary = Product::leftJoin('inventories', 'products.id', '=', 'inventories.product_id')
+            ->selectRaw('
+                SUM(CASE WHEN COALESCE(inventories.quantity, 0) > products.minimum_quantity THEN 1 ELSE 0 END) AS available_count,
+                SUM(CASE WHEN COALESCE(inventories.quantity, 0) < products.minimum_quantity AND COALESCE(inventories.quantity, 0) > 0 THEN 1 ELSE 0 END) AS less_count,
+                SUM(CASE WHEN COALESCE(inventories.quantity, 0) = 0 THEN 1 ELSE 0 END) AS empty_count
+            ')
+            ->first();
+
+        $products = Product::with(['brand', 'tag', 'inventory']);
+        switch ($stockStatus) {
+            case 'available':
+                $products->whereHas('inventory', function ($query) {
+                    $query->whereRaw('COALESCE(inventories.quantity, 0) > products.minimum_quantity');
+                });
+                break;
+
+            case 'less':
+                $products->whereHas('inventory', function ($query) {
+                    $query->whereRaw('COALESCE(inventories.quantity, 0) < products.minimum_quantity')
+                        ->whereRaw('COALESCE(inventories.quantity, 0) > 0');
+                });
+                break;
+
+            case 'empty':
+                $products->where(function ($query) {
+                    $query->whereDoesntHave('inventory') // Products without inventory
+                        ->orWhereHas('inventory', function ($subQuery) {
+                            $subQuery->whereRaw('COALESCE(inventories.quantity, 0) = 0');
+                        });
+                });
+                break;
+        }
+        $products = $products->orderBy('product_name')->get();
 
         return Inertia::render('Products/Index', [
             'products' => $products,
+            'inventorySummary' => $inventorySummary,
         ]);
     }
 

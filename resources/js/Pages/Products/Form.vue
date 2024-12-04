@@ -121,6 +121,12 @@ watch(() => form.unit_id, (newUnitId) => {
                     </div>
 
                     <div>
+                        <InputLabel for="product_description" value="Spesifikasi" />
+                        <TextInput id="product_description" v-model="form.product_description" />
+                        <InputError :message="form.errors.product_description" />
+                    </div>
+
+                    <div>
                         <InputLabel for="tag" value="Kategori" />
                         <Select id="tag" v-model="form.tag" :options="tags" filter optionLabel="tag_name"
                             optionValue="slug" class="w-full" />
@@ -128,9 +134,16 @@ watch(() => form.unit_id, (newUnitId) => {
                     </div>
 
                     <div>
-                        <InputLabel for="product_description" value="Spesifikasi" />
-                        <TextInput id="product_description" v-model="form.product_description" />
-                        <InputError :message="form.errors.product_description" />
+                        <InputLabel for="minimum_quantity" value="Stok Minimum" />
+                        <TextInput id="minimum_quantity" v-model="form.minimum_quantity" />
+                        <InputError :message="form.errors.minimum_quantity" />
+                    </div>
+
+                    <div>
+                        <InputLabel for="unit_id" value="Satuan Terkecil" />
+                        <Select v-model="form.unit_id" :options="units" filter optionLabel="unit_name" optionValue="id"
+                            placeholder="Pilih satuan terkecil" class="w-full" />
+                        <InputError :message="form.errors.unit_id" />
                     </div>
 
                     <div class="flex items-center" v-if="role != 'pengaju'">
@@ -145,13 +158,6 @@ watch(() => form.unit_id, (newUnitId) => {
                         <TextInput id="price" v-model="form.price" type="number" />
                         <InputError :message="form.errors.price" />
                     </div> -->
-
-                    <div>
-                        <InputLabel for="unit_id" value="Satuan Terkecil" />
-                        <Select v-model="form.unit_id" :options="units" filter optionLabel="unit_name" optionValue="id"
-                            placeholder="Pilih satuan terkecil" class="w-full" />
-                        <InputError :message="form.errors.unit_id" />
-                    </div>
 
                 </div>
 

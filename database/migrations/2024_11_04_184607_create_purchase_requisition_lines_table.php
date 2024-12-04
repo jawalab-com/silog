@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('purchase_requisition_lines', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignId('purchase_requisition_id')->constrained()->onDelete('cascade')->onUpdate('cascade');
-            $table->foreignId('product_id')->constrained()->onDelete('cascade')->onUpdate('cascade');
+            $table->foreignUuid('purchase_requisition_id')->constrained()->onDelete('cascade')->onUpdate('cascade');
+            $table->foreignUuid('product_id')->constrained()->onDelete('cascade')->onUpdate('cascade');
             $table->foreignId('unit_id')->constrained()->onDelete('cascade')->onUpdate('cascade');
             $table->decimal('quantity', 10, 2);
             $table->decimal('price_unit', 10, 2)->nullable();

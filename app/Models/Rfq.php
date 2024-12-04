@@ -8,9 +8,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use LakM\Comments\Concerns\Commentable;
+use LakM\Comments\Contracts\CommentableContract;
 
-class Rfq extends Model
+class Rfq extends Model implements CommentableContract
 {
+    use Commentable;
     use HasFactory;
     use HasUuids;
 
@@ -31,7 +34,7 @@ class Rfq extends Model
         'verified_4_user_id',
         'payment_status',
         'status',
-        'comment',
+        'comments',
     ];
 
     protected $casts = [
@@ -46,6 +49,11 @@ class Rfq extends Model
         $no++;
 
         $this->attributes['rfq_number'] = implode('/', [$no, 0, 'ADMIN', date('m'), date('Y')]);
+    }
+
+    public function geCommentsAttribute($value): array
+    {
+        return json_decode($value, true) ?? [];
     }
 
     public function user(): BelongsTo

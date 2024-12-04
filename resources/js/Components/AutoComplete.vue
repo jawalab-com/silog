@@ -17,13 +17,13 @@
 
         <!-- Dropdown suggestions list -->
         <ul v-if="isDropdownVisible && suggestions.length"
-            class="absolute w-full bg-white border border-gray-300 rounded-md mt-1 z-10">
+            class="absolute w-full dark:bg-black bg-white dark:text-white border border-gray-300 rounded-md mt-1 z-10">
             <template v-for="(suggestion, index) in suggestions.slice(0, 10)" :key="index">
                 <slot name="suggestion-item" :suggestion="suggestion" :highlighted="index === highlightedIndex"
                     @click="selectSuggestion(suggestion)" @mousedown="selectSuggestion(suggestion)">
                     <!-- Default rendering if no slot provided -->
                     <li @click="selectSuggestion(suggestion)" @mousedown="selectSuggestion(suggestion)"
-                        :class="['cursor-pointer px-4 py-2 hover:bg-gray-100', { 'bg-gray-200': index === highlightedIndex }]">
+                        :class="['cursor-pointer px-4 py-2 hover:bg-gray-100 hover:bg-gray-900', { 'bg-gray-200': index === highlightedIndex }]">
                         {{ suggestion.label }}
                     </li>
                 </slot>
