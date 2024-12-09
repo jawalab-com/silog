@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\ProductsExport;
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
 use App\Models\Brand;
@@ -12,6 +13,7 @@ use App\Models\Unit;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ProductController extends Controller
 {
@@ -24,9 +26,10 @@ class ProductController extends Controller
 
         $inventorySummary = Product::leftJoin('inventories', 'products.id', '=', 'inventories.product_id')
             ->selectRaw('
+                COUNT(1) AS all_count,
                 SUM(CASE WHEN COALESCE(inventories.quantity, 0) > products.minimum_quantity THEN 1 ELSE 0 END) AS available_count,
                 SUM(CASE WHEN COALESCE(inventories.quantity, 0) < products.minimum_quantity AND COALESCE(inventories.quantity, 0) > 0 THEN 1 ELSE 0 END) AS less_count,
-                SUM(CASE WHEN COALESCE(inventories.quantity, 0) = 0 THEN 1 ELSE 0 END) AS empty_count
+                SUM(CASE WHEN COALESCE(inventories.quantity, 0) <= 0 THEN 1 ELSE 0 END) AS empty_count
             ')
             ->first();
 
@@ -223,5 +226,12 @@ class ProductController extends Controller
 
         return redirect()->route('products.index')
             ->with('success', 'Data deleted successfully.');
+    }
+
+    public function export(Request $request)
+    {
+        $status = $request->status;
+
+        return Excel::download(new ProductsExport($status), 'stock.xlsx');
     }
 }

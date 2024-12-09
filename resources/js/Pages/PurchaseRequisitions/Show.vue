@@ -268,7 +268,7 @@ watch(() => newProduct.value.product_id, async (newVal) => {
                         Kembali
                     </Button>
                     <div v-if="
-                        ($page.props.auth.user.division === 'pimpinan-gudang' && rfq.verified_1 == null) ||
+                        ($page.props.auth.user.division === 'kepala-divisi-logistik' && rfq.verified_1 == null) ||
                         ($page.props.auth.user.division === 'admin-gudang' && rfq.verified_1 != null && rfq.verified_2 == null) ||
                         ($page.props.auth.user.division === 'purchasing' && rfq.verified_2 != null && rfq.verified_3 == null) ||
                         ($page.props.auth.user.division === 'Pimpinan STP' && rfq.verified_3 != null && rfq.verified_4 == null)

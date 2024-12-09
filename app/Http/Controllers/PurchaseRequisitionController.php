@@ -133,7 +133,6 @@ class PurchaseRequisitionController extends Controller
      */
     public function edit(PurchaseRequisition $pr, Request $request)
     {
-        dd($request);
         // $suppliers = Supplier::orderBy('supplier_name')->get();
         $tags = Tag::orderBy('tag_name')->get();
         $units = Unit::orderBy('unit_name')->get();
@@ -165,7 +164,7 @@ class PurchaseRequisitionController extends Controller
         $verified = $request->input('verified', null);
         if (! empty($verified)) {
             switch (auth()->user()->division) {
-                case 'pimpinan-gudang':
+                case 'kepala-divisi-logistik':
                     $data['verified_1'] = $verified;
                     break;
                 case 'admin-gudang':

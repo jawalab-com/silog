@@ -48,7 +48,7 @@ const data = props.purchaseOrders.map(item => ({
     supplier_name: item.supplier?.supplier_name || '',
     user_name: item.user.name,
     // status: orderStatus.find(status => status.value === item.status)?.label || item.status,
-    verifikasi: "pimpinan-gudang: ✔️<br/>admin-gudang: ✔️<br/>Purchasing: ❌<br/>Pimpinan STP: ✔️",
+    verifikasi: "kepala-divisi-logistik: ✔️<br/>admin-gudang: ✔️<br/>Purchasing: ❌<br/>Pimpinan STP: ✔️",
     payment_status: "Belum Lunas",
     status: "Pending",
 }));

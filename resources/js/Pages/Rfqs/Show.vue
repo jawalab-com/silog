@@ -13,6 +13,7 @@ const props = defineProps({
     tagSuppliers: Object,
     rfqStatus: Object,
     suppliers: Array,
+    histories: Array,
 });
 
 const page = usePage();
@@ -25,12 +26,12 @@ const actionLabel = computed(() => {
         return 'Kunci';
     }
 
-    if (role === 'admin-gudang' && props.rfq.verified_1) {
-        return allAvailable ? 'Kirim ke pengaju' : 'Kirim ke purchasing';
+    if (props.rfq.status === 'siap-diambil') {
+        return 'Selesai';
     }
 
-    if (this.rfq.status === 'siap-diambil') {
-        return 'Selesai';
+    if (role === 'admin-gudang' && props.rfq.verified_1) {
+        return allAvailable ? 'Kirim ke pengaju' : 'Kirim ke purchasing';
     }
 
     return 'Terima';
@@ -76,6 +77,17 @@ const newProduct = ref({
 });
 
 const productDetails = ref(null);
+
+const columns = [
+    { name: 'description', label: 'Catatan' },
+    { name: 'user_name', label: 'Oleh' },
+    { name: 'created_at', label: 'Waktu' },
+];
+const data = props.histories.map(item => ({
+    ...item,
+    user_name: item.user.name,
+    created_at: utils.formatDateTime(item.created_at),
+}));
 
 const addRow = () => {
     form.products.push({
@@ -690,6 +702,11 @@ watch(() => newProduct.value.product_id, async (newVal) => {
                             </tr>
                         </tbody>
                     </table>
+
+                    <h2 class="text-sm">Bukti Penyerahan</h2>
+                    <input
+                        class="h-8 block w-full text-xs text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
+                        id="small_size" type="file">
                 </div>
 
                 <div>
@@ -719,7 +736,7 @@ watch(() => newProduct.value.product_id, async (newVal) => {
                         Kembali
                     </Button>
                     <div v-if="
-                        (role === 'pimpinan-gudang' && rfq.verified_1 == null) ||
+                        (role === 'kepala-divisi-logistik' && rfq.verified_1 == null) ||
                         (role === 'admin-gudang' && rfq.verified_1 != null && rfq.verified_2 == null) ||
                         (role === 'purchasing' && rfq.verified_2 != null && rfq.verified_3 == null && !form.suppliers[0]?.date_sent) ||
                         (['pimpinan', 'pejabat-teknis'].includes(role) && rfq.verified_3 != null && rfq.verified_4 == null)
@@ -733,7 +750,7 @@ watch(() => newProduct.value.product_id, async (newVal) => {
                             Terima
                         </Button> -->
                         <Button color="red" @click="form.verified = 0" type="submit"
-                            v-if="['pimpinan-gudang', 'pimpinan'].includes(role)">
+                            v-if="['kepala-divisi-logistik', 'pimpinan'].includes(role)">
                             Tolak
                         </Button>
                         <Button color="green" @click="form.verified = 1" type="submit" class="ml-2">
@@ -746,6 +763,22 @@ watch(() => newProduct.value.product_id, async (newVal) => {
                 </div>
             </form>
         </Card>
+
+        <div class="h-8"></div>
+
+        <Card>
+            <template #header class="flex">
+                <div class="flex justify-between w-full">
+                    <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+                        Riwayat Pengajuan No {{ rfq.rfq_number }}
+                    </h2>
+                </div>
+            </template>
+
+            <DataTable :data="data" :columns="columns"></DataTable>
+
+        </Card>
+
         <div class="h-60"></div>
     </AppLayout>
 </template>

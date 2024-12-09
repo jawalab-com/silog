@@ -25,7 +25,7 @@ class UserSeeder extends Seeder
         ]);
 
         $team = $owner->ownedTeams()->first();
-        $roles = ['pengaju', 'pimpinan-gudang', 'admin-gudang', 'purchasing', 'pejabat-teknis', 'pimpinan', 'keuangan'];
+        $roles = ['pengaju', 'kepala-divisi-logistik', 'admin-gudang', 'purchasing', 'pejabat-teknis', 'pimpinan', 'keuangan'];
         foreach ($roles as $role) {
             $user = User::factory()->create([
                 'name' => ucfirst($role).' User',

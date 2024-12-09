@@ -63,10 +63,10 @@ class JetstreamServiceProvider extends ServiceProvider
             'rfq:create',
         ])->description('Pengaju users can read and create RFQs.');
 
-        Jetstream::role('pimpinan-gudang', 'pimpinan-gudang', [
+        Jetstream::role('kepala-divisi-logistik', 'kepala-divisi-logistik', [
             'rfq:read',
             'rfq:update',
-        ])->description('pimpinan-gudang users can read and update RFQs.');
+        ])->description('kepala-divisi-logistik users can read and update RFQs.');
 
         Jetstream::role('admin-gudang', 'admin-gudang', [
             'rfq:read',

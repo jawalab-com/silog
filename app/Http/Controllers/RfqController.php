@@ -3,12 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Enums\RfqStatus;
+use App\Exports\ReportsExport;
 use App\Http\Requests\StoreRfqRequest;
 use App\Http\Requests\UpdateRfqRequest;
 use App\Models\Inventory;
 use App\Models\InventoryTransaction;
 use App\Models\Rfq;
 use App\Models\RfqDetail;
+use App\Models\RfqHistory;
 use App\Models\RfqSupplier;
 use App\Models\Supplier;
 use App\Models\Tag;
@@ -17,6 +19,7 @@ use App\Services\LogService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
+use Maatwebsite\Excel\Facades\Excel;
 
 class RfqController extends Controller
 {
@@ -95,6 +98,12 @@ class RfqController extends Controller
             foreach ($data['products'] as $key => $detail) {
                 $rfq->rfqDetails()->create($detail);
             }
+            RfqHistory::create([
+                'rfq_id' => $rfq->id,
+                'user_id' => auth()->id(),
+                'status' => RfqStatus::PENDING->value,
+                'description' => "Membuat pengajuan barang dengan nomor pengajuan $request->rfq_number",
+            ]);
 
             return redirect()->route('rfqs.index')
                 ->with('success', 'Rfq created successfully.');
@@ -146,11 +155,17 @@ class RfqController extends Controller
 
         $data['suppliers'] = $rfq->rfqSuppliers()->with(['tag', 'supplier'])->get()->toArray();
 
+        $histories = RfqHistory::with(['rfq', 'user'])
+            ->where('rfq_id', $rfq->id)
+            ->orderBy('rfq_histories.created_at', 'desc')
+            ->get();
+
         return Inertia::render('Rfqs/Show', [
             'suppliers' => $suppliers,
             'tagSuppliers' => $tagSuppliers,
             'rfqStatus' => RfqStatus::toArray(),
             'rfq' => $data,
+            'histories' => $histories,
         ]);
     }
 
@@ -207,9 +222,17 @@ class RfqController extends Controller
         $verified = $request->input('verified', null);
         if (! empty($verified)) {
             switch (auth()->user()->teamRole(auth()->user()->currentTeam)->key) {
-                case 'pimpinan-gudang':
+                case 'kepala-divisi-logistik':
                     $data['verified_1'] = $verified;
                     $data['verified_1_user_id'] = auth()->id();
+                    RfqHistory::create([
+                        'rfq_id' => $rfq->id,
+                        'user_id' => auth()->id(),
+                        'status' => RfqStatus::PENDING->value,
+                        'description' => $verified ?
+                            "Menerima pengajuan barang dengan nomor pengajuan $rfq->rfq_number dan akan diteruskan ke admin gudang" :
+                            "Menolak pengajuan barang dengan nomor pengajuan $rfq->rfq_number dan akan diteruskan ke admin gudang",
+                    ]);
                     break;
                 case 'admin-gudang':
                     $count_available = $rfq->rfqDetails()->join('inventories', 'rfq_details.product_id', '=', 'inventories.product_id')
@@ -247,9 +270,31 @@ class RfqController extends Controller
                         }
                         $data['verified_2'] = $rfq->status === RfqStatus::DIPROSES ? null : true;
                         $data['status'] = $rfq->status === RfqStatus::DIPROSES ? RfqStatus::SIAP_DIAMBIL->value : RfqStatus::SELESAI->value;
+                        if ($rfq->status === RfqStatus::DIPROSES) {
+                            RfqHistory::create([
+                                'rfq_id' => $rfq->id,
+                                'user_id' => auth()->id(),
+                                'status' => $data['status'],
+                                'description' => "Memberitahukan pengajuan nomor $rfq->rfq_number ke pengaju barang atas nama {$rfq->user->name} bahwa barang siap diambil",
+                            ]);
+                        } else {
+                            RfqHistory::create([
+                                'rfq_id' => $rfq->id,
+                                'user_id' => auth()->id(),
+                                'status' => $data['status'],
+                                'description' => "Selesai mengirimkan barang dengan nomor pengajuan $rfq->rfq_number ke pengaju barang atas nama {$rfq->user->name}",
+                            ]);
+                        }
                     } else {
                         if ($rfq->status === RfqStatus::SIAP_DIAMBIL) {
                             $data['status'] = RfqStatus::SELESAI->value;
+                        } else {
+                            RfqHistory::create([
+                                'rfq_id' => $rfq->id,
+                                'user_id' => auth()->id(),
+                                'status' => $data['status'],
+                                'description' => "Mengirimkan pengajuan barang dengan nomor pengajuan $rfq->rfq_number ke bagian purchasing",
+                            ]);
                         }
                         $data['verified_2'] = $verified;
                         $data['verified_2_user_id'] = auth()->id();
@@ -263,6 +308,19 @@ class RfqController extends Controller
                             ->where('sent', false)
                             ->update(['date_sent' => date('Y-m-d'), 'sent' => true]);
                         $data['status'] = 'sedang-dalam-pengiriman';
+                        RfqHistory::create([
+                            'rfq_id' => $rfq->id,
+                            'user_id' => auth()->id(),
+                            'status' => $data['status'],
+                            'description' => "Mengunci transaksi pengajuan barang dengan nomor pengajuan $rfq->rfq_number",
+                        ]);
+                    } else {
+                        RfqHistory::create([
+                            'rfq_id' => $rfq->id,
+                            'user_id' => auth()->id(),
+                            'status' => $data['status'],
+                            'description' => "Menerima pengajuan barang dengan nomor pengajuan $rfq->rfq_number dan akan diteruskan ke pejabat teknis atau pimpinan",
+                        ]);
                     }
                     break;
                 case 'pejabat-teknis':
@@ -271,6 +329,12 @@ class RfqController extends Controller
                     }
                     $data['verified_4'] = $verified;
                     $data['verified_4_user_id'] = auth()->id();
+                    RfqHistory::create([
+                        'rfq_id' => $rfq->id,
+                        'user_id' => auth()->id(),
+                        'status' => $data['status'],
+                        'description' => "Menerima pengajuan barang dengan nomor pengajuan $rfq->rfq_number dan akan diteruskan ke purchasing",
+                    ]);
                     break;
                 case 'pimpinan':
                     if ($verified && $rfq->verified_3) {
@@ -278,6 +342,12 @@ class RfqController extends Controller
                     }
                     $data['verified_4'] = $verified;
                     $data['verified_4_user_id'] = auth()->id();
+                    RfqHistory::create([
+                        'rfq_id' => $rfq->id,
+                        'user_id' => auth()->id(),
+                        'status' => $data['status'],
+                        'description' => "Menerima pengajuan barang dengan nomor pengajuan $rfq->rfq_number dan akan diteruskan ke purchasing",
+                    ]);
                     break;
                 default:
                     break;
@@ -323,7 +393,7 @@ class RfqController extends Controller
                     $no = RfqDetail::whereYear('request_date', date('Y'))
                         ->whereMonth('request_date', date('m'))
                         ->count() + 1;
-                    $supplier_name = Supplier::find($s['supplier_id'])->supplier_name;
+                    $supplier_name = Supplier::find($s['supplier_id'])?->supplier_name;
                     $s['po_number'] = implode('/', [$no, $supplier_name, date('m'), date('Y')]);
                     $s = array_filter($s, function ($value) {
                         return ! is_null($value);
@@ -352,6 +422,12 @@ class RfqController extends Controller
         // try {
         $rfqSupplier = $rfq->rfqSuppliers()->where('tag', $tag)->first();
         if ($rfqSupplier) {
+            RfqHistory::create([
+                'rfq_id' => $rfq->id,
+                'user_id' => auth()->id(),
+                'status' => RfqStatus::SEDANG_DALAM_PENGIRIMAN->value,
+                'description' => "Menerima purchase order dengan nomor PO $rfqSupplier->po_number dari supplier {$rfqSupplier->supplier->supplier_name} dan barang terlah berhasil ditambahkan ke inventory",
+            ]);
             $rfqSupplier->update(['received' => true, 'date_received' => date('Y-m-d')]);
         }
 
@@ -452,5 +528,14 @@ class RfqController extends Controller
 
         return redirect()->route('rfqs.index')
             ->with('success', 'Data deleted successfully.');
+    }
+
+    public function export(Request $request)
+    {
+        $from = $request->date_from;
+        $to = $request->date_to;
+        $status = $request->status ?? '';
+
+        return Excel::download(new ReportsExport($from, $to, $status), 'report.xlsx');
     }
 }

@@ -84,6 +84,8 @@ Route::post('/rfqs/{rfq}/{tag}/paid', [RfqController::class, 'paid'])->name('rfq
 Route::get('/rfqs/{rfq}/{tag}/po-print', [RfqController::class, 'poPrint'])->name('rfqs.po.print');
 Route::get('/rfqs/to-rfq', [RfqController::class, 'toRfq'])->name('rfqs.torfq');
 Route::post('/rfqs/{rfq}/{product_id}/tolak', [RfqController::class, 'tolak'])->name('rfqs.tolak');
+Route::get('/rfqs/export/', [RfqController::class, 'export'])->name('rfqs.export');
+Route::get('/products/export/', [ProductController::class, 'export'])->name('products.export');
 Route::get('/auth/redirect/{provider}', [SocialiteController::class, 'redirectToProvider'])->name('auth.redirect');
 
 Route::middleware([

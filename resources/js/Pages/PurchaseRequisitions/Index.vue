@@ -35,7 +35,7 @@ const data = props.prs.map(item => ({
     ...item,
     user_name: item.user.name,
     comment: (item.comment?.length || 0) > 30 ? item.comment.substring(0, 30) + '...' : item.comment,
-    verified: `pimpinan-gudang: ${item.verified_1 === 1 ? '✔️' : item.verified_1 === 0 ? '❌' : '-'}<br/>` +
+    verified: `kepala-divisi-logistik: ${item.verified_1 === 1 ? '✔️' : item.verified_1 === 0 ? '❌' : '-'}<br/>` +
         `admin-gudang: ${item.verified_2 === 1 ? '✔️' : item.verified_2 === 0 ? '❌' : '-'}<br/>` +
         `purchasing: ${item.verified_3 === 1 ? '✔️' : item.verified_3 === 0 ? '❌' : '-'}<br/>` +
         `pimpinan: ${item.verified_4 === 1 ? '✔️' : item.verified_4 === 0 ? '❌' : '-'}`,
