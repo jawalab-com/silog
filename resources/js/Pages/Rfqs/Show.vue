@@ -32,6 +32,7 @@ const page = usePage();
 const role = (page.props.auth.user.all_teams.find(team => team.id === page.props.auth.user.current_team_id)).membership?.role || 'owner';
 // const allAvailable = computed(() => form.products.filter(item => item.stock - item.quantity >= 0).length == form.products.length);
 const actionLabel = computed(() => {
+    const allAvailable = form.products.filter(item => item.stock - item.quantity >= 0).length == form.products.length;
 
     if (role === 'purchasing' && props.rfq.verified_4) {
         return 'Kunci';
@@ -42,7 +43,6 @@ const actionLabel = computed(() => {
     }
 
     if (role === 'admin-gudang' && props.rfq.verified_1) {
-        const allAvailable = form.products.filter(item => item.stock - item.quantity >= 0).length == form.products.length;
         return allAvailable ? 'Kirim ke pengaju' : 'Kirim ke purchasing';
     }
 
@@ -70,7 +70,9 @@ const form = useForm({
     verified: null,
     status: props.rfq?.status || "",
     comment: props.rfq?.comment || "",
-    products: Array.isArray(props.rfq?.products) ? props.rfq.products : [],
+    products: Array.isArray(props.rfq?.products)
+        ? props.rfq.products
+        : Object.values(props.rfq?.products || {}),
     suppliers:
         props.rfq?.suppliers?.map((supplier) => ({
             rfq_id: supplier.rfq_id || "",

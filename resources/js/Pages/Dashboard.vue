@@ -6,10 +6,16 @@ import Welcome from '@/Components/Welcome.vue';
 import ApexCharts from 'apexcharts';
 
 const props = defineProps({
+    pengeluaran: Array,
     sumHutang: Number,
     countBelumSelesai: Number,
     countSelesai: Number,
     countPengajuan: Number,
+    kategori_pengeluaran_terbanyak: Array,
+    supplier_terbanyak: Array,
+    brand_terbanyak: Array,
+    stok_keluar_terbanyak: Array,
+    stok_keluar_terkecil: Array,
 });
 
 const options = {
@@ -56,12 +62,12 @@ const options = {
     series: [
         {
             name: "sudah selesai + sudah lunas",
-            data: [6500, 6418, 6456, 6526, 6356, 6456],
+            data: props.pengeluaran.paid,
             color: "#1A56DB",
         },
         {
             name: "belum lunas",
-            data: [6456, 6356, 6526, 6332, 6418, 6500],
+            data: props.pengeluaran.not_paid,
             color: "#7E3AF2",
         },
     ],
@@ -72,7 +78,7 @@ const options = {
         curve: 'smooth'
     },
     xaxis: {
-        categories: ['01 Feb', '02 Feb', '03 Feb', '04 Feb', '05 Feb', '06 Feb', '07 Feb'],
+        categories: props.pengeluaran.labels,
         labels: {
             show: true,
             style: {
@@ -94,8 +100,8 @@ const options = {
 
 const getPieChartOptionsA = () => {
     return {
-        series: [52.8, 26.8, 20.4],
-        colors: ["#1C64F2", "#16BDCA", "#9061F9"],
+        series: props.kategori_pengeluaran_terbanyak.series,
+        colors: ["#1C64F2", "#16BDCA", "#9061F9", "#AF4500", "#6BAF24"],
         chart: {
             height: 420,
             width: "100%",
@@ -120,7 +126,7 @@ const getPieChartOptionsA = () => {
                 }
             },
         },
-        labels: ["Direct", "Organic search", "Referrals"],
+        labels: props.kategori_pengeluaran_terbanyak.labels,
         dataLabels: {
             enabled: true,
             style: {
@@ -156,8 +162,8 @@ const getPieChartOptionsA = () => {
 
 const getPieChartOptionsB = () => {
     return {
-        series: [52.8, 26.8, 20.4],
-        colors: ["#1C64F2", "#16BDCA", "#9061F9"],
+        series: props.supplier_terbanyak.series,
+        colors: ["#1C64F2", "#16BDCA", "#9061F9", "#AF4500", "#6BAF24"],
         chart: {
             height: 420,
             width: "100%",
@@ -182,7 +188,7 @@ const getPieChartOptionsB = () => {
                 }
             },
         },
-        labels: ["Direct", "Organic search", "Referrals"],
+        labels: props.supplier_terbanyak.labels,
         dataLabels: {
             enabled: true,
             style: {
@@ -218,8 +224,8 @@ const getPieChartOptionsB = () => {
 
 const getPieChartOptionsC = () => {
     return {
-        series: [52.8, 26.8, 20.4],
-        colors: ["#1C64F2", "#16BDCA", "#9061F9"],
+        series: props.brand_terbanyak.series,
+        colors: ["#1C64F2", "#16BDCA", "#9061F9", "#AF4500", "#6BAF24"],
         chart: {
             height: 420,
             width: "100%",
@@ -244,7 +250,7 @@ const getPieChartOptionsC = () => {
                 }
             },
         },
-        labels: ["Direct", "Organic search", "Referrals"],
+        labels: props.brand_terbanyak.labels,
         dataLabels: {
             enabled: true,
             style: {
@@ -284,15 +290,7 @@ const optionsColumnA = {
         {
             name: "Social media",
             color: "#77DD77",
-            data: [
-                { x: "Mon", y: 232 },
-                { x: "Tue", y: 113 },
-                { x: "Wed", y: 341 },
-                { x: "Thu", y: 224 },
-                { x: "Fri", y: 522 },
-                { x: "Sat", y: 411 },
-                { x: "Sun", y: 243 },
-            ],
+            data: props.stok_keluar_terbanyak,
         },
     ],
     chart: {
@@ -380,15 +378,7 @@ const optionsColumnB = {
         {
             name: "Social media",
             color: "#FF6961",
-            data: [
-                { x: "Mon", y: 232 },
-                { x: "Tue", y: 113 },
-                { x: "Wed", y: 341 },
-                { x: "Thu", y: 224 },
-                { x: "Fri", y: 522 },
-                { x: "Sat", y: 411 },
-                { x: "Sun", y: 243 },
-            ],
+            data: props.stok_keluar_terkecil,
         },
     ],
     chart: {
@@ -523,7 +513,7 @@ onMounted(() => {
             <div
                 class="border-2 border-gray-300 rounded-lg dark:border-gray-600 h-16 md:h-32 bg-blue-200 dark:bg-blue-800">
                 <div class="flex flex-col justify-between h-full px-4 py-2">
-                    <dt class="text-3xl md:text-4xl font-extrabold">
+                    <dt class="text-3xl md:text-3xl font-extrabold">
                         {{
                             new Intl.NumberFormat('id-ID', {
                                 style: 'currency',
