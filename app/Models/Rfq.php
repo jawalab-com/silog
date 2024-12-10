@@ -13,81 +13,83 @@ use LakM\Comments\Contracts\CommentableContract;
 
 class Rfq extends Model implements CommentableContract
 {
-    use Commentable;
-    use HasFactory;
-    use HasUuids;
+	use Commentable;
+	use HasFactory;
+	use HasUuids;
 
-    protected $fillable = [
-        'user_id',
-        'rfq_number',
-        'request_date',
-        'allocation_date',
-        'title',
-        'total_amount',
-        'verified_1',
-        'verified_2',
-        'verified_3',
-        'verified_4',
-        'verified_1_user_id',
-        'verified_2_user_id',
-        'verified_3_user_id',
-        'verified_4_user_id',
-        'payment_status',
-        'status',
-        'comments',
-    ];
+	private $guestMode = false;
 
-    protected $casts = [
-        'status' => RfqStatus::class,
-    ];
+	protected $fillable = [
+		'user_id',
+		'rfq_number',
+		'request_date',
+		'allocation_date',
+		'title',
+		'total_amount',
+		'verified_1',
+		'verified_2',
+		'verified_3',
+		'verified_4',
+		'verified_1_user_id',
+		'verified_2_user_id',
+		'verified_3_user_id',
+		'verified_4_user_id',
+		'payment_status',
+		'status',
+		'comments',
+	];
 
-    public function generateNumber(): void
-    {
-        $no = self::whereYear('request_date', date('Y'))
-            ->whereMonth('request_date', date('m'))
-            ->count();
-        $no++;
+	protected $casts = [
+		'status' => RfqStatus::class,
+	];
 
-        $this->attributes['rfq_number'] = implode('/', [$no, 0, 'ADMIN', date('m'), date('Y')]);
-    }
+	public function generateNumber(): void
+	{
+		$no = self::whereYear('request_date', date('Y'))
+			->whereMonth('request_date', date('m'))
+			->count();
+		$no++;
 
-    public function geCommentsAttribute($value): array
-    {
-        return json_decode($value, true) ?? [];
-    }
+		$this->attributes['rfq_number'] = implode('/', [$no, 0, 'ADMIN', date('m'), date('Y')]);
+	}
 
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class);
-    }
+	public function geCommentsAttribute($value): array
+	{
+		return json_decode($value, true) ?? [];
+	}
 
-    public function verified_1User(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'verified_1_user_id');
-    }
+	public function user(): BelongsTo
+	{
+		return $this->belongsTo(User::class);
+	}
 
-    public function verified_2User(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'verified_1_user_id');
-    }
+	public function verified_1User(): BelongsTo
+	{
+		return $this->belongsTo(User::class, 'verified_1_user_id');
+	}
 
-    public function verified_3User(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'verified_1_user_id');
-    }
+	public function verified_2User(): BelongsTo
+	{
+		return $this->belongsTo(User::class, 'verified_1_user_id');
+	}
 
-    public function verified_4User(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'verified_1_user_id');
-    }
+	public function verified_3User(): BelongsTo
+	{
+		return $this->belongsTo(User::class, 'verified_1_user_id');
+	}
 
-    public function rfqDetails(): HasMany
-    {
-        return $this->hasMany(RfqDetail::class);
-    }
+	public function verified_4User(): BelongsTo
+	{
+		return $this->belongsTo(User::class, 'verified_1_user_id');
+	}
 
-    public function rfqSuppliers(): HasMany
-    {
-        return $this->hasMany(RfqSupplier::class);
-    }
+	public function rfqDetails(): HasMany
+	{
+		return $this->hasMany(RfqDetail::class);
+	}
+
+	public function rfqSuppliers(): HasMany
+	{
+		return $this->hasMany(RfqSupplier::class);
+	}
 }

@@ -9,6 +9,7 @@ use App\Http\Requests\UpdateRfqRequest;
 use App\Models\Inventory;
 use App\Models\InventoryTransaction;
 use App\Models\Rfq;
+use App\Models\RfqComment;
 use App\Models\RfqDetail;
 use App\Models\RfqHistory;
 use App\Models\RfqSupplier;
@@ -23,81 +24,82 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class RfqController extends Controller
 {
-    protected $logService;
+	protected $logService;
 
-    public function __construct(LogService $logService)
-    {
-        $this->logService = $logService;
-    }
+	public function __construct(LogService $logService)
+	{
+		$this->logService = $logService;
+	}
 
-    /**
-     * Display a listing of the resource.
-     */
-    public function index(Request $request)
-    {
-        $role = auth()->user()->teamRole(auth()->user()->currentTeam)->key;
+	/**
+	 * Display a listing of the resource.
+	 */
+	public function index(Request $request)
+	{
+		$role = auth()->user()->teamRole(auth()->user()->currentTeam)->key;
 
-        $rfqs = Rfq::whereIn('status', array_column(RfqStatus::cases(), 'value'))
-            ->with(['user', 'verified_1User', 'verified_2User', 'verified_3User', 'verified_4User', 'rfqDetails'])
-            ->orderBy('request_date', 'desc')
-            ->get()
-            ->map(function ($rfq) {
-                $rfq->total_amount = $rfq->rfqDetails->sum(function ($detail) {
-                    return $detail->unit_price * $detail->quantity;
-                });
+		$rfqs = Rfq::whereIn('status', array_column(RfqStatus::cases(), 'value'))
+			->with(['user', 'verified_1User', 'verified_2User', 'verified_3User', 'verified_4User', 'rfqDetails'])
+			->orderBy('request_date', 'desc')
+			->get()
+			->map(function ($rfq) {
+				$rfq->total_amount = $rfq->rfqDetails->sum(function ($detail) {
+					return $detail->unit_price * $detail->quantity;
+				});
 
-                return $rfq;
-            })
-            ->filter(function ($rfq) use ($role) {
-                if ($role == 'pimpinan') {
-                    return $rfq->total_amount >= 1000000;
-                } elseif ($role == 'pejabat-teknis') {
-                    return $rfq->total_amount < 1000000;
-                } else {
-                    return true;
-                }
-            });
+				return $rfq;
+			})
+			->filter(function ($rfq) use ($role) {
+				if ($role == 'pimpinan') {
+					return $rfq->total_amount >= 1000000;
+				} elseif ($role == 'pejabat-teknis') {
+					return $rfq->total_amount < 1000000;
+				} else {
+					return true;
+				}
+			});
 
-        $rfqs = $rfqs->values()->all();
+		$rfqs = $rfqs->values()->all();
 
-        return Inertia::render('Rfqs/Index', [
-            'rfqStatus' => RfqStatus::toArray(),
-            'rfqs' => $rfqs,
-        ]);
-    }
+		return Inertia::render('Rfqs/Index', [
+			'rfqStatus' => RfqStatus::toArray(),
+			'rfqs' => $rfqs,
+		]);
+	}
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create(Request $request)
-    {
-        $suppliers = Supplier::orderBy('supplier_name')->get();
-        $tags = Tag::orderBy('tag_name')->get();
-        $units = Unit::orderBy('unit_name')->get();
-        $rfq = new Rfq;
-        $rfq->generateNumber();
+	/**
+	 * Show the form for creating a new resource.
+	 */
+	public function create(Request $request)
+	{
+		$suppliers = Supplier::orderBy('supplier_name')->get();
+		$tags = Tag::orderBy('tag_name')->get();
+		$units = Unit::orderBy('unit_name')->get();
+		$rfq = new Rfq;
+		$rfq->generateNumber();
 
-        return Inertia::render('Rfqs/Form', [
-            'tags' => $tags,
-            'units' => $units,
-            'rfq' => $rfq,
-        ]);
-    }
+		return Inertia::render('Rfqs/Form', [
+			'tags' => $tags,
+			'units' => $units,
+			'rfq' => $rfq,
+		]);
+	}
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreRfqRequest $request)
-    {
-        $data = $request->validated();
-        $data['user_id'] = auth()->id();
-        $data['status'] = RfqStatus::PENDING;
-        $data['total_amount'] = 0;
-        try {
-            $rfq = Rfq::create($data);
-            foreach ($data['products'] as $key => $detail) {
-                $rfq->rfqDetails()->create($detail);
-            }
+	/**
+	 * Store a newly created resource in storage.
+	 */
+	public function store(StoreRfqRequest $request)
+	{
+		$data = $request->validated();
+		$data['user_id'] = auth()->id();
+		$data['status'] = RfqStatus::PENDING;
+		$data['total_amount'] = 0;
+		$data['request_date'] = date_format($data['request_date'], 'Y-m-d',);
+		try {
+			$rfq = Rfq::create($data);
+			foreach ($data['products'] as $key => $detail) {
+				$rfq->rfqDetails()->create($detail);
+			}
             RfqHistory::create([
                 'rfq_id' => $rfq->id,
                 'user_id' => auth()->id(),
@@ -105,119 +107,132 @@ class RfqController extends Controller
                 'description' => "Membuat pengajuan barang dengan nomor pengajuan $request->rfq_number",
             ]);
 
-            return redirect()->route('rfqs.index')
-                ->with('success', 'Rfq created successfully.');
-        } catch (\Exception $e) {
-            throw $e;
+			return redirect()->route('rfqs.index')
+				->with('success', 'Rfq created successfully.');
+		} catch (\Exception $e) {
+			throw $e;
 
-            return redirect()->back()
-                ->with('error', 'Failed to store data. Please try again.');
-        }
-    }
+			return redirect()->back()
+				->with('error', 'Failed to store data. Please try again.');
+		}
+	}
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Rfq $rfq, Request $request): Response
-    {
-        $suppliers = Supplier::orderBy('supplier_name')->get();
-        $tags = [];
-        $data = $rfq->toArray();
-        foreach ($rfq->rfqDetails()->orderBy('tag')->get() as $key => $detail) {
-            $tags[] = $detail->product->tag;
-            $data['products'][$key] = $detail->toArray();
-            $data['products'][$key]['product_name'] = $detail->product?->product_name;
-            $data['products'][$key]['tag_name'] = Tag::where('slug', $detail->product->tag)->first()->tag_name;
-            $data['products'][$key]['unit_name'] = $detail->unit?->unit_name;
-            $data['products'][$key]['stock'] = $detail->product->inventory?->quantity ?? 0;
-            $data['products'][$key]['unit_price'] = $detail->unit_price;
-            $data['products'][$key]['total_price'] = $detail->total_price;
-        }
+	/**
+	 * Display the specified resource.
+	 */
+	public function show(Rfq $rfq, Request $request): Response
+	{
+		$suppliers = Supplier::orderBy('supplier_name')->get();
+		$rfqComments = RfqComment::where('rfq_id', $rfq->id)
+			->with('user')
+			->orderBy('created_at', 'desc')
+			->get();
+		$tags = [];
+		$data = $rfq->toArray();
+		$rfqDetails = $rfq->rfqDetails()
+			->with('product') // Load the related Product model
+			->get()
+			->sortBy(function ($detail) {
+				return $detail->product->tag; // Access the `tag` attribute from the related Product model
+			});
+		foreach ($rfqDetails as $key => $detail) {
+			$tags[] = $detail->product->tag;
+			$data['products'][$key] = $detail->toArray();
+			$data['products'][$key]['product_name'] = $detail->product?->product_name;
+			$data['products'][$key]['tag_name'] = Tag::where('slug', $detail->product->tag)->first()->tag_name;
+			$data['products'][$key]['unit_name'] = $detail->unit?->unit_name;
+			$data['products'][$key]['stock'] = $detail->product->inventory?->quantity ?? 0;
+			$data['products'][$key]['unit_price'] = $detail->unit_price;
+			$data['products'][$key]['total_price'] = $detail->total_price;
+		}
 
-        $tags = array_unique($tags);
-        $tagSuppliers = [];
-        $rfq->rfqSuppliers()->whereNotIn('tag', $tags)->delete();
-        foreach ($tags as $tag) {
-            $supplier = Supplier::where('tag', $tag)->first();
-            if (! $supplier) {
-                dd($tag);
-            }
-            if (! $rfq->rfqSuppliers()->where('tag', $tag)->first()) {
-                $rfq->rfqSuppliers()->create(['tag' => $tag, 'supplier_id' => $supplier->id]);
-            }
-            $tagSuppliers[$tag] = Supplier::where('tag', $tag)->get();
-        }
+		$tags = array_unique($tags);
+		$tagSuppliers = [];
+		$rfq->rfqSuppliers()->whereNotIn('tag', $tags)->delete();
+		foreach ($tags as $tag) {
+			$supplier = Supplier::where('tag', $tag)->first();
+			if (! $supplier) {
+				dd($tag);
+			}
+			if (! $rfq->rfqSuppliers()->where('tag', $tag)->first()) {
+				$rfq->rfqSuppliers()->create(['tag' => $tag, 'supplier_id' => $supplier->id]);
+			}
+			$tagSuppliers[$tag] = Supplier::where('tag', $tag)->get();
+		}
 
-        // $tags = Tag::whereIn('slug', $tags)->get()->toArray();
-        // $tags = array_map(function ($tag) {
-        //     return $tag['slug'];
-        // }, $tags);
+		// $tags = Tag::whereIn('slug', $tags)->get()->toArray();
+		// $tags = array_map(function ($tag) {
+		//     return $tag['slug'];
+		// }, $tags);
 
-        $data['suppliers'] = $rfq->rfqSuppliers()->with(['tag', 'supplier'])->get()->toArray();
+		$data['suppliers'] = $rfq->rfqSuppliers()->with(['tag', 'supplier'])->get()->toArray();
 
         $histories = RfqHistory::with(['rfq', 'user'])
             ->where('rfq_id', $rfq->id)
             ->orderBy('rfq_histories.created_at', 'desc')
             ->get();
 
-        return Inertia::render('Rfqs/Show', [
-            'suppliers' => $suppliers,
-            'tagSuppliers' => $tagSuppliers,
-            'rfqStatus' => RfqStatus::toArray(),
-            'rfq' => $data,
+		return Inertia::render('Rfqs/Show', [
+			'suppliers' => $suppliers,
+			'tagSuppliers' => $tagSuppliers,
+			'rfqStatus' => RfqStatus::toArray(),
+			'rfq' => $data,
+			'rfqComments' => $rfqComments,
             'histories' => $histories,
-        ]);
-    }
+		]);
+	}
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Rfq $rfq, Request $request)
-    {
-        // $suppliers = Supplier::orderBy('supplier_name')->get();
-        $tags = Tag::orderBy('tag_name')->get();
-        $units = Unit::orderBy('unit_name')->get();
-        $data = $rfq->toArray();
-        foreach ($rfq->rfqDetails()->get() as $key => $detail) {
-            $data['products'][$key] = $detail->toArray();
-            $data['products'][$key]['product_name'] = $detail->product?->product_name;
-        }
+	/**
+	 * Show the form for editing the specified resource.
+	 */
+	public function edit(Rfq $rfq, Request $request)
+	{
+		// $suppliers = Supplier::orderBy('supplier_name')->get();
+		$tags = Tag::orderBy('tag_name')->get();
+		$units = Unit::orderBy('unit_name')->get();
+		$data = $rfq->toArray();
+		foreach ($rfq->rfqDetails()->get() as $key => $detail) {
+			$data['products'][$key] = $detail->toArray();
+			$data['products'][$key]['product_name'] = $detail->product?->product_name;
+		}
 
-        return Inertia::render('Rfqs/Form', [
-            // 'suppliers' => $suppliers,
-            'tags' => $tags,
-            'units' => $units,
-            'rfq' => $data,
-        ]);
-    }
+		return Inertia::render('Rfqs/Form', [
+			// 'suppliers' => $suppliers,
+			'tags' => $tags,
+			'units' => $units,
+			'rfq' => $data,
+		]);
+	}
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateRfqRequest $request, Rfq $rfq)
-    {
-        // $this->logService->createLogEntry(
-        //     'error',
-        //     'Failed to perform action',
-        //     'error',
-        //     ['action' => 'someAction']
-        // );
-        $data = $request->validated();
+	/**
+	 * Update the specified resource in storage.
+	 */
+	public function update(UpdateRfqRequest $request, Rfq $rfq)
+	{
+		// $this->logService->createLogEntry(
+		//     'error',
+		//     'Failed to perform action',
+		//     'error',
+		//     ['action' => 'someAction']
+		// );
+		$data = $request->validated();
+		$data['request_date'] = date_create($data['request_date'])->format('Y-m-d');
 
-        foreach ($data['suppliers'] as $i => $supplierData) {
-            if (isset($supplierData['file_proof_path'])) {
-                $path = $supplierData['file_proof_path']->store('uploads', 'public');
-                $data['suppliers'][$i]['file_proof'] = $path;
-            }
-            if (isset($supplierData['file_invoice_path'])) {
-                $path = $supplierData['file_invoice_path']->store('uploads', 'public');
-                $data['suppliers'][$i]['file_invoice'] = $path;
-            }
-            if (isset($supplierData['file_receipt_path'])) {
-                $path = $supplierData['file_receipt_path']->store('uploads', 'public');
-                $data['suppliers'][$i]['file_receipt'] = $path;
-            }
-        }
+
+		foreach ($data['suppliers'] as $i => $supplierData) {
+			if (isset($supplierData['file_proof_path'])) {
+				$path = $supplierData['file_proof_path']->store('uploads', 'public');
+				$data['suppliers'][$i]['file_proof'] = $path;
+			}
+			if (isset($supplierData['file_invoice_path'])) {
+				$path = $supplierData['file_invoice_path']->store('uploads', 'public');
+				$data['suppliers'][$i]['file_invoice'] = $path;
+			}
+			if (isset($supplierData['file_receipt_path'])) {
+				$path = $supplierData['file_receipt_path']->store('uploads', 'public');
+				$data['suppliers'][$i]['file_receipt'] = $path;
+			}
+		}
 
         $verified = $request->input('verified', null);
         if (! empty($verified)) {
@@ -270,31 +285,9 @@ class RfqController extends Controller
                         }
                         $data['verified_2'] = $rfq->status === RfqStatus::DIPROSES ? null : true;
                         $data['status'] = $rfq->status === RfqStatus::DIPROSES ? RfqStatus::SIAP_DIAMBIL->value : RfqStatus::SELESAI->value;
-                        if ($rfq->status === RfqStatus::DIPROSES) {
-                            RfqHistory::create([
-                                'rfq_id' => $rfq->id,
-                                'user_id' => auth()->id(),
-                                'status' => $data['status'],
-                                'description' => "Memberitahukan pengajuan nomor $rfq->rfq_number ke pengaju barang atas nama {$rfq->user->name} bahwa barang siap diambil",
-                            ]);
-                        } else {
-                            RfqHistory::create([
-                                'rfq_id' => $rfq->id,
-                                'user_id' => auth()->id(),
-                                'status' => $data['status'],
-                                'description' => "Selesai mengirimkan barang dengan nomor pengajuan $rfq->rfq_number ke pengaju barang atas nama {$rfq->user->name}",
-                            ]);
-                        }
                     } else {
                         if ($rfq->status === RfqStatus::SIAP_DIAMBIL) {
                             $data['status'] = RfqStatus::SELESAI->value;
-                        } else {
-                            RfqHistory::create([
-                                'rfq_id' => $rfq->id,
-                                'user_id' => auth()->id(),
-                                'status' => $data['status'],
-                                'description' => "Mengirimkan pengajuan barang dengan nomor pengajuan $rfq->rfq_number ke bagian purchasing",
-                            ]);
                         }
                         $data['verified_2'] = $verified;
                         $data['verified_2_user_id'] = auth()->id();
@@ -308,19 +301,6 @@ class RfqController extends Controller
                             ->where('sent', false)
                             ->update(['date_sent' => date('Y-m-d'), 'sent' => true]);
                         $data['status'] = 'sedang-dalam-pengiriman';
-                        RfqHistory::create([
-                            'rfq_id' => $rfq->id,
-                            'user_id' => auth()->id(),
-                            'status' => $data['status'],
-                            'description' => "Mengunci transaksi pengajuan barang dengan nomor pengajuan $rfq->rfq_number",
-                        ]);
-                    } else {
-                        RfqHistory::create([
-                            'rfq_id' => $rfq->id,
-                            'user_id' => auth()->id(),
-                            'status' => $data['status'],
-                            'description' => "Menerima pengajuan barang dengan nomor pengajuan $rfq->rfq_number dan akan diteruskan ke pejabat teknis atau pimpinan",
-                        ]);
                     }
                     break;
                 case 'pejabat-teknis':
@@ -329,12 +309,6 @@ class RfqController extends Controller
                     }
                     $data['verified_4'] = $verified;
                     $data['verified_4_user_id'] = auth()->id();
-                    RfqHistory::create([
-                        'rfq_id' => $rfq->id,
-                        'user_id' => auth()->id(),
-                        'status' => $data['status'],
-                        'description' => "Menerima pengajuan barang dengan nomor pengajuan $rfq->rfq_number dan akan diteruskan ke purchasing",
-                    ]);
                     break;
                 case 'pimpinan':
                     if ($verified && $rfq->verified_3) {
@@ -342,12 +316,6 @@ class RfqController extends Controller
                     }
                     $data['verified_4'] = $verified;
                     $data['verified_4_user_id'] = auth()->id();
-                    RfqHistory::create([
-                        'rfq_id' => $rfq->id,
-                        'user_id' => auth()->id(),
-                        'status' => $data['status'],
-                        'description' => "Menerima pengajuan barang dengan nomor pengajuan $rfq->rfq_number dan akan diteruskan ke purchasing",
-                    ]);
                     break;
                 default:
                     break;
@@ -359,33 +327,42 @@ class RfqController extends Controller
             $data['total_amount'] = 0;
         }
 
-        try {
-            $rfq->update($data);
-            if ($request->has('products')) {
+        if (!empty($request->comment)) {
+			RfqComment::create([
+				'rfq_id' => $rfq->id,
+				'user_id' => auth()->id(),
+				'comment' => $request->comment,
+				'role' => auth()->user()->teamRole(auth()->user()->currentTeam)->key,
+			]);
+		}
 
-                // Products
-                $rfq->rfqDetails()->delete();
-                foreach ($data['products'] as $key => $detail) {
-                    $rfq->rfqDetails()->create($detail);
-                    switch ($data['status']) {
-                        case RfqStatus::PENDING->value:
-                            $quantityChange = 0;
-                            $note = 'Input data pengajuan pembelian';
-                            break;
-                        case RfqStatus::APPROVED->value:
-                            $quantityChange = $detail['quantity'];
-                            $note = 'Pengajuan pembelian disetujui';
-                            break;
-                        case RfqStatus::REJECTED->value:
-                            $quantityChange = 0;
-                            $note = 'Pembelian ditolak';
-                            break;
-                        default:
-                            $quantityChange = 0;
-                            $note = '';
-                            break;
-                    }
-                }
+		try {
+			$rfq->update($data);
+			if ($request->has('products')) {
+
+				// Products
+				$rfq->rfqDetails()->delete();
+				foreach ($data['products'] as $key => $detail) {
+					$rfq->rfqDetails()->create($detail);
+					switch ($data['status']) {
+						case RfqStatus::PENDING->value:
+							$quantityChange = 0;
+							$note = 'Input data pengajuan pembelian';
+							break;
+						case RfqStatus::APPROVED->value:
+							$quantityChange = $detail['quantity'];
+							$note = 'Pengajuan pembelian disetujui';
+							break;
+						case RfqStatus::REJECTED->value:
+							$quantityChange = 0;
+							$note = 'Pembelian ditolak';
+							break;
+						default:
+							$quantityChange = 0;
+							$note = '';
+							break;
+					}
+				}
 
                 // Suppliers
                 foreach ($data['suppliers'] as $key => $s) {
@@ -407,15 +384,15 @@ class RfqController extends Controller
                 }
             }
 
-            return redirect()->route('rfqs.index', ['formType' => $request->form_type])
-                ->with('success', 'Data updated successfully.');
-        } catch (\Exception $e) {
-            throw $e;
+			return redirect()->route('rfqs.index', ['formType' => $request->form_type])
+				->with('success', 'Data updated successfully.');
+		} catch (\Exception $e) {
+			throw $e;
 
-            return redirect()->back()
-                ->with('error', 'Failed to store data. Please try again.');
-        }
-    }
+			return redirect()->back()
+				->with('error', 'Failed to store data. Please try again.');
+		}
+	}
 
     public function received(Request $request, Rfq $rfq, string $tag)
     {
@@ -431,100 +408,100 @@ class RfqController extends Controller
             $rfqSupplier->update(['received' => true, 'date_received' => date('Y-m-d')]);
         }
 
-        if ($rfq->rfqSuppliers()->where('received', false)->count() == 0) {
-            $rfq->update(['status' => RfqStatus::DIPROSES, 'verified_3' => true, 'verified_3_user_id' => auth()->user()->id, 'verified_2' => null]);
-        }
+		if ($rfq->rfqSuppliers()->where('received', false)->count() == 0) {
+			$rfq->update(['status' => RfqStatus::DIPROSES, 'verified_3' => true, 'verified_3_user_id' => auth()->user()->id, 'verified_2' => null]);
+		}
 
-        $rfqDetails = $rfq->rfqDetails()->with('product')->whereHas('product', function ($query) use ($tag) {
-            $query->where('tag', $tag);
-        })->get();
+		$rfqDetails = $rfq->rfqDetails()->with('product')->whereHas('product', function ($query) use ($tag) {
+			$query->where('tag', $tag);
+		})->get();
 
-        foreach ($rfqDetails as $product) {
-            InventoryTransaction::create([
-                'product_id' => $product->product_id,
-                'quantity_change' => $product->quantity,
-                'transaction_type' => 'RECEIVED_PRODUCT',
-                'reference_id' => $rfqSupplier->po_number,
-                'transaction_date' => $product->created_at,
-                'user_id' => auth()->id(),
-                'note' => 'Barang ditambah melalui penerimaan Purchase Order No. '.
-                    $rfqSupplier->po_number.
-                    ' dari Pengajuan No. '.
-                    $rfq->rfq_number,
-            ]);
-            $inv = Inventory::where('product_id', $product->product_id)->first();
-            Inventory::updateOrCreate(
-                ['product_id' => $product->product_id],
-                ['quantity' => ($inv->quantity ?? 0) + $product->quantity]
-            );
-        }
+		foreach ($rfqDetails as $product) {
+			InventoryTransaction::create([
+				'product_id' => $product->product_id,
+				'quantity_change' => $product->quantity,
+				'transaction_type' => 'RECEIVED_PRODUCT',
+				'reference_id' => $rfqSupplier->po_number,
+				'transaction_date' => $product->created_at,
+				'user_id' => auth()->id(),
+				'note' => 'Barang ditambah melalui penerimaan Purchase Order No. ' .
+					$rfqSupplier->po_number .
+					' dari Pengajuan No. ' .
+					$rfq->rfq_number,
+			]);
+			$inv = Inventory::where('product_id', $product->product_id)->first();
+			Inventory::updateOrCreate(
+				['product_id' => $product->product_id],
+				['quantity' => ($inv->quantity ?? 0) + $product->quantity]
+			);
+		}
 
-        return response()->json(['message' => 'Success'], 200);
-        // } catch (\Exception $e) {
-        //     return response()->json(['message' => 'Failed'], 500);
-        // }
-    }
+		return response()->json(['message' => 'Success'], 200);
+		// } catch (\Exception $e) {
+		//     return response()->json(['message' => 'Failed'], 500);
+		// }
+	}
 
-    public function paid(Request $request, Rfq $rfq, string $tag)
-    {
-        try {
-            $rfqSupplier = $rfq->rfqSuppliers()->where('tag', $tag)->first();
-            if ($rfqSupplier) {
-                $rfqSupplier->update(['paid' => true]);
-            }
+	public function paid(Request $request, Rfq $rfq, string $tag)
+	{
+		try {
+			$rfqSupplier = $rfq->rfqSuppliers()->where('tag', $tag)->first();
+			if ($rfqSupplier) {
+				$rfqSupplier->update(['paid' => true]);
+			}
 
-            if ($rfq->rfqSuppliers()->count() == $rfq->rfqSuppliers()->where('paid', true)->count()) {
-                $rfq->update(['payment_status' => true]);
-            }
+			if ($rfq->rfqSuppliers()->count() == $rfq->rfqSuppliers()->where('paid', true)->count()) {
+				$rfq->update(['payment_status' => true]);
+			}
 
-            return response()->json(['message' => 'Success'], 200);
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'Failed'], 500);
-        }
-    }
+			return response()->json(['message' => 'Success'], 200);
+		} catch (\Exception $e) {
+			return response()->json(['message' => 'Failed'], 500);
+		}
+	}
 
-    public function tolak(Rfq $rfq, string $product_id)
-    {
-        RfqDetail::where('rfq_id', $rfq->id)
-            ->where('product_id', $product_id)
-            ->update(['quantity' => 0]);
+	public function tolak(Rfq $rfq, string $product_id)
+	{
+		RfqDetail::where('rfq_id', $rfq->id)
+			->where('product_id', $product_id)
+			->update(['quantity' => 0]);
 
-        return response()->json(['message' => 'Success'], 200);
-    }
+		return response()->json(['message' => 'Success'], 200);
+	}
 
-    public function poPrint(Request $request, Rfq $rfq, string $tag)
-    {
-        // try {
-        // $rfq = $rfq->where('rfq_number', $rfq->rfq_number)->first();
-        $supplier = $rfq->rfqSuppliers()->with(['supplier'])->where('tag', $tag)->first();
-        $products = $rfq->rfqDetails()->with(['product', 'unit'])->whereHas('product', function ($query) use ($tag) {
-            $query->where('tag', $tag);
-        })->get();
+	public function poPrint(Request $request, Rfq $rfq, string $tag)
+	{
+		// try {
+		// $rfq = $rfq->where('rfq_number', $rfq->rfq_number)->first();
+		$supplier = $rfq->rfqSuppliers()->with(['supplier'])->where('tag', $tag)->first();
+		$products = $rfq->rfqDetails()->with(['product', 'unit'])->whereHas('product', function ($query) use ($tag) {
+			$query->where('tag', $tag);
+		})->get();
 
-        return Inertia::render('Rfqs/Print', [
-            'rfq' => $rfq,
-            'supplier' => $supplier,
-            'products' => $products,
-        ]);
-        // } catch (\Exception $e) {
-        //     return response()->json(['message' => 'Failed'], 500);
-        // }
-    }
+		return Inertia::render('Rfqs/Print', [
+			'rfq' => $rfq,
+			'supplier' => $supplier,
+			'products' => $products,
+		]);
+		// } catch (\Exception $e) {
+		//     return response()->json(['message' => 'Failed'], 500);
+		// }
+	}
 
-    public function toRfq(Request $request)
-    {
-        $po_number = urldecode($request->query('po_number'));
-        $rfqSupplier = RfqSupplier::where('po_number', $po_number)->first();
+	public function toRfq(Request $request)
+	{
+		$po_number = urldecode($request->query('po_number'));
+		$rfqSupplier = RfqSupplier::where('po_number', $po_number)->first();
 
-        return redirect()->route('rfqs.show', $rfqSupplier->rfq_id);
-    }
+		return redirect()->route('rfqs.show', $rfqSupplier->rfq_id);
+	}
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Rfq $rfq)
-    {
-        $rfq->delete();
+	/**
+	 * Remove the specified resource from storage.
+	 */
+	public function destroy(Rfq $rfq)
+	{
+		$rfq->delete();
 
         return redirect()->route('rfqs.index')
             ->with('success', 'Data deleted successfully.');

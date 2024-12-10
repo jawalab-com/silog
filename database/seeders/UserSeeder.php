@@ -14,10 +14,12 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
+        \DB::statement('SET FOREIGN_KEY_CHECKS=0;');
         User::truncate();
         Team::truncate();
         \DB::table('team_user')->truncate();
         // User::factory(10)->withPersonalTeam()->create();
+        \DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
         $owner = User::factory()->withPersonalTeam()->create([
             'name' => 'Test User',
