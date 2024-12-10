@@ -51,7 +51,13 @@ export default {
         },
     },
 
-    plugins: [forms, typography, flowbite],
+    plugins: [
+        forms,
+        typography,
+        require("flowbite/plugin")({
+            charts: true,
+        }),
+    ],
 
     darkMode: "media",
 };

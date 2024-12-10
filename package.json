@@ -27,6 +27,7 @@
     "dependencies": {
         "@primevue/themes": "^4.2.1",
         "@sweetalert2/theme-dark": "^5.0.18",
+        "apexcharts": "^4.2.0",
         "flowbite-vue": "^0.1.6",
         "laravel-precognition-vue": "^0.5.9",
         "lodash": "^4.17.21",
