@@ -27,7 +27,11 @@
     "dependencies": {
         "@primevue/themes": "^4.2.1",
         "@sweetalert2/theme-dark": "^5.0.18",
+        "@tiptap/core": "^2.10.3",
+        "@tiptap/pm": "^2.10.3",
+        "@tiptap/starter-kit": "^2.10.3",
         "apexcharts": "^4.2.0",
+        "flowbite-typography": "^1.0.5",
         "flowbite-vue": "^0.1.6",
         "laravel-precognition-vue": "^0.5.9",
         "lodash": "^4.17.21",

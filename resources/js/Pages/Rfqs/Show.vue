@@ -4,7 +4,7 @@ import { ref, computed, watch } from "vue";
 import axios from "axios";
 import AppLayout from "@/Layouts/AppLayout.vue";
 import PrimaryButton from "@/Components/PrimaryButton.vue";
-import { FwbButtonGroup } from "flowbite-vue";
+import { FwbButton, FwbButtonGroup } from "flowbite-vue";
 import {
     AutoComplete,
     Breadcrumb,
@@ -32,7 +32,6 @@ const page = usePage();
 const role = (page.props.auth.user.all_teams.find(team => team.id === page.props.auth.user.current_team_id)).membership?.role || 'owner';
 // const allAvailable = computed(() => form.products.filter(item => item.stock - item.quantity >= 0).length == form.products.length);
 const actionLabel = computed(() => {
-    const allAvailable = form.products.filter(item => item.stock - item.quantity >= 0).length == form.products.length;
 
     if (role === 'purchasing' && props.rfq.verified_4) {
         return 'Kunci';
@@ -43,6 +42,7 @@ const actionLabel = computed(() => {
     }
 
     if (role === 'admin-gudang' && props.rfq.verified_1) {
+        const allAvailable = form.products.filter(item => item.stock - item.quantity >= 0).length == form.products.length;
         return allAvailable ? 'Kirim ke pengaju' : 'Kirim ke purchasing';
     }
 
@@ -70,7 +70,7 @@ const form = useForm({
     verified: null,
     status: props.rfq?.status || "",
     comment: props.rfq?.comment || "",
-    products: props.rfq?.products || [],
+    products: Array.isArray(props.rfq?.products) ? props.rfq.products : [],
     suppliers:
         props.rfq?.suppliers?.map((supplier) => ({
             rfq_id: supplier.rfq_id || "",
@@ -310,7 +310,7 @@ watch(
                                                         !item.date_sent &&
                                                         !rfq.verified_4
                                                     " v-model="item.supplier_id
-                                                            " class="py-1 px-2">
+                                                        " class="py-1 px-2">
                                                         <option value="">
                                                             Ga Tau
                                                         </option>
@@ -346,9 +346,9 @@ watch(
                                             </div>
                                         </td>
                                         <td class="" :colspan="role === 'purchasing' &&
-                                                !rfq.verified_3
-                                                ? '2'
-                                                : '1'
+                                            !rfq.verified_3
+                                            ? '2'
+                                            : '1'
                                             ">
                                             <div class="flex">
                                                 <div class="flex items-center me-4" v-if="
@@ -449,10 +449,10 @@ watch(
                                             <input
                                                 class="h-8 block w-full text-xs text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
                                                 id="small_size" type="file" @change="(event) =>
-                                                    (form.suppliers[
-                                                        index
-                                                    ].file_proof_path =
-                                                        event.target.files[0])
+                                                (form.suppliers[
+                                                    index
+                                                ].file_proof_path =
+                                                    event.target.files[0])
                                                     " />
                                         </td>
                                         <td v-if="item.file_proof" class="px-4 py-0.5">
@@ -497,10 +497,10 @@ watch(
                                             <input
                                                 class="h-8 block w-full text-xs text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
                                                 type="file" @change="(event) =>
-                                                    (form.suppliers[
-                                                        index
-                                                    ].file_invoice_path =
-                                                        event.target.files[0])
+                                                (form.suppliers[
+                                                    index
+                                                ].file_invoice_path =
+                                                    event.target.files[0])
                                                     " />
                                         </td>
                                         <td class="px-4 py-0.5">
@@ -521,7 +521,7 @@ watch(
                                                         rfq.verified_4 &&
                                                         !item.date_sent
                                                     " class="py-1 px-2" type="number" v-model="item.transportation
-                                                            " />
+                                                        " />
                                                     <span class="text-md" v-else>{{
                                                         item.transportation
                                                     }}</span>
@@ -562,10 +562,10 @@ watch(
                                             <input
                                                 class="h-8 block w-full text-xs text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
                                                 type="file" @change="(event) =>
-                                                    (form.suppliers[
-                                                        index
-                                                    ].file_receipt_path =
-                                                        event.target.files[0])
+                                                (form.suppliers[
+                                                    index
+                                                ].file_receipt_path =
+                                                    event.target.files[0])
                                                     " />
                                         </td>
                                         <td class="px-4 py-0.5">
@@ -970,14 +970,13 @@ watch(
                     <label for="message" class="block my-2 text-sm font-medium text-gray-900 dark:text-white">
                         Komentar (opsional)
                     </label>
-                    <x-comments::index :model="$rfq" />
                     <textarea v-model="form.comment" id="message" rows="4"
                         class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                         placeholder="Berikan komentar untuk menuliskan alasan penolakan jika diperlukan..."></textarea>
                 </div>
                 <div>
-                    <Wysiwyg v-model="form.comment" value="{{form.comment}}"
-                        placeholder="Berikan komentar untuk menuliskan alasan penolakan jika diperlukan..." />
+                    <!-- <Wysiwyg v-model="form.comment" value="{{form.comment}}"
+                        placeholder="Berikan komentar untuk menuliskan alasan penolakan jika diperlukan..." /> -->
                 </div>
                 <div class="px-4 py-8">
                     <ol class="relative border-s border-gray-200 dark:border-gray-700">
@@ -1010,7 +1009,7 @@ watch(
                                 <div class="text-sm font-normal text-gray-500 dark:text-gray-300">
                                     <span
                                         class="bg-gray-100 text-gray-800 text-xs font-normal me-2 px-2.5 py-0.5 rounded dark:bg-gray-600 dark:text-gray-300">{{
-                                        item.user.name }}</span>
+                                            item.user.name }}</span>
                                     <span
                                         class="bg-green-100 text-green-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300">{{
                                             item.role

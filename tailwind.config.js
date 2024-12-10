@@ -54,8 +54,10 @@ export default {
     plugins: [
         forms,
         typography,
+        require("flowbite-typography"),
         require("flowbite/plugin")({
             charts: true,
+            wysiwyg: true,
         }),
     ],
 
