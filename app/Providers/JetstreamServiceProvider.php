@@ -63,12 +63,12 @@ class JetstreamServiceProvider extends ServiceProvider
             'rfq:create',
         ])->description('Pengaju users can read and create RFQs.');
 
-        Jetstream::role('kepala-divisi-logistik', 'kepala-divisi-logistik', [
+        Jetstream::role('kepala-divisi-logistik', 'Kepala Divisi Logistik', [
             'rfq:read',
             'rfq:update',
         ])->description('kepala-divisi-logistik users can read and update RFQs.');
 
-        Jetstream::role('admin-gudang', 'admin-gudang', [
+        Jetstream::role('admin-gudang', 'Admin Gudang', [
             'rfq:read',
             'rfq:create',
             'rfq:update',
@@ -83,7 +83,7 @@ class JetstreamServiceProvider extends ServiceProvider
             'payment:delete',
         ])->description('admin-gudang users can perform any action on RFQs, POs, and Payments.');
 
-        Jetstream::role('purchasing', 'purchasing', [
+        Jetstream::role('purchasing', 'Purchasing', [
             'po:read',
             'po:create',
             'po:update',

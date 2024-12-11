@@ -19,6 +19,7 @@ class RfqDetail extends Model
         'unit_id',
         'estimation_price',
         'unit_price',
+        'total_estimation_price',
         'total_price',
     ];
 

@@ -436,14 +436,15 @@ const logout = () => {
                             Profile
                             </Link>
                         </li>
-                        <li>
+                        <!-- <li>
                             <Link v-if="$page.props.jetstream.hasApiFeatures" :href="route('api-tokens.index')"
                                 class="block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
                             API Tokens
                             </Link>
-                        </li>
+                        </li> -->
                     </ul>
-                    <ul class="py-1 text-gray-700 dark:text-gray-300" aria-labelledby="dropdown">
+                    <ul class="py-1 text-gray-700 dark:text-gray-300" aria-labelledby="dropdown"
+                        v-if="role === 'owner'">
                         <Link :href="route('teams.show', $page.props.auth.user.current_team)"
                             class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">
                         Team Settings

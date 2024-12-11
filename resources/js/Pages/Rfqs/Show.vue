@@ -136,15 +136,51 @@ const breadcrumbs = [
 ];
 const saveAction = () => {
     try {
-        form.post(route("rfqs.update", props.rfq.id), {
-            onSuccess: () => {
-                console.log("Purchase order updated successfully");
-            },
-            onError: (errors) => {
-                console.error("Failed to update purchase order:", errors);
-            },
-            forceFormData: true,
-        });
+        // let result;
+        // if (form.verified == 0) {
+        //     result = utils.confirm({
+        //         title: "Konfirmasi",
+        //         text: "Apakah Anda yakin ingin menolak pengajuan ini? Tindakan ini tidak dapat dibatalkan!",
+        //         confirmButtonText: "Tolak",
+        //     });
+        // } else {
+        //     result = utils.confirm({
+        //         title: "Konfirmasi",
+        //         text: "Apakah Anda yakin?",
+        //         confirmButtonText: "Ya",
+        //     });
+        // }
+
+        if (confirm('Apakah Anda yakin?')) {
+            form.post(route("rfqs.update", props.rfq.id), {
+                onSuccess: () => {
+                    console.log("Purchase order updated successfully");
+                },
+                onError: (errors) => {
+                    console.error("Failed to update purchase order:", errors);
+                },
+                forceFormData: true,
+            });
+        }
+    } catch (error) {
+        console.error("An unexpected error occurred:", error);
+    }
+};
+
+const rejectSupplier = () => {
+    try {
+        if (confirm('Apakah Anda yakin?')) {
+            form._method = "post";
+            form.post(route("rfqs.tolak-supplier", props.rfq.id), {
+                onSuccess: () => {
+                    console.log("Purchase order updated successfully");
+                },
+                onError: (errors) => {
+                    console.error("Failed to update purchase order:", errors);
+                },
+                forceFormData: true,
+            });
+        }
     } catch (error) {
         console.error("An unexpected error occurred:", error);
     }
@@ -173,6 +209,7 @@ const setTolak = (product_id, index) => {
     const result = utils.confirm({
         title: "Hapus Data",
         text: "Apakah Anda yakin ingin menghapus data ini? Tindakan ini tidak dapat dibatalkan!",
+        confirmButtonText: "Tolak",
     });
 
     if (result.isConfirmed) {
@@ -266,21 +303,28 @@ watch(
                     <div>
                         <InputLabel for="order_date" value="Tanggal Pengajuan" />
                         <p class="dark:text-white mt-2">
-                            {{ rfq.request_date }}
+                            {{ new Date(rfq.request_date).toLocaleDateString('id-ID', {
+                                day: '2-digit', month: 'long',
+                                year:
+                                    'numeric'
+                            }) }}
                         </p>
                     </div>
 
                     <div>
                         <InputLabel for="order_date" value="Tanggal Peruntukan" />
                         <p class="dark:text-white mt-2">
-                            {{ rfq.allocation_date }}
+                            {{ new Date(rfq.allocation_date).toLocaleDateString('id-ID', {
+                                day: '2-digit', month: 'long',
+                                year:
+                                    'numeric'
+                            }) }}
                         </p>
                     </div>
                 </div>
 
-                <div v-if="
-                    rfq.verified_3 ||
-                    (rfq.verified_2 && ['purchasing'].includes(role))
+                <div v-if="role !== 'pengaju' &&
+                    (rfq.verified_3 || (rfq.verified_2 && ['purchasing'].includes(role)))
                 ">
                     <div class="card-header px-4 py-2 border-b border-gray-200 dark:border-gray-700"></div>
                     <h2 class="font-semibold text-lg text-gray-800 dark:text-gray-200 leading-tight my-4">
@@ -422,7 +466,7 @@ watch(
                                                     " class="py-1 px-2" type="number" v-model="item.discount" />
                                                     <span class="text-md" v-else>{{
                                                         item.discount
-                                                    }}</span>
+                                                        }}</span>
                                                 </p>
                                                 <p class="w-32 ps-2">
                                                     Tanggal Dikirim
@@ -526,7 +570,7 @@ watch(
                                                         " />
                                                     <span class="text-md" v-else>{{
                                                         item.transportation
-                                                    }}</span>
+                                                        }}</span>
                                                 </p>
                                                 <p class="w-32 ps-2">
                                                     Lama Pengiriman
@@ -716,7 +760,8 @@ watch(
                     Daftar Barang
                 </h2>
 
-                <div class="relative overflow-x-auto overflow-y-hidden shadow-md sm:rounded-lg mt-2">
+                <div
+                    class="relative overflow-x-auto overflow-y-hidden border border-gray-500 shadow-md sm:rounded-lg mt-2">
                     <table class="w-full text-sm text-left rtl:text-right text-gray-700 dark:text-gray-300">
                         <thead class="text-xs text-gray-700 uppercase bg-gray-200 dark:bg-gray-700 dark:text-gray-300">
                             <tr>
@@ -726,6 +771,7 @@ watch(
                                     [
                                         'admin-gudang',
                                         'purchasing',
+                                        'pejabat-teknis',
                                         'pimpinan',
                                     ].includes(role)
                                 " class="px-4 py-3 text-center" colspan="2">
@@ -738,30 +784,42 @@ watch(
                                 </th> -->
                                 <th class="px-4 py-3">Satuan</th>
                                 <th v-if="
-                                    ['purchasing', 'pimpinan'].includes(
-                                        role
-                                    )
+                                    ['purchasing',
+                                        'pejabat-teknis', 'pimpinan'].includes(
+                                            role
+                                        )
                                 " class="px-4 py-3 text-right">
                                     Harga Estimasi
                                 </th>
                                 <th v-if="
-                                    ['purchasing', 'pimpinan'].includes(
-                                        role
-                                    )
+                                    ['purchasing',
+                                        'pejabat-teknis', 'pimpinan'].includes(
+                                            role
+                                        )
+                                " class="px-4 py-3 text-right">
+                                    Subtotal Estimasi
+                                </th>
+                                <th v-if="
+                                    ['purchasing',
+                                        'pejabat-teknis', 'pimpinan'].includes(
+                                            role
+                                        ) && rfq.verified_4
                                 " class="px-4 py-3 text-right">
                                     Harga
                                 </th>
                                 <th v-if="
-                                    ['purchasing', 'pimpinan'].includes(
-                                        role
-                                    )
+                                    ['purchasing',
+                                        'pejabat-teknis', 'pimpinan'].includes(
+                                            role
+                                        ) && rfq.verified_4
                                 " class="px-4 py-3 text-right">
                                     Subtotal
                                 </th>
                                 <th v-if="
-                                    ['pejabat-teknis', 'pimpinan'].includes(
-                                        role
-                                    ) && rfq.status === 'pending'
+                                    ['pejabat-teknis',
+                                        'pejabat-teknis', 'pimpinan'].includes(
+                                            role
+                                        ) && rfq.status === 'pending'
                                 " class="px-4 py-1 text-right pr-4">
                                     &nbsp;
                                 </th>
@@ -778,6 +836,7 @@ watch(
                                     [
                                         'admin-gudang',
                                         'purchasing',
+                                        'pejabat-teknis',
                                         'pimpinan',
                                     ].includes(role)
                                 " class="px-4 py-1 text-right pr-4">
@@ -787,6 +846,7 @@ watch(
                                     [
                                         'admin-gudang',
                                         'purchasing',
+                                        'pejabat-teknis',
                                         'pimpinan',
                                     ].includes(role)
                                 " class="px-0 py-1 text-right">
@@ -821,9 +881,10 @@ watch(
                                 </td> -->
                                 <td class="px-4 py-1">{{ item.unit_name }}</td>
                                 <td v-if="
-                                    ['purchasing', 'pimpinan'].includes(
-                                        role
-                                    )
+                                    ['purchasing',
+                                        'pejabat-teknis', 'pimpinan'].includes(
+                                            role
+                                        )
                                 " class="px-4 py-1 text-right pr-4">
                                     <template v-if="
                                         rfq.verified_2 &&
@@ -845,14 +906,38 @@ watch(
                                     </template>
                                 </td>
                                 <td v-if="
-                                    ['purchasing', 'pimpinan'].includes(
-                                        role
-                                    )
+                                    ['purchasing',
+                                        'pejabat-teknis', 'pimpinan'].includes(
+                                            role
+                                        )
+                                " class="px-4 py-1 text-right pr-4">
+                                    <p class="py-1">
+                                        <TextInput class="py-1" type="hidden" v-model="item.total_estimation_price" />
+                                        {{
+                                            utils.formatDecimal(
+                                                (item.total_estimation_price = isNaN(
+                                                    item.quantity *
+                                                    item.estimation_price
+                                                )
+                                                    ? 0.0
+                                                    : (
+                                                        item.quantity *
+                                                        item.estimation_price
+                                                    ).toFixed(2))
+                                            )
+                                        }}
+                                    </p>
+                                </td>
+                                <td v-if="
+                                    ['purchasing',
+                                        'pejabat-teknis', 'pimpinan'].includes(
+                                            role
+                                        ) && rfq.verified_4
                                 " class="px-4 py-1 text-right pr-4">
                                     <template v-if="
                                         rfq.verified_2 &&
                                         ['purchasing'].includes(role) &&
-                                        !rfq.verified_4 &&
+                                        rfq.verified_4 &&
                                         !rfq.verified_3
                                     ">
                                         <TextInput class="py-1" type="number" v-model="item.unit_price" step="0.01" />
@@ -865,9 +950,10 @@ watch(
                                     </template>
                                 </td>
                                 <td v-if="
-                                    ['purchasing', 'pimpinan'].includes(
-                                        role
-                                    )
+                                    ['purchasing',
+                                        'pejabat-teknis', 'pimpinan'].includes(
+                                            role
+                                        ) && rfq.verified_4
                                 " class="px-4 py-1 text-right pr-4">
                                     <p class="py-1">
                                         <TextInput class="py-1" type="hidden" v-model="item.total_price" />
@@ -889,7 +975,11 @@ watch(
                                 <td v-if="
                                     ['pejabat-teknis', 'pimpinan'].includes(
                                         role
-                                    ) && rfq.status === 'pending'
+                                    ) && rfq.status === 'pending' && ((form.products.reduce(
+                                        (sum, item) =>
+                                            sum +
+                                            item.estimation_price *
+                                            item.quantity, 0) > 1000000 && role === 'pimpinan'))
                                 " class="px-4 py-1 text-right pr-4">
                                     <a href="#" class="text-red-500 hover:text-red-300 font-bold" @click="
                                         setTolak(item.product_id, index)
@@ -905,6 +995,7 @@ watch(
                                     [
                                         'admin-gudang',
                                         'purchasing',
+                                        'pejabat-teknis',
                                         'pimpinan',
                                     ].includes(role)
                                 " class="px-4 py-3 text-center" colspan="2">
@@ -917,16 +1008,42 @@ watch(
                                 </th> -->
                                 <td class="px-4 py-3">&nbsp;</td>
                                 <td v-if="
-                                    ['purchasing', 'pimpinan'].includes(
-                                        role
-                                    )
+                                    ['purchasing',
+                                        'pejabat-teknis', 'pimpinan'].includes(
+                                            role
+                                        )
                                 " class="px-4 py-3 text-right">
                                     TOTAL
                                 </td>
                                 <td v-if="
-                                    ['purchasing', 'pimpinan'].includes(
+                                    ['purchasing',
+                                        'pejabat-teknis', 'pimpinan'].includes(
+                                            role
+                                        )
+                                " class="px-4 py-3 text-right">
+                                    {{
+                                        utils.formatDecimal(
+                                            form.products
+                                                .reduce(
+                                                    (sum, item) =>
+                                                        sum +
+                                                        item.estimation_price *
+                                                        item.quantity,
+                                                    0
+                                                )
+                                                .toFixed(2)
+                                        )
+                                    }}
+                                </td>
+                                <td class="px-4 py-3">&nbsp;</td>
+                                <td v-if="
+                                    [
+                                        'purchasing',
+                                        'pejabat-teknis',
+                                        'pimpinan'
+                                    ].includes(
                                         role
-                                    )
+                                    ) && rfq.verified_4
                                 " class="px-4 py-3 text-right">
                                     {{
                                         utils.formatDecimal(
@@ -952,15 +1069,86 @@ watch(
                             </tr>
                         </tbody>
                     </table>
+                </div>
 
-                    <h2 class="text-sm">Bukti Penyerahan</h2>
+                <div v-if="rfq.status === 'siap-diambil'" class="mt-4">
+                    <h2 class=" text-sm">Bukti Penyerahan</h2>
                     <input
                         class="h-8 block w-full text-xs text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
                         id="small_size" type="file">
                 </div>
 
-                <div>
-                    <div class="card-header px-4 py-4 border-b border-gray-500"></div>
+                <div v-if="role !== 'pengaju'">
+                    <div class="mt-4">
+                        <label for="message" class="block my-2 text-sm font-medium text-gray-900 dark:text-white">
+                            Komentar (opsional)
+                        </label>
+                        <textarea v-model="form.comment" id="message" rows="4"
+                            class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                            placeholder="Berikan komentar untuk menuliskan alasan penolakan jika diperlukan..."></textarea>
+                    </div>
+                    <div>
+                        <!-- <Wysiwyg v-model="form.comment" value="{{form.comment}}"
+                        placeholder="Berikan komentar untuk menuliskan alasan penolakan jika diperlukan..." /> -->
+                    </div>
+                    <div class="px-4 py-8">
+                        <ol class="relative border-s border-gray-200 dark:border-gray-700">
+                            <li class="mb-10 ms-6" v-for="(item, index) in props.rfqComments" :key="index">
+                                <span
+                                    class="absolute flex items-center justify-center w-6 h-6 bg-blue-100 rounded-full -start-3 ring-8 ring-white dark:ring-gray-900 dark:bg-blue-900">
+                                    <img class="rounded-full shadow-lg" :src="item.user?.profile_photo_url" />
+                                </span>
+                                <div
+                                    class="items-center justify-between p-4 bg-white border border-gray-200 rounded-lg shadow-sm sm:flex dark:bg-gray-700 dark:border-gray-600">
+                                    <time class="mb-1 text-xs font-normal text-gray-400 sm:order-last sm:mb-0">
+                                        {{
+                                            new Date(
+                                                item.created_at
+                                            ).toLocaleDateString("en-GB", {
+                                                day: "2-digit",
+                                                month: "2-digit",
+                                                year: "numeric",
+                                            }) +
+                                            " " +
+                                            new Date(
+                                                item.created_at
+                                            ).toLocaleTimeString("en-GB", {
+                                                hour: "2-digit",
+                                                minute: "2-digit",
+                                            })
+                                        }}
+                                    </time>
+
+                                    <div class="text-sm font-normal text-gray-500 dark:text-gray-300">
+                                        <span
+                                            class="bg-gray-100 text-gray-800 text-xs font-normal me-2 px-2.5 py-0.5 rounded dark:bg-gray-600 dark:text-gray-300">{{
+                                                item.user.name }}</span>
+                                        <span
+                                            class="bg-green-100 text-green-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300">{{
+                                                item.role
+                                                    .replace("-", " ")
+                                                    .replace(/\b\w/g, (l) =>
+                                                        l.toUpperCase()
+                                                    )
+                                            }}</span>
+                                        <p class="mb-2 mt-2">{{ item.comment }}</p>
+                                    </div>
+                                </div>
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+
+                <!-- <p class="text-base leading-relaxed text-gray-800 dark:text-gray-200 text-right mt-2">
+                    Klik "Terima" untuk menyetujui atau "Tolak" untuk Menolak.
+                </p> -->
+
+                <div class="card-header px-4 py-4 border-b border-gray-500"></div>
+                <div v-if="role !== 'pengaju' && !(form.products.reduce(
+                    (sum, item) =>
+                        sum +
+                        item.estimation_price *
+                        item.quantity, 0) <= 1000000 && role === 'pimpinan')">
                     <h2 class="font-semibold text-lg text-gray-800 dark:text-gray-200 leading-tight my-2">
                         Persetujuan
                     </h2>
@@ -969,67 +1157,7 @@ watch(
                         order ini? Pastikan data pengajuan sudah benar dan
                         sesuai dengan permintaan.
                     </p>
-                    <label for="message" class="block my-2 text-sm font-medium text-gray-900 dark:text-white">
-                        Komentar (opsional)
-                    </label>
-                    <textarea v-model="form.comment" id="message" rows="4"
-                        class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                        placeholder="Berikan komentar untuk menuliskan alasan penolakan jika diperlukan..."></textarea>
                 </div>
-                <div>
-                    <!-- <Wysiwyg v-model="form.comment" value="{{form.comment}}"
-                        placeholder="Berikan komentar untuk menuliskan alasan penolakan jika diperlukan..." /> -->
-                </div>
-                <div class="px-4 py-8">
-                    <ol class="relative border-s border-gray-200 dark:border-gray-700">
-                        <li class="mb-10 ms-6" v-for="(item, index) in props.rfqComments" :key="index">
-                            <span
-                                class="absolute flex items-center justify-center w-6 h-6 bg-blue-100 rounded-full -start-3 ring-8 ring-white dark:ring-gray-900 dark:bg-blue-900">
-                                <img class="rounded-full shadow-lg" :src="item.user?.profile_photo_url" />
-                            </span>
-                            <div
-                                class="items-center justify-between p-4 bg-white border border-gray-200 rounded-lg shadow-sm sm:flex dark:bg-gray-700 dark:border-gray-600">
-                                <time class="mb-1 text-xs font-normal text-gray-400 sm:order-last sm:mb-0">
-                                    {{
-                                        new Date(
-                                            item.created_at
-                                        ).toLocaleDateString("en-GB", {
-                                            day: "2-digit",
-                                            month: "2-digit",
-                                            year: "numeric",
-                                        }) +
-                                        " " +
-                                        new Date(
-                                            item.created_at
-                                        ).toLocaleTimeString("en-GB", {
-                                            hour: "2-digit",
-                                            minute: "2-digit",
-                                        })
-                                    }}
-                                </time>
-
-                                <div class="text-sm font-normal text-gray-500 dark:text-gray-300">
-                                    <span
-                                        class="bg-gray-100 text-gray-800 text-xs font-normal me-2 px-2.5 py-0.5 rounded dark:bg-gray-600 dark:text-gray-300">{{
-                                            item.user.name }}</span>
-                                    <span
-                                        class="bg-green-100 text-green-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300">{{
-                                            item.role
-                                                .replace("-", " ")
-                                                .replace(/\b\w/g, (l) =>
-                                                    l.toUpperCase()
-                                                )
-                                        }}</span>
-                                    <p class="mb-2 mt-2">{{ item.comment }}</p>
-                                </div>
-                            </div>
-                        </li>
-                    </ol>
-                </div>
-
-                <!-- <p class="text-base leading-relaxed text-gray-800 dark:text-gray-200 text-right mt-2">
-                    Klik "Terima" untuk menyetujui atau "Tolak" untuk Menolak.
-                </p> -->
 
                 <div class="flex justify-between mt-2">
                     <Button color="gray" :href="route('rfqs.index')" type="button">
@@ -1049,13 +1177,26 @@ watch(
                             type="submit" class="ml-2">
                             Terima
                         </Button> -->
-                        <Button color="red" @click="form.verified = 0" type="submit"
-                            v-if="['kepala-divisi-logistik', 'pimpinan'].includes(role)">
-                            Tolak
-                        </Button>
-                        <Button color="green" @click="form.verified = 1" type="submit" class="ml-2">
-                            {{ actionLabel }}
-                        </Button>
+                        <div v-if="
+                            (form.products.reduce(
+                                (sum, item) => sum + item.estimation_price * item.quantity, 0
+                            ) > 1000000 && role === 'pimpinan') ||
+                            (form.products.reduce(
+                                (sum, item) => sum + item.estimation_price * item.quantity, 0
+                            ) <= 1000000 && role === 'pejabat-teknis') ||
+                            !['pejabat-teknis', 'pimpinan'].includes(role)">
+                            <Button color="red" @click="rejectSupplier" type="button"
+                                v-if="['pejabat-teknis', 'pimpinan'].includes(role)">
+                                Tolak Supplier
+                            </Button>
+                            <Button color="red" @click="form.verified = 0" type="submit" class="ml-2"
+                                v-if="['kepala-divisi-logistik', 'pejabat-teknis', 'pimpinan'].includes(role)">
+                                Tolak
+                            </Button>
+                            <Button color="green" @click="form.verified = 1" type="submit" class="ml-2">
+                                {{ actionLabel }}
+                            </Button>
+                        </div>
                         <!-- <Button color="blue" @click="form.verified = null" type="submit" class="ml-2">
                             Simpan
                         </Button> -->

@@ -20,6 +20,7 @@ return new class extends Migration
             $table->foreignId('unit_id')->nullable()->constrained('units')->onDelete('cascade')->onUpdate('cascade');
             $table->decimal('estimation_price', 10, 2)->default(0);
             $table->decimal('unit_price', 10, 2)->default(0);
+            $table->decimal('total_estimation_price', 10, 2)->default(0);
             $table->decimal('total_price', 10, 2)->default(0);
             $table->timestamps();
         });

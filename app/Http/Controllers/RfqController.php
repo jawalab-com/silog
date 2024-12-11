@@ -40,7 +40,7 @@ class RfqController extends Controller
 
         $rfqs = Rfq::whereIn('status', array_column(RfqStatus::cases(), 'value'))
             ->with(['user', 'verified_1User', 'verified_2User', 'verified_3User', 'verified_4User', 'rfqDetails'])
-            ->orderBy('request_date', 'desc')
+            ->orderBy('updated_at', 'desc')
             ->get()
             ->map(function ($rfq) {
                 $rfq->total_amount = $rfq->rfqDetails->sum(function ($detail) {
@@ -48,16 +48,16 @@ class RfqController extends Controller
                 });
 
                 return $rfq;
-            })
-            ->filter(function ($rfq) use ($role) {
-                if ($role == 'pimpinan') {
-                    return $rfq->total_amount >= 1000000;
-                } elseif ($role == 'pejabat-teknis') {
-                    return $rfq->total_amount < 1000000;
-                } else {
-                    return true;
-                }
             });
+        // ->filter(function ($rfq) use ($role) {
+        //     if ($role == 'pimpinan') {
+        //         return $rfq->total_amount >= 1000000;
+        //     } elseif ($role == 'pejabat-teknis') {
+        //         return $rfq->total_amount < 1000000;
+        //     } else {
+        //         return true;
+        //     }
+        // });
 
         $rfqs = $rfqs->values()->all();
 
@@ -94,7 +94,6 @@ class RfqController extends Controller
         $data['user_id'] = auth()->id();
         $data['status'] = RfqStatus::PENDING;
         $data['total_amount'] = 0;
-        $data['request_date'] = date_format($data['request_date'], 'Y-m-d');
         try {
             $rfq = Rfq::create($data);
             foreach ($data['products'] as $key => $detail) {
@@ -466,6 +465,32 @@ class RfqController extends Controller
             ->update(['quantity' => 0]);
 
         return response()->json(['message' => 'Success'], 200);
+    }
+
+    public function tolakSupplier(Request $request, Rfq $rfq)
+    {
+        $rfq->update([
+            'verified_3' => null,
+            'verified_4' => null,
+            'verified_3_user_id' => null,
+            'verified_4_user_id' => null,
+            'payment_status' => false,
+        ]);
+        $rfq->rfqSuppliers()->delete();
+        $rfq->rfqDetails()->update([
+            'estimation_price' => 0,
+            'unit_price' => 0,
+            'total_price' => 0,
+        ]);
+        RfqHistory::create([
+            'rfq_id' => $rfq->id,
+            'user_id' => auth()->id(),
+            'status' => RfqStatus::PENDING->value,
+            'description' => "Menolak supplier dari pengajuan barang dengan nomor pengajuan $rfq->rfq_number dan akan dikembalikan ke purchasing",
+        ]);
+
+        return redirect()->route('rfqs.index')
+            ->with('success', 'Supplier berhasil ditolak');
     }
 
     public function poPrint(Request $request, Rfq $rfq, string $tag)
