@@ -36,10 +36,23 @@ class RfqController extends Controller
 	 */
 	public function index(Request $request)
 	{
+		$rfqStatus = $request->input('rfq_status', 'belum');
+
+		$rfqSummary = Rfq::selectRaw("
+            COUNT(1) AS all_count,
+            SUM(CASE WHEN status != 'selesai' THEN 1 ELSE 0 END) AS belum_count,
+            SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) AS pending_count,
+            SUM(CASE WHEN status = 'sedang-dalam-pengiriman' THEN 1 ELSE 0 END) AS pengiriman_count,
+            SUM(CASE WHEN status = 'siap-diambil' THEN 1 ELSE 0 END) AS siap_diambil_count,
+            SUM(CASE WHEN status = 'selesai' THEN 1 ELSE 0 END) AS selesai_count
+            ")
+			->first();
+
 		$role = auth()->user()->teamRole(auth()->user()->currentTeam)->key;
 
 		$rfqs = Rfq::whereIn('status', array_column(RfqStatus::cases(), 'value'))
 			->with(['user', 'verified_1User', 'verified_2User', 'verified_3User', 'verified_4User', 'rfqDetails'])
+			->where('status', $rfqStatus == 'belum' ? '!=' : '=', $rfqStatus == 'belum' ? 'selesai' : $rfqStatus)
 			->orderBy('updated_at', 'desc')
 			->get()
 			->map(function ($rfq) {
@@ -64,6 +77,8 @@ class RfqController extends Controller
 		return Inertia::render('Rfqs/Index', [
 			'rfqStatus' => RfqStatus::toArray(),
 			'rfqs' => $rfqs,
+			'rfqSummary' => $rfqSummary,
+			'rfqStatus' => $rfqStatus,
 		]);
 	}
 
