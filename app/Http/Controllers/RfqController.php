@@ -37,6 +37,7 @@ class RfqController extends Controller
     public function index(Request $request)
     {
         $rfqStatus = $request->input('rfq_status', 'belum');
+        $rfqTotal = $request->input('rfq_total', 'est_lt');
 
         $rfqSummary = Rfq::selectRaw("
             COUNT(1) AS all_count,
@@ -52,6 +53,9 @@ class RfqController extends Controller
 
         $rfqs = Rfq::whereIn('status', array_column(RfqStatus::cases(), 'value'))
             ->with(['user', 'verified_1User', 'verified_2User', 'verified_3User', 'verified_4User', 'rfqDetails'])
+            ->whereHas('user', function ($query) {
+                $query->where('division', auth()->user()->division);
+            })
             ->where('status', $rfqStatus == 'belum' ? '!=' : '=', $rfqStatus == 'belum' ? 'selesai' : $rfqStatus)
             ->orderBy('updated_at', 'desc')
             ->get()
@@ -59,8 +63,23 @@ class RfqController extends Controller
                 $rfq->total_amount = $rfq->rfqDetails->sum(function ($detail) {
                     return $detail->unit_price * $detail->quantity;
                 });
+                $rfq->total_estimation_amount = $rfq->rfqDetails->sum(function ($detail) {
+                    return $detail->estimation_price * $detail->quantity;
+                });
 
                 return $rfq;
+            })
+            ->filter(function ($rfq) use ($rfqTotal) {
+                switch ($rfqTotal) {
+                    case 'est_gt':
+                        return $rfq->total_amount > 1000000;
+                    case 'price_lt':
+                        return $rfq->total_amount <= 1000000;
+                    case 'price_gt':
+                        return $rfq->total_amount > 1000000;
+                    default:
+                        return $rfq->total_amount <= 1000000;
+                }
             });
         // ->filter(function ($rfq) use ($role) {
         //     if ($role == 'pimpinan') {
@@ -79,6 +98,7 @@ class RfqController extends Controller
             'rfqs' => $rfqs,
             'rfqSummary' => $rfqSummary,
             'rfqStatus' => $rfqStatus,
+            'rfqTotal' => $rfqTotal,
         ]);
     }
 

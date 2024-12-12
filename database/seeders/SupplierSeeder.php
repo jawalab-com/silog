@@ -16,5 +16,11 @@ class SupplierSeeder extends Seeder
         Supplier::truncate();
         // \DB::statement('SET FOREIGN_KEY_CHECKS=1;');
         Supplier::factory()->count(50)->create();
+        Supplier::factory()->create([
+            'name' => 'Supplier A',
+            'address' => 'Jl. Supplier A No. 1',
+            'phone' => '081234567890',
+            'email' => '',
+        ]);
     }
 }

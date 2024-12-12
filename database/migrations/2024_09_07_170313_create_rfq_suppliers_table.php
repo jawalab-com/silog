@@ -15,7 +15,7 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->foreignUuid('rfq_id')->constrained('rfqs')->onDelete('cascade')->onUpdate('cascade');
             $table->string('tag');
-            $table->foreignUuid('supplier_id');
+            $table->foreignUuid('supplier_id')->nullable();
             $table->string('po_number')->nullable();
             $table->decimal('discount', 10, 2)->nullable();
             $table->decimal('tax', 10, 2)->nullable();

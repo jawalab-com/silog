@@ -82,7 +82,7 @@ Route::get('/auth/redirect/{provider}', [SocialiteController::class, 'redirectTo
 Route::get('/auth/callback/{provider}', [SocialiteController::class, 'handleProviderCallback'])->name('auth.callback');
 Route::post('/rfqs/{rfq}/{tag}/received', [RfqController::class, 'received'])->name('rfqs.received');
 Route::post('/rfqs/{rfq}/{tag}/paid', [RfqController::class, 'paid'])->name('rfqs.paid');
-Route::post('/rfqs/{rfq}/{tag}/paid', [RfqController::class, 'paid'])->name('rfqs.paid');
+Route::get('/rfqs/{rfq}/{tag}/po-print', [RfqController::class, 'poPrint'])->name('rfqs.po.print');
 Route::get('/rfqs/to-rfq', [RfqController::class, 'toRfq'])->name('rfqs.torfq');
 Route::post('/rfqs/{rfq}/{product_id}/tolak', [RfqController::class, 'tolak'])->name('rfqs.tolak');
 Route::post('/rfqs/{rfq}/tolak-supplier', [RfqController::class, 'tolakSupplier'])->name('rfqs.tolak-supplier');
