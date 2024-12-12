@@ -622,7 +622,7 @@ function getRandomQuote() {
             <div
                 class="border-2 rounded-lg border-gray-300 dark:border-gray-600 h-36 mb-4 p-4 bg-gray-200 dark:bg-gray-800">
                 <h1 class="text-4xl">Selamat datang, {{ $page.props.auth.user.name }}</h1>
-                <p class="text-md text-gray-600 dark:text-gray-400 mt-4"><i>"{{ getRandomQuote() }}""</i></p>
+                <p class="text-md text-gray-600 dark:text-gray-400 mt-4"><i>"{{ getRandomQuote() }}"</i></p>
             </div>
         </div>
         <div v-else>

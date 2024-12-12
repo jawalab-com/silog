@@ -42,6 +42,10 @@ const actionLabel = computed(() => {
         return 'Selesai';
     }
 
+    if (role === 'keuangan' && props.rfq.status == 'diproses') {
+        return 'Upload Nota';
+    }
+
     if (role === 'admin-gudang' && props.rfq.verified_1) {
         return allAvailable ? 'Kirim ke pengaju' : 'Kirim ke purchasing';
     }
@@ -391,7 +395,7 @@ watch(
                                                 </p>
                                             </div>
                                         </td>
-                                        <td class="" :colspan="role === 'purchasing' &&
+                                        <td colspan="2" class="" :colspan="role === 'purchasing' &&
                                             !rfq.verified_3
                                             ? '2'
                                             : '1'
@@ -1167,7 +1171,8 @@ watch(
                         (role === 'kepala-divisi-logistik' && rfq.verified_1 == null) ||
                         (role === 'admin-gudang' && rfq.verified_1 != null && rfq.verified_2 == null) ||
                         (role === 'purchasing' && rfq.verified_2 != null && rfq.verified_3 == null && !form.suppliers[0]?.date_sent) ||
-                        (['pimpinan', 'pejabat-teknis'].includes(role) && rfq.verified_3 != null && rfq.verified_4 == null)
+                        (['pimpinan', 'pejabat-teknis'].includes(role) && rfq.verified_3 != null && rfq.verified_4 == null) ||
+                        (['keuangan'].includes(role) && rfq.status == 'diproses' && !form.suppliers.every(supplier => supplier.file_receipt))
                     ">
                         <!-- <Button color="red" @click="form.status = rfqStatus['REJECTED']" type="submit">
                             Tolak

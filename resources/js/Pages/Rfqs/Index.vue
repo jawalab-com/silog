@@ -13,6 +13,7 @@ const props = defineProps({
     rfqSummary: Array,
     rfqStatus: Object,
     rfqTotal: Object,
+    rfqPaid: Object,
 });
 
 const page = usePage();
@@ -44,8 +45,8 @@ function getActiveTotal(status) {
     return props.rfqTotal == status ? 'bg-blue-200 dark:bg-blue-800 dark:hover:bg-blue-700 hover:bg-blue-100' : 'bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 hover:bg-gray-100';
 }
 
-function getActiveLunas(status) {
-    return props.rfqLunas == status ? 'bg-blue-200 dark:bg-blue-800 dark:hover:bg-blue-700 hover:bg-blue-100' : 'bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 hover:bg-gray-100';
+function getActivePaid(status) {
+    return props.rfqPaid == status ? 'bg-blue-200 dark:bg-blue-800 dark:hover:bg-blue-700 hover:bg-blue-100' : 'bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 hover:bg-gray-100';
 }
 
 const data = props.rfqs.map(item => ({
@@ -77,101 +78,104 @@ const data = props.rfqs.map(item => ({
 
         <div class="mb-2">
             <div class="inline-flex rounded-md shadow-sm" role="group">
-                <Link :href="route('rfqs.index', { rfq_status: 'pending', rfq_total: rfqTotal })"
+                <Link :href="route('rfqs.index', { rfq_status: 'pending', rfq_total: rfqTotal, rfq_paid: rfqPaid })"
                     :class="getActiveColor('pending')"
                     class="inline-flex items-center px-2 py-1 text-xs font-medium text-gray-900 border border-gray-200 rounded-lg hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:border-gray-700 dark:text-white dark:hover:text-white dark:focus:ring-blue-500 dark:focus:text-white">
-                Pending ({{ rfqSummary.pending_count }})
-                </Link>
-            </div>
-
-            <div class="inline-flex rounded-md shadow-sm" role="group">
-                <Link :href="route('rfqs.index')" :class="getActiveColor('belum')"
-                    class="inline-flex items-center px-2 py-1 text-xs font-medium text-gray-900 border border-gray-200 rounded-lg hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:border-gray-700 dark:text-white dark:hover:text-white dark:focus:ring-blue-500 dark:focus:text-white">
-                Belum Selesai ({{ rfqSummary.belum_count }})
+                Pending
                 </Link>
             </div>
 
             <div class="inline-flex rounded-md shadow-sm ml-2" role="group">
-                <Link :href="route('rfqs.index', { rfq_status: 'pending', rfq_total: rfqTotal })"
-                    :class="getActiveColor('pending')"
+                <Link :href="route('rfqs.index', { rfq_status: null, rfq_total: rfqTotal, rfq_paid: rfqPaid })"
+                    :class="getActiveColor('belum')"
                     class="inline-flex items-center px-2 py-1 text-xs font-medium text-gray-900 border border-gray-200 rounded-lg hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:border-gray-700 dark:text-white dark:hover:text-white dark:focus:ring-blue-500 dark:focus:text-white">
-                Pending ({{ rfqSummary.pending_count }})
+                Belum Selesai
                 </Link>
             </div>
 
             <div class="inline-flex rounded-md shadow-sm ml-2" role="group">
-                <Link :href="route('rfqs.index', { rfq_status: 'sedang-dalam-pengiriman', rfq_total: rfqTotal })"
+                <Link
+                    :href="route('rfqs.index', { rfq_status: 'sedang-dalam-pengiriman', rfq_total: rfqTotal, rfq_paid: rfqPaid })"
                     :class="getActiveColor('sedang-dalam-pengiriman')"
                     class="inline-flex items-center px-2 py-1 text-xs font-medium text-gray-900 border border-gray-200 rounded-lg hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:border-gray-700 dark:text-white dark:hover:text-white dark:focus:ring-blue-500 dark:focus:text-white">
-                Dalam Pengiriman ({{ rfqSummary.pengiriman_count }})
+                Dalam Pengiriman
                 </Link>
             </div>
 
             <div class="inline-flex rounded-md shadow-sm ml-2" role="group">
-                <Link :href="route('rfqs.index', { rfq_status: 'siap-diambil', rfq_total: rfqTotal })"
+                <Link :href="route('rfqs.index', { rfq_status: 'diproses', rfq_total: rfqTotal, rfq_paid: rfqPaid })"
+                    :class="getActiveColor('diproses')"
+                    class="inline-flex items-center px-2 py-1 text-xs font-medium text-gray-900 border border-gray-200 rounded-lg hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:border-gray-700 dark:text-white dark:hover:text-white dark:focus:ring-blue-500 dark:focus:text-white">
+                Diproses
+                </Link>
+            </div>
+
+            <div class="inline-flex rounded-md shadow-sm ml-2" role="group">
+                <Link
+                    :href="route('rfqs.index', { rfq_status: 'siap-diambil', rfq_total: rfqTotal, rfq_paid: rfqPaid })"
                     :class="getActiveColor('siap-diambil')"
                     class="inline-flex items-center px-2 py-1 text-xs font-medium text-gray-900 border border-gray-200 rounded-lg hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:border-gray-700 dark:text-white dark:hover:text-white dark:focus:ring-blue-500 dark:focus:text-white">
-                Siap Diambil ({{ rfqSummary.siap_diambil_count }})
+                Siap Diambil
                 </Link>
             </div>
 
             <div class="inline-flex rounded-md shadow-sm ml-2" role="group">
-                <Link :href="route('rfqs.index', { rfq_status: 'selesai', rfq_total: rfqTotal })"
+                <Link :href="route('rfqs.index', { rfq_status: 'selesai', rfq_total: rfqTotal, rfq_paid: rfqPaid })"
                     :class="getActiveColor('selesai')"
                     class="inline-flex items-center px-2 py-1 text-xs font-medium text-gray-900 border border-gray-200 rounded-lg hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:border-gray-700 dark:text-white dark:hover:text-white dark:focus:ring-blue-500 dark:focus:text-white">
-                Selesai ({{ rfqSummary.siap_diambil_count }})
+                Selesai
                 </Link>
             </div>
         </div>
 
-        <div class="mb-2">
+        <div class="mb-2" v-if="role == ['pimpinan', 'pejabat-teknis'].includes(role)">
             <div class="inline-flex rounded-md shadow-sm" role="group">
-                <Link :href="route('rfqs.index', { rfq_status: rfqStatus, rfq_total: 'est_lt' })"
+                <Link :href="route('rfqs.index', { rfq_status: rfqStatus, rfq_total: 'est_lt', rfq_paid: rfqPaid })"
                     :class="getActiveTotal('est_lt')"
                     class="inline-flex items-center px-2 py-1 text-xs font-medium text-gray-900 border border-gray-200 rounded-lg hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:border-gray-700 dark:text-white dark:hover:text-white dark:focus:ring-blue-500 dark:focus:text-white">
                 Total estimasi harga <= 1000000 </Link>
             </div>
 
             <div class="inline-flex rounded-md shadow-sm ml-2" role="group">
-                <Link :href="route('rfqs.index', { rfq_status: rfqStatus, rfq_total: 'est_gt' })"
+                <Link :href="route('rfqs.index', { rfq_status: rfqStatus, rfq_total: 'est_gt', rfq_paid: rfqPaid })"
                     :class="getActiveTotal('est_gt')"
                     class="inline-flex items-center px-2 py-1 text-xs font-medium text-gray-900 border border-gray-200 rounded-lg hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:border-gray-700 dark:text-white dark:hover:text-white dark:focus:ring-blue-500 dark:focus:text-white">
                 Total estimasi harga > 1000000 </Link>
             </div>
 
             <div class="inline-flex rounded-md shadow-sm ml-2" role="group">
-                <Link :href="route('rfqs.index', { rfq_status: rfqStatus, rfq_total: 'price_lt' })"
+                <Link :href="route('rfqs.index', { rfq_status: rfqStatus, rfq_total: 'price_lt', rfq_paid: rfqPaid })"
                     :class="getActiveTotal('price_lt')"
                     class="inline-flex items-center px-2 py-1 text-xs font-medium text-gray-900 border border-gray-200 rounded-lg hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:border-gray-700 dark:text-white dark:hover:text-white dark:focus:ring-blue-500 dark:focus:text-white">
                 Total harga <= 1000000 </Link>
             </div>
 
             <div class="inline-flex rounded-md shadow-sm ml-2" role="group">
-                <Link :href="route('rfqs.index', { rfq_status: rfqStatus, rfq_total: 'price_gt' })"
+                <Link :href="route('rfqs.index', { rfq_status: rfqStatus, rfq_total: 'price_gt', rfq_paid: rfqPaid })"
                     :class="getActiveTotal('price_gt')"
                     class="inline-flex items-center px-2 py-1 text-xs font-medium text-gray-900 border border-gray-200 rounded-lg hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:border-gray-700 dark:text-white dark:hover:text-white dark:focus:ring-blue-500 dark:focus:text-white">
                 Total harga > 1000000 </Link>
             </div>
         </div>
 
-        <div class="mb-2">
+        <div class="mb-8" v-if="role == 'keuangan'">
             <div class="inline-flex rounded-md shadow-sm" role="group">
-                <Link :href="route('rfqs.index', { rfq_status: rfqStatus, rfq_total: 'est_lt' })"
-                    :class="getActiveLunas('')"
+                <Link :href="route('rfqs.index', { rfq_status: rfqStatus, rfq_total: rfqTotal, rfq_paid: null })"
+                    :class="getActivePaid(null)"
                     class="inline-flex items-center px-2 py-1 text-xs font-medium text-gray-900 border border-gray-200 rounded-lg hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:border-gray-700 dark:text-white dark:hover:text-white dark:focus:ring-blue-500 dark:focus:text-white">
                 Lunas + Belum lunas
                 </Link>
             </div>
             <div class="inline-flex rounded-md shadow-sm ml-2" role="group">
-                <Link :href="route('rfqs.index', { rfq_status: rfqStatus, rfq_total: 'est_lt' })"
-                    :class="getActiveLunas('1')"
+                <Link :href="route('rfqs.index', { rfq_status: 'selesai', rfq_total: rfqTotal, rfq_paid: 1 })"
+                    :class="getActivePaid(1)"
                     class="inline-flex items-center px-2 py-1 text-xs font-medium text-gray-900 border border-gray-200 rounded-lg hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:border-gray-700 dark:text-white dark:hover:text-white dark:focus:ring-blue-500 dark:focus:text-white">
                 Lunas
                 </Link>
             </div>
             <div class="inline-flex rounded-md shadow-sm ml-2" role="group">
-                <Link :href="route('rfqs.index', { rfq_status: rfqStatus, rfq_total: 'est_lt' })"
-                    :class="getActiveLunas('0')"
+                <Link :href="route('rfqs.index', { rfq_status: rfqStatus, rfq_total: rfqTotal, rfq_paid: 0 })"
+                    :class="getActivePaid(0)"
                     class="inline-flex items-center px-2 py-1 text-xs font-medium text-gray-900 border border-gray-200 rounded-lg hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:border-gray-700 dark:text-white dark:hover:text-white dark:focus:ring-blue-500 dark:focus:text-white">
                 Belum Lunas
                 </Link>
@@ -191,6 +195,6 @@ const data = props.rfqs.map(item => ({
                 </fwb-button-group>
             </template>
         </DataTable>
-
+        <div class="h-36"></div>
     </AppLayout>
 </template>

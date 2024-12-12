@@ -8,6 +8,7 @@ use App\Http\Requests\UpdateProductRequest;
 use App\Models\Brand;
 use App\Models\InventoryTransaction;
 use App\Models\Product;
+use App\Models\ProductUnitConversion;
 use App\Models\Tag;
 use App\Models\Unit;
 use Illuminate\Http\Request;
@@ -156,7 +157,22 @@ class ProductController extends Controller
 
     public function get(Product $product)
     {
-        return response()->json($product->load('brand'));
+        $p = $product->load(['brand', 'unit'])->toArray();
+        $p['units'][] = [
+            'id' => $p['unit_id'],
+            'unit_name' => $p['unit']['unit_name'],
+        ];
+        ProductUnitConversion::where('product_id', $product->id)
+            ->join('units', 'units.id', '=', 'product_unit_conversions.to_unit_id')
+            ->get(['product_unit_conversions.*', 'units.unit_name'])
+            ->each(function ($unitConversion) use (&$p) {
+                $p['units'][] = [
+                    'id' => $unitConversion->to_unit_id,
+                    'unit_name' => $unitConversion->unit_name,
+                ];
+            });
+
+        return response()->json($p);
     }
 
     /**

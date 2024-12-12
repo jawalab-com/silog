@@ -51,16 +51,19 @@ const newProduct = ref({
     product_name: "",
     quantity: 1,
     unit_id: 1,
+    units: [],
 });
 
 const productDetails = ref(null);
 
 const addRow = () => {
+    console.log(newProduct.value);
     form.products.push({
         product_id: newProduct.value.product_id,
         product_name: newProduct.value.product_name,
         quantity: newProduct.value.quantity,
         unit_id: newProduct.value.unit_id,
+        units: newProduct.value.units,
     });
 };
 
@@ -96,6 +99,8 @@ watch(
                     route("products.get", { id: newVal })
                 );
                 productDetails.value = response.data;
+                newProduct.value.units = response.data.units;
+                newProduct.value.unit_id = response.data.unit_id;
             } catch (error) {
                 console.error("Error fetching product:", error);
                 productDetails.value = null;
@@ -138,8 +143,9 @@ watch(
                         <p class="dark:text-white mt-2">
                             {{ new Date(form.request_date).toLocaleDateString('id-ID', {
                                 day: '2-digit', month: 'long',
-                            year:
-                            'numeric' }) }}
+                                year:
+                                    'numeric'
+                            }) }}
                         </p>
                         <TextInput type="hidden" id="request_date" v-model="form.request_date" />
                         <InputError :message="form.errors.request_date" />
@@ -250,7 +256,7 @@ watch(
                                 <td class="px-4 py-1">
                                     <!-- <TextInput class="py-1" type="text" v-model="item.unit" /> -->
                                     <Select v-model="item.unit_id">
-                                        <option v-for="option in units" :value="option.id" :key="option.id">
+                                        <option v-for="option in item.units" :value="option.id" :key="option.id">
                                             {{ option.unit_name }}
                                         </option>
                                     </Select>

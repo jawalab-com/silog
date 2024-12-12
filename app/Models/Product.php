@@ -47,7 +47,7 @@ class Product extends Model
 
     public function unit()
     {
-        return $this->belongsTo(Unit::class, 'default_unit_id');
+        return $this->belongsTo(Unit::class, 'unit_id');
     }
 
     public function unitConversions()

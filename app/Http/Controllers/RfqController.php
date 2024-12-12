@@ -38,12 +38,14 @@ class RfqController extends Controller
     {
         $rfqStatus = $request->input('rfq_status', 'belum');
         $rfqTotal = $request->input('rfq_total', 'est_lt');
+        $rfqPaid = $request->input('rfq_paid', null);
 
         $rfqSummary = Rfq::selectRaw("
             COUNT(1) AS all_count,
             SUM(CASE WHEN status != 'selesai' THEN 1 ELSE 0 END) AS belum_count,
             SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) AS pending_count,
             SUM(CASE WHEN status = 'sedang-dalam-pengiriman' THEN 1 ELSE 0 END) AS pengiriman_count,
+            SUM(CASE WHEN status = 'disproses' THEN 1 ELSE 0 END) AS diproses_count,
             SUM(CASE WHEN status = 'siap-diambil' THEN 1 ELSE 0 END) AS siap_diambil_count,
             SUM(CASE WHEN status = 'selesai' THEN 1 ELSE 0 END) AS selesai_count
             ")
@@ -57,6 +59,28 @@ class RfqController extends Controller
                 $query->where('division', auth()->user()->division);
             })
             ->where('status', $rfqStatus == 'belum' ? '!=' : '=', $rfqStatus == 'belum' ? 'selesai' : $rfqStatus)
+            ->where(function ($query) use ($rfqPaid, $rfqStatus, $role) {
+                if ($rfqPaid !== null) {
+                    $query->where('payment_status', $rfqPaid);
+                }
+                if ($role == 'pengaju') {
+                    $query->where('user_id', auth()->id());
+                }
+                if ($role == 'keuangan') {
+                    $query->where('status', 'selesai');
+                }
+                if ($rfqStatus === 'pending') {
+                    if ($role === 'kepala-divisi-logistik') {
+                        $query->whereNull('verified_1');
+                    } elseif ($role === 'admin-gudang') {
+                        $query->where('verified_2', true);
+                    } elseif ($role === 'purchasing') {
+                        $query->where('verified_3', true);
+                    } elseif (in_array($role, ['pejabat-teknis', 'pimpinan'])) {
+                        $query->where('verified_4', true);
+                    }
+                }
+            })
             ->orderBy('updated_at', 'desc')
             ->get()
             ->map(function ($rfq) {
@@ -99,6 +123,7 @@ class RfqController extends Controller
             'rfqSummary' => $rfqSummary,
             'rfqStatus' => $rfqStatus,
             'rfqTotal' => $rfqTotal,
+            'rfqPaid' => $rfqPaid,
         ]);
     }
 
