@@ -30,52 +30,52 @@ use Inertia\Inertia;
 // });
 
 Route::get('/', function () {
-    if (auth()->check()) {
-        return redirect()->route('dashboard');
-    } else {
-        return redirect()->route('login');
-    }
+	if (auth()->check()) {
+		return redirect()->route('dashboard');
+	} else {
+		return redirect()->route('login');
+	}
 });
 
 Route::get('/pengajuan', function () {
-    return Inertia::render('Pengajuan');
+	return Inertia::render('Pengajuan');
 })->name('pengajuan');
 
 Route::get('/page/{page}', function ($page) {
-    $items = \App\Models\RfqDetail::leftJoin('products', 'rfq_details.product_id', '=', 'products.id')
-        ->leftJoin('tags', 'products.tag', '=', 'tags.slug')
-        ->selectRaw('tags.tag_name, SUM(rfq_details.quantity) as total_quantity')
-        ->groupBy('tags.id')
-        ->get();
+	$items = \App\Models\RfqDetail::leftJoin('products', 'rfq_details.product_id', '=', 'products.id')
+		->leftJoin('tags', 'products.tag', '=', 'tags.slug')
+		->selectRaw('tags.tag_name, SUM(rfq_details.quantity) as total_quantity')
+		->groupBy('tags.id')
+		->get();
 
-    return Inertia::render('Static/'.$page, ['rfqs' => []]);
+	return Inertia::render('Static/' . $page, ['rfqs' => []]);
 })->name('page');
 
 Route::get('/updaterole/{role}', function ($role) {
-    $user = auth()->user();
-    $team = $user->allTeams()->find($user->currentTeam->id);
-    if ($team) {
-        $user->teams()->updateExistingPivot($team->id, [
-            'role' => $role,
-        ]);
-    }
+	$user = auth()->user();
+	$team = $user->allTeams()->find($user->currentTeam->id);
+	if ($team) {
+		$user->teams()->updateExistingPivot($team->id, [
+			'role' => $role,
+		]);
+	}
 })->name('updaterole');
 
 Route::get('/book', function () {
-    return Inertia::render('Book');
+	return Inertia::render('Book');
 })->name('book');
 
 if (App::environment('local')) {
-    Route::get('/clear-all', function () {
-        Artisan::call('cache:clear');
-        Artisan::call('config:clear');
-        Artisan::call('route:clear');
-        Artisan::call('view:clear');
-        Artisan::call('optimize:clear');
-        \Illuminate\Support\Facades\Auth::logout();
+	Route::get('/clear-all', function () {
+		Artisan::call('cache:clear');
+		Artisan::call('config:clear');
+		Artisan::call('route:clear');
+		Artisan::call('view:clear');
+		Artisan::call('optimize:clear');
+		\Illuminate\Support\Facades\Auth::logout();
 
-        return redirect('/');
-    });
+		return redirect('/');
+	});
 }
 
 Route::get('/auth/redirect/{provider}', [SocialiteController::class, 'redirectToProvider'])->name('auth.redirect');
@@ -86,28 +86,29 @@ Route::post('/rfqs/{rfq}/{tag}/paid', [RfqController::class, 'paid'])->name('rfq
 Route::get('/rfqs/to-rfq', [RfqController::class, 'toRfq'])->name('rfqs.torfq');
 Route::post('/rfqs/{rfq}/{product_id}/tolak', [RfqController::class, 'tolak'])->name('rfqs.tolak');
 Route::post('/rfqs/{rfq}/tolak-supplier', [RfqController::class, 'tolakSupplier'])->name('rfqs.tolak-supplier');
+Route::post('/rfqs/{rfq}/comment', [RfqController::class, 'submitComment'])->name('rfqs.submit-comment');
 Route::get('/rfqs/export/', [RfqController::class, 'export'])->name('rfqs.export');
 Route::get('/products/export/', [ProductController::class, 'export'])->name('products.export');
 Route::get('/auth/redirect/{provider}', [SocialiteController::class, 'redirectToProvider'])->name('auth.redirect');
 
 Route::middleware([
-    'auth:sanctum',
-    config('jetstream.auth_session'),
-    'verified',
+	'auth:sanctum',
+	config('jetstream.auth_session'),
+	'verified',
 ])->group(function () {
-    Route::get('/dashboard', [HomeController::class, 'dashboard'])->name('dashboard');
-    Route::resources([
-        'brands' => BrandController::class,
-        'products' => ProductController::class,
-        'stock-opnames' => StockOpnameController::class,
-        'room-types' => RoomTypeController::class,
-        'suppliers' => SupplierController::class,
-        'purchase-orders' => PurchaseOrderController::class,
-        'sales-orders' => SalesOrderController::class,
-        'rfqs' => RfqController::class,
-        'tags' => TagController::class,
-        'units' => UnitController::class,
-        'purchase-requisitions' => PurchaseRequisitionController::class,
-        'reports' => ReportController::class,
-    ]);
+	Route::get('/dashboard', [HomeController::class, 'dashboard'])->name('dashboard');
+	Route::resources([
+		'brands' => BrandController::class,
+		'products' => ProductController::class,
+		'stock-opnames' => StockOpnameController::class,
+		'room-types' => RoomTypeController::class,
+		'suppliers' => SupplierController::class,
+		'purchase-orders' => PurchaseOrderController::class,
+		'sales-orders' => SalesOrderController::class,
+		'rfqs' => RfqController::class,
+		'tags' => TagController::class,
+		'units' => UnitController::class,
+		'purchase-requisitions' => PurchaseRequisitionController::class,
+		'reports' => ReportController::class,
+	]);
 });
