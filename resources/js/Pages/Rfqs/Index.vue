@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue';
-import { useForm, usePage } from '@inertiajs/vue3';
+import { useForm, usePage, Link } from '@inertiajs/vue3';
 import { AppLayout } from '@/Layouts';
 import { Breadcrumb, Button, DataTable, Icon } from '@/Components';
 import { FwbButtonGroup } from 'flowbite-vue';
@@ -11,6 +11,8 @@ const props = defineProps({
     formType: String,
     rfqStatus: Object,
     rfqs: Array,
+    rfqSummary: Array,
+    rfqStatus: Object,
 });
 
 const page = usePage();
@@ -34,7 +36,9 @@ const columns = [
     { name: 'status', label: 'Status' },
 ].filter(Boolean);
 
-console.log(props.rfqs[0]);
+function getActiveColor(status) {
+    return props.rfqStatus == status ? 'bg-blue-200 dark:bg-blue-800 dark:hover:bg-blue-700 hover:bg-blue-100' : 'bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 hover:bg-gray-100';
+}
 
 const data = props.rfqs.map(item => ({
     ...item,
@@ -65,6 +69,45 @@ const data = props.rfqs.map(item => ({
                 <Icon name="plus" class="mr-2" />
                 Tambah {{ title }}
             </SuccessButton>
+        </div>
+
+        <div class="mb-2">
+            <div class="inline-flex rounded-md shadow-sm" role="group">
+                <Link :href="route('rfqs.index')" :class="getActiveColor('belum')"
+                    class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-900 border border-gray-200 rounded-lg hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:border-gray-700 dark:text-white dark:hover:text-white dark:focus:ring-blue-500 dark:focus:text-white">
+                Belum Selesai ({{ rfqSummary.belum_count }})
+                </Link>
+            </div>
+
+            <div class="inline-flex rounded-md shadow-sm ml-2" role="group">
+                <Link :href="route('rfqs.index', { rfq_status: 'pending' })" :class="getActiveColor('pending')"
+                    class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-900 border border-gray-200 rounded-lg hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:border-gray-700 dark:text-white dark:hover:text-white dark:focus:ring-blue-500 dark:focus:text-white">
+                Pending ({{ rfqSummary.pending_count }})
+                </Link>
+            </div>
+
+            <div class="inline-flex rounded-md shadow-sm ml-2" role="group">
+                <Link :href="route('rfqs.index', { rfq_status: 'sedang-dalam-pengiriman' })"
+                    :class="getActiveColor('sedang-dalam-pengiriman')"
+                    class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-900 border border-gray-200 rounded-lg hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:border-gray-700 dark:text-white dark:hover:text-white dark:focus:ring-blue-500 dark:focus:text-white">
+                Dalam Pengiriman ({{ rfqSummary.pengiriman_count }})
+                </Link>
+            </div>
+
+            <div class="inline-flex rounded-md shadow-sm ml-2" role="group">
+                <Link :href="route('rfqs.index', { rfq_status: 'siap-diambil' })"
+                    :class="getActiveColor('siap-diambil')"
+                    class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-900 border border-gray-200 rounded-lg hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:border-gray-700 dark:text-white dark:hover:text-white dark:focus:ring-blue-500 dark:focus:text-white">
+                Siap Diambil ({{ rfqSummary.siap_diambil_count }})
+                </Link>
+            </div>
+
+            <div class="inline-flex rounded-md shadow-sm ml-2" role="group">
+                <Link :href="route('rfqs.index', { rfq_status: 'selesai' })" :class="getActiveColor('selesai')"
+                    class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-900 border border-gray-200 rounded-lg hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:border-gray-700 dark:text-white dark:hover:text-white dark:focus:ring-blue-500 dark:focus:text-white">
+                Selesai ({{ rfqSummary.siap_diambil_count }})
+                </Link>
+            </div>
         </div>
 
         <DataTable :data="data" :columns="columns">
