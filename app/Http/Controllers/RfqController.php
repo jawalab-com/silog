@@ -58,7 +58,7 @@ class RfqController extends Controller
             ->whereHas('user', function ($query) {
                 $query->where('division', auth()->user()->division);
             })
-            ->where('status', $rfqStatus == 'belum' ? '!=' : '=', $rfqStatus == 'belum' ? 'selesai' : $rfqStatus)
+            // ->where('status', $rfqStatus == 'belum' ? '!=' : '=', $rfqStatus == 'belum' ? 'selesai' : $rfqStatus)
             ->where(function ($query) use ($rfqPaid, $rfqStatus, $role) {
                 if ($rfqPaid !== null) {
                     $query->where('payment_status', $rfqPaid);
@@ -79,6 +79,10 @@ class RfqController extends Controller
                     } elseif (in_array($role, ['pejabat-teknis', 'pimpinan'])) {
                         $query->whereNull('verified_4');
                     }
+                } elseif ($rfqStatus === 'belum') {
+                    $query->where('status', '!=', 'selesai');
+                } elseif ($rfqStatus === 'selesai') {
+                    $query->where('status', '=', 'selesai');
                 }
             })
             ->orderBy('updated_at', 'desc')
@@ -152,6 +156,7 @@ class RfqController extends Controller
     {
         $data = $request->validated();
         $data['user_id'] = auth()->id();
+        $data['step'] = 1;
         $data['status'] = RfqStatus::PENDING;
         $data['total_amount'] = 0;
         try {
@@ -299,6 +304,7 @@ class RfqController extends Controller
                 case 'kepala-divisi-logistik':
                     $data['verified_1'] = $verified;
                     $data['verified_1_user_id'] = auth()->id();
+                    $data['step'] = 2;
                     RfqHistory::create([
                         'rfq_id' => $rfq->id,
                         'user_id' => auth()->id(),

@@ -23,7 +23,7 @@
                     @click="selectSuggestion(suggestion)" @mousedown="selectSuggestion(suggestion)">
                     <!-- Default rendering if no slot provided -->
                     <li @click="selectSuggestion(suggestion)" @mousedown="selectSuggestion(suggestion)"
-                        :class="['cursor-pointer px-4 py-2 hover:bg-gray-100 hover:bg-gray-900', { 'bg-gray-200': index === highlightedIndex }]">
+                        :class="['cursor-pointer px-4 py-2 hover:bg-gray-200 hover:dark:bg-gray-800', { 'bg-gray-200': index === highlightedIndex }]">
                         {{ suggestion.label }}
                     </li>
                 </slot>
