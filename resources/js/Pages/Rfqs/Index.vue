@@ -127,8 +127,7 @@ const data = props.rfqs.map(item => ({
                 </Link>
             </div>
         </div>
-
-        <div class="mb-2" v-if="role == ['pimpinan', 'pejabat-teknis'].includes(role)">
+        <div class="mb-2" v-if="['pimpinan', 'pejabat-teknis'].includes(role)">
             <div class="inline-flex rounded-md shadow-sm" role="group">
                 <Link :href="route('rfqs.index', { rfq_status: rfqStatus, rfq_total: 'est_lt', rfq_paid: rfqPaid })"
                     :class="getActiveTotal('est_lt')"
