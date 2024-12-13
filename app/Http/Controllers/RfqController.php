@@ -36,7 +36,7 @@ class RfqController extends Controller
      */
     public function index(Request $request)
     {
-        $rfqStatus = $request->input('rfq_status', 'belum');
+        $rfqStatus = $request->input('rfq_status', 'pending');
         $rfqTotal = $request->input('rfq_total', 'est_lt');
         $rfqPaid = $request->input('rfq_paid', null);
 
@@ -73,11 +73,11 @@ class RfqController extends Controller
                     if ($role === 'kepala-divisi-logistik') {
                         $query->whereNull('verified_1');
                     } elseif ($role === 'admin-gudang') {
-                        $query->where('verified_2', true);
+                        $query->whereNull('verified_2');
                     } elseif ($role === 'purchasing') {
-                        $query->where('verified_3', true);
+                        $query->whereNull('verified_3');
                     } elseif (in_array($role, ['pejabat-teknis', 'pimpinan'])) {
-                        $query->where('verified_4', true);
+                        $query->whereNull('verified_4');
                     }
                 }
             })
@@ -275,6 +275,7 @@ class RfqController extends Controller
         //     ['action' => 'someAction']
         // );
         $data = $request->validated();
+
         $data['request_date'] = date_create($data['request_date'])->format('Y-m-d');
 
         foreach ($data['suppliers'] as $i => $supplierData) {

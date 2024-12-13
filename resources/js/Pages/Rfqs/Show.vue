@@ -42,7 +42,7 @@ const actionLabel = computed(() => {
         return 'Selesai';
     }
 
-    if (role === 'keuangan' && props.rfq.status == 'diproses') {
+    if (role === 'keuangan' && ['diproses', 'selesai'].includes(props.rfq.status)) {
         return 'Upload Nota';
     }
 
@@ -357,8 +357,7 @@ watch(
                                                         [
                                                             'purchasing',
                                                         ].includes(role) &&
-                                                        !item.date_sent &&
-                                                        !rfq.verified_4
+                                                        !item.date_sent // && !rfq.verified_4
                                                     " v-model="item.supplier_id
                                                         " class="py-1 px-2">
                                                         <option value="">
@@ -470,7 +469,7 @@ watch(
                                                     " class="py-1 px-2" type="number" v-model="item.discount" />
                                                     <span class="text-md" v-else>{{
                                                         item.discount
-                                                        }}</span>
+                                                    }}</span>
                                                 </p>
                                                 <p class="w-32 ps-2">
                                                     Tanggal Dikirim
@@ -574,7 +573,7 @@ watch(
                                                         " />
                                                     <span class="text-md" v-else>{{
                                                         item.transportation
-                                                        }}</span>
+                                                    }}</span>
                                                 </p>
                                                 <p class="w-32 ps-2">
                                                     Lama Pengiriman
@@ -1172,7 +1171,7 @@ watch(
                         (role === 'admin-gudang' && rfq.verified_1 != null && rfq.verified_2 == null) ||
                         (role === 'purchasing' && rfq.verified_2 != null && rfq.verified_3 == null && !form.suppliers[0]?.date_sent) ||
                         (['pimpinan', 'pejabat-teknis'].includes(role) && rfq.verified_3 != null && rfq.verified_4 == null) ||
-                        (['keuangan'].includes(role) && rfq.status == 'diproses' && !form.suppliers.every(supplier => supplier.file_receipt))
+                        (['keuangan'].includes(role) && ['diproses', 'selesai'].includes(rfq.status) && !form.suppliers.every(supplier => supplier.file_receipt))
                     ">
                         <!-- <Button color="red" @click="form.status = rfqStatus['REJECTED']" type="submit">
                             Tolak
