@@ -11,7 +11,7 @@ enum RfqStatus: string
     case DIPROSES = 'diproses';
     case VERIFIED = 'verified';
     case APPROVED = 'approved';
-    case REJECTED = 'rejected';
+    case DITOLAK = 'ditolak';
     case CANCELED = 'canceled';
     case SELESAI = 'selesai';
 
@@ -36,7 +36,7 @@ enum RfqStatus: string
             self::DIPROSES => $lang === 'id' ? 'Diproses' : 'Processing',
             self::VERIFIED => $lang === 'id' ? 'Terverifikasi' : 'Verified',
             self::APPROVED => $lang === 'id' ? 'Disetujui' : 'Approved',
-            self::REJECTED => $lang === 'id' ? 'Ditolak' : 'Rejected',
+            self::DITOLAK => $lang === 'id' ? 'Ditolak' : 'Rejected',
             self::CANCELED => $lang === 'id' ? 'Dibatalkan' : 'Canceled',
             self::SELESAI => $lang === 'id' ? 'Selesai' : 'Completed',
         };

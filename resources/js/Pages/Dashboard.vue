@@ -626,6 +626,17 @@ function getRandomQuote() {
             </div>
         </div>
         <div v-else>
+            <div class="flex items-center mb-4">
+                <label for="dropdown" class="mr-4 text-lg font-medium text-gray-700 dark:text-gray-300">
+                    Divisi:
+                </label>
+                <select id="dropdown"
+                    class="block w-full py-2 px-3 border border-gray-300 bg-white dark:bg-gray-700 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                    <option value="option1">Option 1</option>
+                    <option value="option2">Option 2</option>
+                    <option value="option3">Option 3</option>
+                </select>
+            </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
                 <div
                     class="border-2 border-gray-300 rounded-lg dark:border-gray-600 h-16 md:h-32 bg-blue-200 dark:bg-blue-800">

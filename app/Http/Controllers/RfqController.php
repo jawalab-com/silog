@@ -374,6 +374,14 @@ class RfqController extends Controller
                     }
                     $data['verified_4'] = $verified;
                     $data['verified_4_user_id'] = auth()->id();
+                    RfqHistory::create([
+                        'rfq_id' => $rfq->id,
+                        'user_id' => auth()->id(),
+                        'status' => RfqStatus::PENDING->value,
+                        'description' => $verified ?
+                            "Menerima pengajuan barang dengan nomor pengajuan $rfq->rfq_number" :
+                            "Menolak pengajuan barang dengan nomor pengajuan $rfq->rfq_number",
+                    ]);
                     break;
                 case 'pimpinan':
                     if ($verified && $rfq->verified_3) {
@@ -381,6 +389,14 @@ class RfqController extends Controller
                     }
                     $data['verified_4'] = $verified;
                     $data['verified_4_user_id'] = auth()->id();
+                    RfqHistory::create([
+                        'rfq_id' => $rfq->id,
+                        'user_id' => auth()->id(),
+                        'status' => RfqStatus::PENDING->value,
+                        'description' => $verified ?
+                            "Menerima pengajuan barang dengan nomor pengajuan $rfq->rfq_number" :
+                            "Menolak pengajuan barang dengan nomor pengajuan $rfq->rfq_number",
+                    ]);
                     break;
                 default:
                     break;
@@ -402,6 +418,7 @@ class RfqController extends Controller
         }
 
         try {
+            $data['status'] = $verified == 0 ? RfqStatus::DITOLAK->value : $data['status'];
             $rfq->update($data);
             if ($request->has('products')) {
 
@@ -418,7 +435,7 @@ class RfqController extends Controller
                             $quantityChange = $detail['quantity'];
                             $note = 'Pengajuan pembelian disetujui';
                             break;
-                        case RfqStatus::REJECTED->value:
+                        case RfqStatus::DITOLAK->value:
                             $quantityChange = 0;
                             $note = 'Pembelian ditolak';
                             break;

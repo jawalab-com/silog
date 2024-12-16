@@ -210,13 +210,13 @@ const setReceived = (tag, index) => {
 };
 
 const setTolak = (product_id, index) => {
-    const result = utils.confirm({
-        title: "Hapus Data",
-        text: "Apakah Anda yakin ingin menghapus data ini? Tindakan ini tidak dapat dibatalkan!",
-        confirmButtonText: "Tolak",
-    });
+    // const result = utils.confirm({
+    //     title: "Hapus Data",
+    //     text: "Apakah Anda yakin ingin menghapus barang ini? Tindakan ini tidak dapat dibatalkan!",
+    //     confirmButtonText: "Tolak",
+    // });
 
-    if (result.isConfirmed) {
+    if (confirm("Apakah Anda yakin ingin menghapus barang ini? Tindakan ini tidak dapat dibatalkan!")) {
         try {
             axios
                 .post(
@@ -286,7 +286,8 @@ watch(
                     <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
                         {{ title }}
                     </h2>
-                    <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+                    <h2 class="font-semibold text-xl leading-tight"
+                        :class="rfq.status === 'ditolak' ? 'text-red-600 dark:text-red-400' : 'text-gray-800 dark:text-gray-200'">
                         Status: {{ rfq.status.toUpperCase() }}
                     </h2>
                 </div>
@@ -978,11 +979,16 @@ watch(
                                 <td v-if="
                                     ['pejabat-teknis', 'pimpinan'].includes(
                                         role
-                                    ) && rfq.status === 'pending' && ((form.products.reduce(
-                                        (sum, item) =>
+                                    ) && rfq.status === 'pending' && (
+                                        (form.products.reduce((sum, item) =>
                                             sum +
                                             item.estimation_price *
-                                            item.quantity, 0) > 1000000 && role === 'pimpinan'))
+                                            item.quantity, 0) > 1000000 && role === 'pimpinan') ||
+                                        (form.products.reduce((sum, item) =>
+                                            sum +
+                                            item.estimation_price *
+                                            item.quantity, 0) <= 1000000 && role === 'pejabat-teknis')) &&
+                                    item.quantity > 0
                                 " class="px-4 py-1 text-right pr-4">
                                     <a href="#" class="text-red-500 hover:text-red-300 font-bold" @click="
                                         setTolak(item.product_id, index)
@@ -1182,13 +1188,14 @@ watch(
                             Terima
                         </Button> -->
                         <div v-if="
-                            (form.products.reduce(
+                            rfq.status != 'ditolak' &&
+                            ((form.products.reduce(
                                 (sum, item) => sum + item.estimation_price * item.quantity, 0
                             ) > 1000000 && role === 'pimpinan') ||
-                            (form.products.reduce(
-                                (sum, item) => sum + item.estimation_price * item.quantity, 0
-                            ) <= 1000000 && role === 'pejabat-teknis') ||
-                            !['pejabat-teknis', 'pimpinan'].includes(role)">
+                                (form.products.reduce(
+                                    (sum, item) => sum + item.estimation_price * item.quantity, 0
+                                ) <= 1000000 && role === 'pejabat-teknis') ||
+                                !['pejabat-teknis', 'pimpinan'].includes(role))">
                             <Button color="red" @click="rejectSupplier" type="button"
                                 v-if="['pejabat-teknis', 'pimpinan'].includes(role)">
                                 Tolak Supplier
