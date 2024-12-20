@@ -28,6 +28,26 @@ const props = defineProps({
     histories: Array,
 });
 
+props.suppliers.unshift({
+    rfq_id: "",
+    tag: "",
+    supplier_id: "",
+    po_number: "",
+    discount: "",
+    tax: "",
+    transportation: "",
+    file_proof: null,
+    file_invoice: null,
+    file_receipt: null,
+    file_proof_path: null,
+    file_invoice_path: null,
+    file_receipt_path: null,
+    date_sent: "",
+    date_received: "",
+    received: false,
+    paid: false,
+});
+
 const page = usePage();
 const role = (page.props.auth.user.all_teams.find(team => team.id === page.props.auth.user.current_team_id)).membership?.role || 'owner';
 // const allAvailable = computed(() => form.products.filter(item => item.stock - item.quantity >= 0).length == form.products.length);
@@ -361,9 +381,7 @@ watch(
                                                         !item.date_sent // && !rfq.verified_4
                                                     " v-model="item.supplier_id
                                                         " class="py-1 px-2">
-                                                        <option value="">
-                                                            Ga Tau
-                                                        </option>
+                                                        <option :value="null"></option>
                                                         <option v-for="supplier in tagSuppliers[
                                                             item.tag.slug
                                                         ]" :value="supplier.id" :key="supplier.id">
@@ -470,7 +488,7 @@ watch(
                                                     " class="py-1 px-2" type="number" v-model="item.discount" />
                                                     <span class="text-md" v-else>{{
                                                         item.discount
-                                                    }}</span>
+                                                        }}</span>
                                                 </p>
                                                 <p class="w-32 ps-2">
                                                     Tanggal Dikirim
@@ -574,7 +592,7 @@ watch(
                                                         " />
                                                     <span class="text-md" v-else>{{
                                                         item.transportation
-                                                    }}</span>
+                                                        }}</span>
                                                 </p>
                                                 <p class="w-32 ps-2">
                                                     Lama Pengiriman

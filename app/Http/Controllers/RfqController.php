@@ -219,7 +219,8 @@ class RfqController extends Controller
                 dd($tag);
             }
             if (! $rfq->rfqSuppliers()->where('tag', $tag)->first()) {
-                $rfq->rfqSuppliers()->create(['tag' => $tag, 'supplier_id' => $supplier->id]);
+                // $rfq->rfqSuppliers()->create(['tag' => $tag, 'supplier_id' => $supplier->id]);
+                $rfq->rfqSuppliers()->create(['tag' => $tag, 'supplier_id' => null]);
             }
             $tagSuppliers[$tag] = Supplier::where('tag', $tag)->get();
         }
@@ -313,6 +314,31 @@ class RfqController extends Controller
                             "Menerima pengajuan barang dengan nomor pengajuan $rfq->rfq_number dan akan diteruskan ke admin gudang" :
                             "Menolak pengajuan barang dengan nomor pengajuan $rfq->rfq_number dan akan diteruskan ke admin gudang",
                     ]);
+
+                    $count_available = $rfq->rfqDetails()->join('inventories', 'rfq_details.product_id', '=', 'inventories.product_id')
+                        ->whereRaw('inventories.quantity - rfq_details.quantity >= 0')->count();
+                    $count_requested = $rfq->rfqDetails()->count();
+
+                    if (empty($rfq->verified_4) && $count_available === $count_requested) {
+                        $data['status'] = RfqStatus::DIPROSES->value;
+                        foreach ($rfq->rfqDetails()->get() as $product) {
+                            $rfqSupplier = $rfq->rfqSuppliers()->where('tag', $product->product->tag)->first();
+                            InventoryTransaction::create([
+                                'product_id' => $product->product_id,
+                                'quantity_change' => -$product->quantity,
+                                'transaction_type' => 'DIAMBIL',
+                                'reference_id' => $rfq->rfq_number,
+                                'transaction_date' => $product->created_at,
+                                'user_id' => auth()->id(),
+                                'note' => 'Barang diambil melalui penerimaan dari Pengajuan No. '.$rfq->rfq_number,
+                            ]);
+                            $inv = Inventory::where('product_id', $product->product_id)->first();
+                            Inventory::updateOrCreate(
+                                ['product_id' => $product->product_id],
+                                ['quantity' => ($inv->quantity ?? 0) - $product->quantity]
+                            );
+                        }
+                    }
                     break;
                 case 'admin-gudang':
                     $count_available = $rfq->rfqDetails()->join('inventories', 'rfq_details.product_id', '=', 'inventories.product_id')
@@ -327,26 +353,26 @@ class RfqController extends Controller
                         $data['payment_status'] = true;
                     } elseif ($rfq->verified_4 && ($rfq->status === RfqStatus::DIPROSES || $rfq->status === RfqStatus::SIAP_DIAMBIL)) {
                         if ($rfq->status === RfqStatus::SIAP_DIAMBIL) {
-                            foreach ($rfq->rfqDetails()->get() as $product) {
-                                $rfqSupplier = $rfq->rfqSuppliers()->where('tag', $product->product->tag)->first();
-                                InventoryTransaction::create([
-                                    'product_id' => $product->product_id,
-                                    'quantity_change' => -$product->quantity,
-                                    'transaction_type' => 'DIAMBIL',
-                                    'reference_id' => $rfqSupplier->po_number,
-                                    'transaction_date' => $product->created_at,
-                                    'user_id' => auth()->id(),
-                                    'note' => 'Barang diambil melalui penerimaan Purchase Order No. '.
-                                        $rfqSupplier->po_number.
-                                        ' dari Pengajuan No. '.
-                                        $rfq->rfq_number,
-                                ]);
-                                $inv = Inventory::where('product_id', $product->product_id)->first();
-                                Inventory::updateOrCreate(
-                                    ['product_id' => $product->product_id],
-                                    ['quantity' => ($inv->quantity ?? 0) - $product->quantity]
-                                );
-                            }
+                            // foreach ($rfq->rfqDetails()->get() as $product) {
+                            //     $rfqSupplier = $rfq->rfqSuppliers()->where('tag', $product->product->tag)->first();
+                            //     InventoryTransaction::create([
+                            //         'product_id' => $product->product_id,
+                            //         'quantity_change' => -$product->quantity,
+                            //         'transaction_type' => 'DIAMBIL',
+                            //         'reference_id' => $rfqSupplier->po_number,
+                            //         'transaction_date' => $product->created_at,
+                            //         'user_id' => auth()->id(),
+                            //         'note' => 'Barang diambil melalui penerimaan Purchase Order No. '.
+                            //             $rfqSupplier->po_number.
+                            //             ' dari Pengajuan No. '.
+                            //             $rfq->rfq_number,
+                            //     ]);
+                            //     $inv = Inventory::where('product_id', $product->product_id)->first();
+                            //     Inventory::updateOrCreate(
+                            //         ['product_id' => $product->product_id],
+                            //         ['quantity' => ($inv->quantity ?? 0) - $product->quantity]
+                            //     );
+                            // }
                         }
                         $data['verified_2'] = $rfq->status === RfqStatus::DIPROSES ? null : true;
                         $data['status'] = $rfq->status === RfqStatus::DIPROSES ? RfqStatus::SIAP_DIAMBIL->value : RfqStatus::SELESAI->value;

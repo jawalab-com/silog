@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('rfq_suppliers', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('rfq_id')->constrained('rfqs')->onDelete('cascade')->onUpdate('cascade');
+            $table->foreignUuid('rfq_id')->nullable();
             $table->string('tag');
             $table->foreignUuid('supplier_id')->nullable();
             $table->string('po_number')->nullable();
