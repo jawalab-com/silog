@@ -20,7 +20,7 @@ class PurchaseRequisition extends Model
         'date_created',
         'date_deadline',
         'state',
-        'department_id',
+        'department',
         'user_id',
     ];
 

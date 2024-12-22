@@ -152,14 +152,14 @@ const clearPhotoFileInput = () => {
 
             <!-- Division -->
             <div class="col-span-6 sm:col-span-4">
-                <InputLabel for="department_id" value="Divisi" />
-                <Select id="department_id" v-model="form.department_id" class="mt-1 block w-full">
+                <InputLabel for="division" value="Divisi" />
+                <Select id="division" v-model="form.division" class="mt-1 block w-full">
                     <option value="Divisi Logistik">Divisi Logistik</option>
                     <option value="Divisi IT">Divisi IT</option>
                     <option value="Divisi Marketing">Divisi Marketing</option>
                     <option value="Divisi Keuangan">Divisi Keuangan</option>
                 </Select>
-                <InputError :message="form.errors.department_id" class="mt-2" />
+                <InputError :message="form.errors.division" class="mt-2" />
             </div>
         </template>
 
