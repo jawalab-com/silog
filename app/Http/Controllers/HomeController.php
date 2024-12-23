@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class HomeController extends Controller
@@ -9,9 +10,10 @@ class HomeController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function dashboard()
+    public function dashboard(Request $request)
     {
         $dbDriver = \DB::getDriverName();
+        $department = $request->input('department', null);
 
         // PENGELUARAN ======================================================================
         if ($dbDriver === 'sqlite') {
@@ -24,6 +26,7 @@ class HomeController extends Controller
         $pengeluaran = \DB::table('rfq_suppliers')
             ->join('rfqs', 'rfqs.id', '=', 'rfq_suppliers.rfq_id')
             ->join('rfq_details', 'rfqs.id', '=', 'rfq_details.rfq_id')
+            ->join('users', 'rfqs.user_id', '=', 'users.id')
             ->select(
                 $yearField,
                 $monthField,
@@ -31,6 +34,9 @@ class HomeController extends Controller
                 \DB::raw('SUM(CASE WHEN paid = 1 THEN total_price ELSE 0 END) as total_paid')
             )
             ->groupBy('year', 'month')
+            ->when($department, function ($query, $department) {
+                return $query->where('users.department', $department);
+            })
             ->orderBy('year')
             ->orderBy('month')
             ->get();
@@ -151,6 +157,7 @@ class HomeController extends Controller
             ],
             'stok_keluar_terbanyak' => $stok_keluar_terbanyak,
             'stok_keluar_terkecil' => $stok_keluar_terkecil,
+            'department' => $department,
         ];
 
         return Inertia::render('Dashboard', $data);

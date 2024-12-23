@@ -51,7 +51,7 @@ class Rfq extends Model implements CommentableContract
             ->count();
         $no++;
 
-        $this->attributes['rfq_number'] = implode('/', [$no, 0, 'ADMIN', date('m'), date('Y')]);
+        $this->attributes['rfq_number'] = implode('/', [$no, 0, auth()->user()->division, date('m'), date('Y')]);
     }
 
     public function geCommentsAttribute($value): array

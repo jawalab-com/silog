@@ -31,7 +31,7 @@ const columns = [
     { name: 'allocation_date', label: 'Tanggal Digunakan' },
     { name: 'user_name', label: 'Pengaju' },
     { name: 'title', label: 'Perihal' },
-    { name: 'total_amount', label: 'Total' },
+    role === 'pengaju' ? null : { name: 'total_amount', label: 'Total' },
     { name: 'verified', label: 'Status Verifikasi' },
     role === 'keuangan' ? { name: 'payment_status', label: 'Status Pembayaran' } : null,
     { name: 'status', label: 'Status' },

@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { useForm, usePage } from '@inertiajs/vue3';
+import { useForm, usePage, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import Welcome from '@/Components/Welcome.vue';
 import ApexCharts from 'apexcharts';
@@ -19,6 +19,7 @@ const props = defineProps({
     brand_terbanyak: Array,
     stok_keluar_terbanyak: Array,
     stok_keluar_terkecil: Array,
+    department: String,
 });
 
 const options = {
@@ -608,6 +609,17 @@ function getRandomQuote() {
     return quotes[Math.floor(Math.random() * quotes.length)];
 }
 
+function handleDepartmentChange(event) {
+    const selectedDepartment = event.target.value;
+    if (selectedDepartment) {
+        // Redirect to the department route with the selected department
+        router.visit(route('dashboard', { department: selectedDepartment }));
+    } else {
+        // Redirect to the default department route
+        router.visit(route('department'));
+    }
+}
+
 </script>
 
 <template>
@@ -627,14 +639,16 @@ function getRandomQuote() {
         </div>
         <div v-else>
             <div class="flex items-center mb-4">
-                <label for="dropdown" class="mr-4 text-lg font-medium text-gray-700 dark:text-gray-300">
+                <!-- <label for="dropdown" class="mr-4 text-lg font-medium text-gray-700 dark:text-gray-300">
                     Divisi:
-                </label>
+                </label> -->
                 <select id="dropdown"
-                    class="block w-full py-2 px-3 border border-gray-300 bg-white dark:bg-gray-700 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                    <option value="option1">Option 1</option>
-                    <option value="option2">Option 2</option>
-                    <option value="option3">Option 3</option>
+                    class="block w-full py-2 px-3 border border-gray-300 bg-white dark:bg-gray-700 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    @change="handleDepartmentChange" :value="department">
+                    <option value="">Semua</option>
+                    <option value="umum">Umum</option>
+                    <option value="keuangan">Keuangan</option>
+                    <option value="pelayanan">Pelayanan</option>
                 </select>
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
