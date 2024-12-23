@@ -55,9 +55,9 @@ class RfqController extends Controller
 
         $rfqs = Rfq::whereIn('status', array_column(RfqStatus::cases(), 'value'))
             ->with(['user', 'verified_1User', 'verified_2User', 'verified_3User', 'verified_4User', 'rfqDetails'])
-            ->whereHas('user', function ($query) {
-                $query->where('division', auth()->user()->division);
-            })
+            // ->whereHas('user', function ($query) {
+            //     $query->where('division', auth()->user()->division);
+            // })
             // ->where('status', $rfqStatus == 'belum' ? '!=' : '=', $rfqStatus == 'belum' ? 'selesai' : $rfqStatus)
             ->where(function ($query) use ($rfqPaid, $rfqStatus, $role) {
                 if ($rfqPaid !== null) {
@@ -70,15 +70,16 @@ class RfqController extends Controller
                     $query->where('status', 'selesai');
                 }
                 if ($rfqStatus === 'pending') {
-                    if ($role === 'kepala-divisi-logistik') {
-                        $query->whereNull('verified_1');
-                    } elseif ($role === 'admin-gudang') {
-                        $query->whereNull('verified_2');
-                    } elseif ($role === 'purchasing') {
-                        $query->whereNull('verified_3');
-                    } elseif (in_array($role, ['pejabat-teknis', 'pimpinan'])) {
-                        $query->whereNull('verified_4');
-                    }
+                    // if ($role === 'kepala-divisi-logistik') {
+                    //     $query->whereNull('verified_1');
+                    // } elseif ($role === 'admin-gudang') {
+                    //     $query->whereNull('verified_2');
+                    // } elseif ($role === 'purchasing') {
+                    //     $query->whereNull('verified_3');
+                    // } elseif (in_array($role, ['pejabat-teknis', 'pimpinan'])) {
+                    //     $query->whereNull('verified_4');
+                    // }
+                    $query->where('status', '=', 'pending');
                 } elseif ($rfqStatus === 'belum') {
                     $query->where('status', '!=', 'selesai');
                 } elseif ($rfqStatus === 'selesai') {
