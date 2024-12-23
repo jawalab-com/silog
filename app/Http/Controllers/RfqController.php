@@ -55,9 +55,11 @@ class RfqController extends Controller
 
         $rfqs = Rfq::whereIn('status', array_column(RfqStatus::cases(), 'value'))
             ->with(['user', 'verified_1User', 'verified_2User', 'verified_3User', 'verified_4User', 'rfqDetails'])
-            // ->whereHas('user', function ($query) {
-            //     $query->where('division', auth()->user()->division);
-            // })
+            ->whereHas('user', function ($query) use ($role) {
+                if ($role == 'pengaju') {
+                    $query->where('department', auth()->user()->department);
+                }
+            })
             // ->where('status', $rfqStatus == 'belum' ? '!=' : '=', $rfqStatus == 'belum' ? 'selesai' : $rfqStatus)
             ->where(function ($query) use ($rfqPaid, $rfqStatus, $role) {
                 if ($rfqPaid !== null) {
