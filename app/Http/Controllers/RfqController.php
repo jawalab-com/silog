@@ -701,4 +701,23 @@ class RfqController extends Controller
 
         return Excel::download(new ReportsExport($from, $to, $status), 'report.xlsx');
     }
+
+    public function submitComment(Request $request, Rfq $rfq)
+    {
+        if (! empty($request->comment)) {
+            $comment = RfqComment::create([
+                'rfq_id' => $rfq->id,
+                'user_id' => auth()->id(),
+                'comment' => $request->comment,
+            ]);
+
+            $comment = RfqComment::where('id', $comment->id)
+                ->with('user')
+                ->first();
+
+            return response()->json($comment, 201);
+        }
+
+        return response()->json(['message' => 'Comment cannot be empty'], 400);
+    }
 }

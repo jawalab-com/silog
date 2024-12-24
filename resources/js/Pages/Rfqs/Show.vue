@@ -51,6 +51,7 @@ props.suppliers.unshift({
 const page = usePage();
 const role = (page.props.auth.user.all_teams.find(team => team.id === page.props.auth.user.current_team_id)).membership?.role || 'owner';
 const department = page.props.auth.user.department;
+const comments = ref(props.rfqComments);
 // const allAvailable = computed(() => form.products.filter(item => item.stock - item.quantity >= 0).length == form.products.length);
 const actionLabel = computed(() => {
     const allAvailable = form.products.filter(item => item.stock - item.quantity >= 0).length == form.products.length;
@@ -275,6 +276,24 @@ const setPaid = (tag, index) => {
     }
 };
 
+const submitKomentar = () => {
+    try {
+        axios
+            .post(route("rfqs.submit-comment", { rfq: props.rfq.id }), {
+                comment: form.comment
+            })
+            .then((response) => {
+                comments.value.unshift(response.data);
+                console.log("comment added successfully");
+            })
+            .catch((errors) => {
+                console.error("Failed to comment :", errors);
+            });
+    } catch (error) {
+        console.error("An unexpected error occurred:", error);
+    }
+};
+
 const goBack = () => {
     window.history.back();
 };
@@ -297,6 +316,7 @@ watch(
         }
     }
 );
+
 </script>
 
 <template>
@@ -495,7 +515,7 @@ watch(
                                                     " class="py-1 px-2" type="number" v-model="item.discount" />
                                                     <span class="text-md" v-else>{{
                                                         item.discount
-                                                        }}</span>
+                                                    }}</span>
                                                 </p>
                                                 <p class="w-32 ps-2">
                                                     Tanggal Dikirim
@@ -599,7 +619,7 @@ watch(
                                                         " />
                                                     <span class="text-md" v-else>{{
                                                         item.transportation
-                                                        }}</span>
+                                                    }}</span>
                                                 </p>
                                                 <p class="w-32 ps-2">
                                                     Lama Pengiriman
@@ -1125,13 +1145,19 @@ watch(
                             class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                             placeholder="Berikan komentar untuk menuliskan alasan penolakan jika diperlukan..."></textarea>
                     </div>
+                    <div class="text-right">
+                        <Button color="" @click="submitKomentar" type="button"
+                            class="ml-2 text-blue-600 dark:text-blue-400 hover:text-blue-800 hover:dark:text-blue-200">
+                            KIRIM KOMENTAR
+                        </Button>
+                    </div>
                     <div>
                         <!-- <Wysiwyg v-model="form.comment" value="{{form.comment}}"
                         placeholder="Berikan komentar untuk menuliskan alasan penolakan jika diperlukan..." /> -->
                     </div>
-                    <div class="px-4 py-8">
+                    <div class="px-4 py-4">
                         <ol class="relative border-s border-gray-200 dark:border-gray-700">
-                            <li class="mb-10 ms-6" v-for="(item, index) in props.rfqComments" :key="index">
+                            <li class="mb-4 ms-6" v-for="(item, index) in comments" :key="index">
                                 <span
                                     class="absolute flex items-center justify-center w-6 h-6 bg-blue-100 rounded-full -start-3 ring-8 ring-white dark:ring-gray-900 dark:bg-blue-900">
                                     <img class="rounded-full shadow-lg" :src="item.user?.profile_photo_url" />
@@ -1159,16 +1185,15 @@ watch(
 
                                     <div class="text-sm font-normal text-gray-500 dark:text-gray-300">
                                         <span
-                                            class="bg-gray-100 text-gray-800 text-xs font-normal me-2 px-2.5 py-0.5 rounded dark:bg-gray-600 dark:text-gray-300">{{
-                                                item.user.name }}</span>
-                                        <span
-                                            class="bg-green-100 text-green-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300">{{
-                                                item.role
-                                                    .replace("-", " ")
-                                                    .replace(/\b\w/g, (l) =>
-                                                        l.toUpperCase()
-                                                    )
-                                            }}</span>
+                                            class="bg-gray-100 text-gray-800 text-xs font-normal me-2 px-2.5 py-0.5 rounded dark:bg-gray-600 dark:text-gray-300">
+                                            {{ item.user.name }}
+                                        </span>
+                                        <span v-if="item.role"
+                                            class="bg-green-100 text-green-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300">
+                                            {{
+                                                item.role.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+                                            }}
+                                        </span>
                                         <p class="mb-2 mt-2">{{ item.comment }}</p>
                                     </div>
                                 </div>

@@ -43,7 +43,7 @@ const logout = () => {
                     </svg>
                     <span class="sr-only">Toggle sidebar</span>
                 </button>
-                <img src="images/logo-sl.png" alt="logo" class="w-12 h-8" />
+                <img src="/images/logo-sl.png" alt="logo" class="w-12 h-8" />
                 <!-- <a href="https://flowbite.com" class="flex items-center justify-between mr-2">
                     <ApplicationLogo />
                     <span v-if="!$page.props.jetstream.hasTeamFeatures"
