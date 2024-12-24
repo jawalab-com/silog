@@ -134,6 +134,14 @@ const data = props.rfqs.map(item => ({
                 Selesai
                 </Link>
             </div>
+
+            <div class="inline-flex rounded-md shadow-sm ml-2" role="group">
+                <Link :href="route('rfqs.index', { rfq_status: 'ditolak', rfq_total: rfqTotal, rfq_paid: rfqPaid })"
+                    :class="getActiveColor('ditolak')"
+                    class="inline-flex items-center px-2 py-1 text-xs font-medium text-gray-900 border border-gray-200 rounded-lg hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:border-gray-700 dark:text-white dark:hover:text-white dark:focus:ring-blue-500 dark:focus:text-white">
+                Ditolak
+                </Link>
+            </div>
         </div>
         <div class="mb-2" v-if="['pimpinan', 'pejabat-teknis'].includes(role)">
             <div class="inline-flex rounded-md shadow-sm" role="group">

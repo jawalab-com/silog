@@ -12,6 +12,14 @@ const props = defineProps({
     rfq: Object,
     supplier: Object,
     products: Object,
+    verified_user_1: Object,
+    verified_user_2: Object,
+    verified_user_3: Object,
+    verified_user_4: Object,
+    verified_user_1_role: String,
+    verified_user_2_role: String,
+    verified_user_3_role: String,
+    verified_user_4_role: String,
 });
 
 const page = usePage();
@@ -21,18 +29,18 @@ let total = 0;
 
 <template>
     <PrintLayout title="Cetak PO">
-        <div class="bg-gray-100 flex justify-center items-center min-h-screen">
+        <div class="bg-white flex justify-center items-center min-h-screen">
 
             <div class="a4">
                 <!-- Header Section -->
                 <header class="text-center mb-2 border-b border-gray-200 pb-4">
-                    <h1 class="text-2xl font-bold">SOLO TECHNOPARK</h1>
-                    <p class="text-gray-600">Jl. Ki Hajar Dewantara No. 19 Jebres, Kec. Jebres, Kota Surakarta</p>
-                    <p class="text-gray-600">Telp: (0271) 666628 | Email: info@solotechnopark.id</p>
+                    <h1 class="text-2xl font-bold text-black">SOLO TECHNOPARK</h1>
+                    <p class="text-black">Jl. Ki Hajar Dewantara No. 19 Jebres, Kec. Jebres, Kota Surakarta</p>
+                    <p class="text-black">Telp: (0271) 666628 | Email: info@solotechnopark.id</p>
                 </header>
 
                 <!-- Content Section -->
-                <div class="px-8">
+                <div class="px-8 text-black">
                     <h2 class="text-md text-center font-semibold mb-2">
                         PURCHASE ORDER<br />
                         {{ rfq.rfq_number }}
@@ -40,18 +48,18 @@ let total = 0;
 
                     <div class="mb-2">
                         <div class="flex">
-                            <p class="w-44">Perihal</p>
-                            <p class="text-gray-700">: {{ rfq.title }}</p>
+                            <p class="w-44 text-black">Perihal</p>
+                            <p class="text-black">: {{ rfq.title }}</p>
                         </div>
 
                         <div class="flex">
-                            <p class="w-44">Tanggal Permintaan</p>
-                            <p class="text-gray-700">: {{ new Date(rfq.request_date).toLocaleDateString('id-ID') }}</p>
+                            <p class="w-44 text-black">Tanggal Permintaan</p>
+                            <p class="text-black">: {{ new Date(rfq.request_date).toLocaleDateString('id-ID') }}</p>
                         </div>
 
                         <div class="flex">
-                            <p class="w-44">Kepada</p>
-                            <p class="text-gray-700">: {{ supplier.supplier.supplier_name }}</p>
+                            <p class="w-44 text-black">Kepada</p>
+                            <p class="text-black">: {{ supplier.supplier.supplier_name }}</p>
                         </div>
                     </div>
 
@@ -123,12 +131,13 @@ let total = 0;
                             </tr>
                             <tr>
                                 <td class="px-2 py-1 border border-gray-300 text-sm font-bold" colspan="2">
-                                    Grant Total
+                                    Grand Total
                                 </td>
                                 <td colspan="2" class="px-2 py-1 border border-gray-300 text-sm text-right font-bold">
                                     {{
-                                        utils.formatCurrency(total + supplier.tax + (total * supplier.tax / 100) +
-                                            supplier.transportation)
+                                        utils.formatCurrency(Number(total) + Number(supplier.tax) + (Number(total) *
+                                            Number(supplier.tax) / 100) +
+                                            Number(supplier.transportation))
                                     }}
                                 </td>
                             </tr>
@@ -139,30 +148,22 @@ let total = 0;
                         Mohon segera diproses dan dikirimkan ke alamat kami secepatnya. Terima kasih atas kerjasamanya.
                     </p>
 
-                    <div class="flex justify-between mt-6">
+                    <div class="flex justify-around mt-6">
                         <div class="text-center">
                             <p>Mengetahui,</p>
                             <br />
                             <br />
                             <br />
-                            <p class="font-semibold">Nama Satu</p>
-                            <p>Direktur</p>
-                        </div>
-                        <div class="text-center">
-                            <p>Disetujui,</p>
-                            <br />
-                            <br />
-                            <br />
-                            <p class="font-semibold">Nama Dua</p>
-                            <p>Manager</p>
+                            <p class="font-semibold">{{ verified_user_4.name }}</p>
+                            <p>{{ verified_user_4_role }}</p>
                         </div>
                         <div class="text-center">
                             <p>Diterima,</p>
                             <br />
                             <br />
                             <br />
-                            <p class="font-semibold">Nama Tiga</p>
-                            <p>Supplier</p>
+                            <p class="font-semibold">{{ verified_user_4.name }}</p>
+                            <p>{{ verified_user_4_role }}</p>
                         </div>
                     </div>
                 </div>

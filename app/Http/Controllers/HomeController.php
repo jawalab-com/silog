@@ -82,6 +82,11 @@ class HomeController extends Controller
         $kategori_pengeluaran_terbanyak = \DB::table('rfq_details')
             ->join('products', 'products.id', '=', 'rfq_details.product_id')
             ->join('tags', 'tags.slug', '=', 'products.tag')
+            ->join('rfqs', 'rfq_details.rfq_id', '=', 'rfqs.id')
+            ->join('users', 'rfqs.user_id', '=', 'users.id')
+            ->when($department, function ($query, $department) {
+                return $query->where('users.department', $department);
+            })
             ->select('tags.tag_name as labels', \DB::raw('SUM(rfq_details.total_price) as series'))
             ->groupBy('tags.slug', 'tags.tag_name')
             ->orderByDesc('series')
@@ -91,6 +96,11 @@ class HomeController extends Controller
 
         $supplier_terbanyak = \DB::table('rfq_suppliers')
             ->join('suppliers', 'rfq_suppliers.supplier_id', '=', 'suppliers.id')
+            ->join('rfqs', 'rfq_suppliers.rfq_id', '=', 'rfqs.id')
+            ->join('users', 'rfqs.user_id', '=', 'users.id')
+            ->when($department, function ($query, $department) {
+                return $query->where('users.department', $department);
+            })
             ->select('suppliers.supplier_name as labels', \DB::raw('COUNT(1) as series'))
             ->groupBy('suppliers.id', 'suppliers.supplier_name')
             ->orderByDesc('series')
@@ -101,6 +111,11 @@ class HomeController extends Controller
         $brand_terbanyak = \DB::table('rfq_details')
             ->join('products', 'products.id', '=', 'rfq_details.product_id')
             ->join('brands', 'brands.id', '=', 'products.brand_id')
+            ->join('rfqs', 'rfq_details.rfq_id', '=', 'rfqs.id')
+            ->join('users', 'rfqs.user_id', '=', 'users.id')
+            ->when($department, function ($query, $department) {
+                return $query->where('users.department', $department);
+            })
             ->select('brands.brand_name as labels', \DB::raw('COUNT(1) as series'))
             ->groupBy('brands.id', 'brands.brand_name')
             ->orderByDesc('series')
@@ -110,6 +125,12 @@ class HomeController extends Controller
 
         $stok_keluar_terbanyak = \DB::table('inventory_transactions')
             ->join('products', 'inventory_transactions.product_id', '=', 'products.id')
+            ->join('rfq_details', 'inventory_transactions.product_id', '=', 'rfq_details.product_id')
+            ->join('rfqs', 'rfq_details.rfq_id', '=', 'rfqs.id')
+            ->join('users', 'rfqs.user_id', '=', 'users.id')
+            ->when($department, function ($query, $department) {
+                return $query->where('users.department', $department);
+            })
             ->select('products.product_name as x', \DB::raw('SUM(inventory_transactions.quantity_change) * -1 as y'))
             ->where('inventory_transactions.quantity_change', '<', 0)
             ->whereMonth('transaction_date', date('m'))
@@ -120,6 +141,12 @@ class HomeController extends Controller
 
         $stok_keluar_terkecil = \DB::table('inventory_transactions')
             ->join('products', 'inventory_transactions.product_id', '=', 'products.id')
+            ->join('rfq_details', 'inventory_transactions.product_id', '=', 'rfq_details.product_id')
+            ->join('rfqs', 'rfq_details.rfq_id', '=', 'rfqs.id')
+            ->join('users', 'rfqs.user_id', '=', 'users.id')
+            ->when($department, function ($query, $department) {
+                return $query->where('users.department', $department);
+            })
             ->select('products.product_name as x', \DB::raw('SUM(inventory_transactions.quantity_change) * -1 as y'))
             ->where('inventory_transactions.quantity_change', '<', 0)
             ->whereMonth('transaction_date', date('m'))
@@ -132,11 +159,30 @@ class HomeController extends Controller
             'pengeluaran' => $pengeluaran,
             'sumHutang' => \DB::table('rfqs')
                 ->join('rfq_details', 'rfqs.id', '=', 'rfq_details.rfq_id')
-                ->where('status', 'sedang-dalam-pengiriman')
+                ->join('users', 'rfqs.user_id', '=', 'users.id')
+                ->when($department, function ($query, $department) {
+                    return $query->where('users.department', $department);
+                })
+                // ->where('status', 'sedang-dalam-pengiriman')
                 ->sum('rfq_details.total_price'),
-            'countBelumSelesai' => \DB::table('rfqs')->where('status', '!=', 'selesai')->count(),
-            'countSelesai' => \DB::table('rfqs')->where('status', 'selesai')->count(),
-            'countPengajuan' => \DB::table('rfqs')->whereMonth('request_date', date('m'))->count(),
+            'countBelumSelesai' => \DB::table('rfqs')
+                ->join('users', 'rfqs.user_id', '=', 'users.id')
+                ->when($department, function ($query, $department) {
+                    return $query->where('users.department', $department);
+                })
+                ->where('status', '!=', 'selesai')->count(),
+            'countSelesai' => \DB::table('rfqs')
+                ->join('users', 'rfqs.user_id', '=', 'users.id')
+                ->when($department, function ($query, $department) {
+                    return $query->where('users.department', $department);
+                })
+                ->where('status', 'selesai')->count(),
+            'countPengajuan' => \DB::table('rfqs')
+                ->join('users', 'rfqs.user_id', '=', 'users.id')
+                ->when($department, function ($query, $department) {
+                    return $query->where('users.department', $department);
+                })
+                ->whereMonth('request_date', date('m'))->count(),
             'kategori_pengeluaran_terbanyak' => [
                 'labels' => $kategori_pengeluaran_terbanyak->pluck('labels')->toArray(),
                 'series' => $kategori_pengeluaran_terbanyak->map(function ($item) use ($total_kategori_pengeluaran_terbanyak) {

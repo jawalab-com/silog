@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('rfqs', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade')->onUpdate('cascade');
+            $table->foreignId('user_id');
             $table->string('rfq_number')->unique();
             $table->date('request_date');
             $table->date('allocation_date')->nullable();
@@ -23,10 +23,10 @@ return new class extends Migration
             $table->boolean('verified_2')->nullable();
             $table->boolean('verified_3')->nullable();
             $table->boolean('verified_4')->nullable();
-            $table->foreignId('verified_1_user_id')->nullable()->constrained('users')->onDelete('cascade')->onUpdate('cascade');
-            $table->foreignId('verified_2_user_id')->nullable()->constrained('users')->onDelete('cascade')->onUpdate('cascade');
-            $table->foreignId('verified_3_user_id')->nullable()->constrained('users')->onDelete('cascade')->onUpdate('cascade');
-            $table->foreignId('verified_4_user_id')->nullable()->constrained('users')->onDelete('cascade')->onUpdate('cascade');
+            $table->foreignId('verified_1_user_id')->nullable();
+            $table->foreignId('verified_2_user_id')->nullable();
+            $table->foreignId('verified_3_user_id')->nullable();
+            $table->foreignId('verified_4_user_id')->nullable();
             $table->string('file_proof')->nullable();
             $table->boolean('payment_status')->default(false);
             $table->integer('step')->nullable();

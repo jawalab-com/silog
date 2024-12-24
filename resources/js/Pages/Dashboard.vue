@@ -292,7 +292,7 @@ const optionsColumnA = {
     colors: ["#1A56DB", "#FDBA8C"],
     series: [
         {
-            name: "Social media",
+            name: "Jumlah",
             color: "#77DD77",
             data: props.stok_keluar_terbanyak,
         },
@@ -380,7 +380,7 @@ const optionsColumnB = {
     colors: ["#1A56DB", "#FDBA8C"],
     series: [
         {
-            name: "Social media",
+            name: "Jumlah",
             color: "#FF6961",
             data: props.stok_keluar_terkecil,
         },
@@ -611,13 +611,7 @@ function getRandomQuote() {
 
 function handleDepartmentChange(event) {
     const selectedDepartment = event.target.value;
-    if (selectedDepartment) {
-        // Redirect to the department route with the selected department
-        router.visit(route('dashboard', { department: selectedDepartment }));
-    } else {
-        // Redirect to the default department route
-        router.visit(route('department'));
-    }
+    router.visit(route('dashboard', { department: selectedDepartment }));
 }
 
 </script>

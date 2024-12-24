@@ -12,9 +12,9 @@ const isLog = true;
 
 <template>
     <aside
-        class="fixed top-0 left-0 w-52 z-40 h-screen pt-14 transition-transform -translate-x-full bg-white border-r border-gray-200 md:translate-x-0 dark:bg-gray-800 dark:border-gray-700"
+        class="fixed top-0 left-0 w-52 z-40 h-screen pt-14 transition-transform -translate-x-full bg-white border-r border-gray-200 md:translate-x-0 dark:bg-blue-950 dark:border-gray-700"
         aria-label="Sidenav" id="drawer-navigation">
-        <div class="overflow-y-auto py-5 px-3 h-full bg-white dark:bg-gray-800">
+        <div class="overflow-y-auto py-5 px-3 h-full bg-white dark:bg-blue-950">
             <form action="#" method="GET" class="md:hidden mb-2">
                 <label for="sidebar-search" class="sr-only">Search</label>
                 <div class="relative">
@@ -34,7 +34,7 @@ const isLog = true;
             <ul class="space-y-1 text-base">
                 <li>
                     <a :href="route('dashboard')"
-                        class="flex items-center p-2 font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+                        class="flex items-center p-2 font-medium text-lime-900 rounded-lg dark:text-lime-100 hover:bg-gray-100 dark:hover:bg-gray-700 group">
                         <svg aria-hidden="true"
                             class="w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
                             fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -47,80 +47,80 @@ const isLog = true;
                 <template v-if="isLog">
                     <li>
                         <Link :href="route('rfqs.index')"
-                            class="flex items-center p-2 font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+                            class="flex items-center p-2 font-medium text-lime-900 rounded-lg dark:text-lime-100 hover:bg-gray-100 dark:hover:bg-gray-700 group">
                         <span class="ml-3">Pengajuan</span>
                         </Link>
                     </li>
                     <!-- <li>
                         <Link :href="route('purchase-orders.index')"
-                            class="flex items-center p-2 font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+                            class="flex items-center p-2 font-medium text-lime-900 rounded-lg dark:text-lime-100 hover:bg-gray-100 dark:hover:bg-gray-700 group">
                         <span class="ml-3">Purchasing</span>
                         </Link>
                     </li>
                     <li>
                         <Link :href="route('page', { page: 'UnderConstruction' })"
-                            class="flex items-center p-2 font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+                            class="flex items-center p-2 font-medium text-lime-900 rounded-lg dark:text-lime-100 hover:bg-gray-100 dark:hover:bg-gray-700 group">
                         <span class="ml-3">Keuangan</span>
                         </Link>
                     </li> -->
                     <!-- <li>
                         <Link :href="route('sales-orders.index')"
-                            class="flex items-center p-2 font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+                            class="flex items-center p-2 font-medium text-lime-900 rounded-lg dark:text-lime-100 hover:bg-gray-100 dark:hover:bg-gray-700 group">
                         <span class="ml-3">Sales Order</span>
                         </Link>
                     </li> -->
                     <li class="pt-0 mt-5 space-y-1 border-t border-gray-200 dark:border-gray-700 text-base"></li>
                     <li>
                         <Link :href="route('products.index')"
-                            class="flex items-center p-2 font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+                            class="flex items-center p-2 font-medium text-lime-900 rounded-lg dark:text-lime-100 hover:bg-gray-100 dark:hover:bg-gray-700 group">
                         <span class="ml-3">Barang</span>
                         </Link>
                     </li>
                     <li v-if="role != 'pengaju'">
                         <Link :href="route('brands.index')"
-                            class="flex items-center p-2 font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+                            class="flex items-center p-2 font-medium text-lime-900 rounded-lg dark:text-lime-100 hover:bg-gray-100 dark:hover:bg-gray-700 group">
                         <span class="ml-3">Merk</span>
                         </Link>
                     </li>
                     <li v-if="role != 'pengaju'">
                         <Link :href="route('tags.index')"
-                            class="flex items-center p-2 font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+                            class="flex items-center p-2 font-medium text-lime-900 rounded-lg dark:text-lime-100 hover:bg-gray-100 dark:hover:bg-gray-700 group">
                         <span class="ml-3">Kategori</span>
                         </Link>
                     </li>
                     <li v-if="role != 'pengaju'">
                         <Link :href="route('units.index')"
-                            class="flex items-center p-2 font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+                            class="flex items-center p-2 font-medium text-lime-900 rounded-lg dark:text-lime-100 hover:bg-gray-100 dark:hover:bg-gray-700 group">
                         <span class="ml-3">Satuan</span>
                         </Link>
                     </li>
                     <li v-if="role != 'pengaju'">
                         <Link :href="route('suppliers.index')"
-                            class="flex items-center p-2 font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+                            class="flex items-center p-2 font-medium text-lime-900 rounded-lg dark:text-lime-100 hover:bg-gray-100 dark:hover:bg-gray-700 group">
                         <span class="ml-3">Supplier</span>
                         </Link>
                     </li>
                     <li v-if="role != 'pengaju'">
                         <Link :href="route('reports.index')"
-                            class="flex items-center p-2 font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+                            class="flex items-center p-2 font-medium text-lime-900 rounded-lg dark:text-lime-100 hover:bg-gray-100 dark:hover:bg-gray-700 group">
                         <span class="ml-3">Laporan</span>
                         </Link>
                     </li>
                     <!-- <li>
                         <Link :href="route('suppliers.index')"
-                            class="flex items-center p-2 font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+                            class="flex items-center p-2 font-medium text-lime-900 rounded-lg dark:text-lime-100 hover:bg-gray-100 dark:hover:bg-gray-700 group">
                         <span class="ml-3">Customer</span>
                         </Link>
                     </li> -->
                     <!-- <li>
                         <Link :href="route('purchase-orders.index')"
-                            class="flex items-center p-2 font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+                            class="flex items-center p-2 font-medium text-lime-900 rounded-lg dark:text-lime-100 hover:bg-gray-100 dark:hover:bg-gray-700 group">
                         <span class="ml-3">Sales Order</span>
                         </Link>
                     </li>
                     <li>
                         <Link :href="route('suppliers.index')"
-                            class="flex items-center p-2 font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+                            class="flex items-center p-2 font-medium text-lime-900 rounded-lg dark:text-lime-100 hover:bg-gray-100 dark:hover:bg-gray-700 group">
                         <span class="ml-3">Inventori</span>
                         </Link>
                     </li> -->
@@ -128,13 +128,13 @@ const isLog = true;
                 <template v-else>
                     <li>
                         <Link :href="route('room-types.index')"
-                            class="flex items-center p-2 font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+                            class="flex items-center p-2 font-medium text-lime-900 rounded-lg dark:text-lime-100 hover:bg-gray-100 dark:hover:bg-gray-700 group">
                         <span class="ml-3">Room Type</span>
                         </Link>
                     </li>
                     <li>
                         <Link :href="route('purchase-orders.index')"
-                            class="flex items-center p-2 font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+                            class="flex items-center p-2 font-medium text-lime-900 rounded-lg dark:text-lime-100 hover:bg-gray-100 dark:hover:bg-gray-700 group">
                         <span class="ml-3">Booking</span>
                         </Link>
                     </li>
@@ -292,7 +292,7 @@ const isLog = true;
             </ul>
         </div>
         <div style="display:none;"
-            class="hidden absolute bottom-0 left-0 justify-center p-4 space-x-4 w-full lg:flex bg-white dark:bg-gray-800 z-20">
+            class="hidden absolute bottom-0 left-0 justify-center p-4 space-x-4 w-full lg:flex bg-white dark:bg-blue-950 z-20">
             <a href="#"
                 class="inline-flex justify-center p-2 text-gray-500 rounded cursor-pointer dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-600">
                 <svg aria-hidden="true" class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"

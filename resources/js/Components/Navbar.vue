@@ -43,15 +43,22 @@ const logout = () => {
                     </svg>
                     <span class="sr-only">Toggle sidebar</span>
                 </button>
-                <a href="https://flowbite.com" class="flex items-center justify-between mr-2">
+                <img src="images/logo-sl.png" alt="logo" class="w-12 h-8" />
+                <!-- <a href="https://flowbite.com" class="flex items-center justify-between mr-2">
                     <ApplicationLogo />
                     <span v-if="!$page.props.jetstream.hasTeamFeatures"
                         class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white ms-2">
                         Demo App
                     </span>
-                </a>
+                </a> -->
                 <!-- ========================  -->
+                <p class="text-lg font-semibold ml-4">
+                    {{
+                        role.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+                    }}
+                </p>
                 <span v-if="role === 'owner'" class="
+                            hidden
                             flex
                             items-center
                             justify-between
@@ -70,6 +77,7 @@ const logout = () => {
                     Owner
                 </span>
                 <button v-else id="roleLink" data-dropdown-toggle="role" class="
+                            hidden
                             flex
                             items-center
                             justify-between
@@ -90,7 +98,7 @@ const logout = () => {
                             dark:hover:bg-gray-700
                         ">
                     {{
-                        role.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())
+                        role.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
                     }}
                     <svg class="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
                         viewBox="0 0 10 6">
@@ -105,7 +113,7 @@ const logout = () => {
                             v-for="role in ['pengaju', 'kepala-divisi-logistik', 'admin-gudang', 'purchasing', 'pejabat-teknis', 'pimpinan', 'keuangan']"
                             :key="role" :href="route('updaterole', { role: role })"
                             class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">
-                        {{ role.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) }}
+                        {{ role.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) }}
                         </Link>
                     </div>
                 </div>

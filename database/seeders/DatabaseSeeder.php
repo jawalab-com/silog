@@ -12,6 +12,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        \DB::statement('SET FOREIGN_KEY_CHECKS=0;');
         $this->call([
             UserSeeder::class,
             TagSeeder::class,
@@ -24,5 +25,6 @@ class DatabaseSeeder extends Seeder
             // RfqDetailSeeder::class,
             // PurchaseOrderSeeder::class,
         ]);
+        \DB::statement('SET FOREIGN_KEY_CHECKS=1;');
     }
 }

@@ -50,6 +50,7 @@ props.suppliers.unshift({
 
 const page = usePage();
 const role = (page.props.auth.user.all_teams.find(team => team.id === page.props.auth.user.current_team_id)).membership?.role || 'owner';
+const department = page.props.auth.user.department;
 // const allAvailable = computed(() => form.products.filter(item => item.stock - item.quantity >= 0).length == form.products.length);
 const actionLabel = computed(() => {
     const allAvailable = form.products.filter(item => item.stock - item.quantity >= 0).length == form.products.length;
@@ -67,7 +68,7 @@ const actionLabel = computed(() => {
     }
 
     if (role === 'admin-gudang' && props.rfq.verified_1) {
-        return allAvailable ? 'Kirim ke pengaju' : 'Kirim ke purchasing';
+        return allAvailable || props.rfq.status == 'diproses' ? 'Kirim ke pengaju' : 'Kirim ke purchasing';
     }
 
     return 'Terima';
@@ -381,7 +382,12 @@ watch(
                                                         !item.date_sent // && !rfq.verified_4
                                                     " v-model="item.supplier_id
                                                         " class="py-1 px-2">
-                                                        <option :value="null"></option>
+                                                        <option :value="null" v-if="!(
+                                                            role ===
+                                                            'purchasing' &&
+                                                            rfq.verified_4 &&
+                                                            !item.date_sent
+                                                        )"></option>
                                                         <option v-for="supplier in tagSuppliers[
                                                             item.tag.slug
                                                         ]" :value="supplier.id" :key="supplier.id">
@@ -420,14 +426,14 @@ watch(
                                             ">
                                             <div class="flex">
                                                 <div class="flex items-center me-4" v-if="
-                                                    role === 'purchasing' &&
+                                                    ['purchasing', 'kepala-divisi-logistik'].includes(role) &&
                                                     !!item.date_sent &
                                                     rfq.verified_4
                                                 ">
                                                     <p v-if="item.received" class="text-green-500 font-semibold">
                                                         &#10003; Diterima
                                                     </p>
-                                                    <Button v-else color="gray" @click="
+                                                    <Button v-else-if="role === 'purchasing'" color="gray" @click="
                                                         setReceived(
                                                             item.tag.slug,
                                                             index
@@ -456,6 +462,7 @@ watch(
                                                     [
                                                         'purchasing',
                                                         'keuangan',
+                                                        'kepala-divisi-logistik',
                                                     ].includes(role) &&
                                                     rfq.verified_3
                                                 ">
@@ -872,7 +879,11 @@ watch(
                                         'pimpinan',
                                     ].includes(role)
                                 " class="px-0 py-1 text-right">
-                                    <span v-if="item.stock - item.quantity >= 0"
+                                    <span v-if="['siap-diambil', 'diproses'].includes(rfq.status)"
+                                        class="ml-2 bg-blue-100 text-blue-800 text-xs font-medium me-2 px-1.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">
+                                        Sudah diambil
+                                    </span>
+                                    <span v-else-if="item.stock - item.quantity >= 0"
                                         class="ml-2 bg-green-100 text-green-800 text-xs font-medium me-2 px-1.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300">
                                         Tersedia
                                     </span>
@@ -1005,7 +1016,7 @@ watch(
                                         (form.products.reduce((sum, item) =>
                                             sum +
                                             item.estimation_price *
-                                            item.quantity, 0) <= 1000000 && role === 'pejabat-teknis')) &&
+                                            item.quantity, 0) <= 1000000 && role === 'pejabat-teknis' && rfq.user.department == department)) &&
                                     item.quantity > 0
                                 " class="px-4 py-1 text-right pr-4">
                                     <a href="#" class="text-red-500 hover:text-red-300 font-bold" @click="
@@ -1212,14 +1223,14 @@ watch(
                             ) > 1000000 && role === 'pimpinan') ||
                                 (form.products.reduce(
                                     (sum, item) => sum + item.estimation_price * item.quantity, 0
-                                ) <= 1000000 && role === 'pejabat-teknis') ||
+                                ) <= 1000000 && role === 'pejabat-teknis' && rfq.user.department == department) ||
                                 !['pejabat-teknis', 'pimpinan'].includes(role))">
                             <Button color="red" @click="rejectSupplier" type="button"
                                 v-if="['pejabat-teknis', 'pimpinan'].includes(role)">
                                 Tolak Supplier
                             </Button>
                             <Button color="red" @click="form.verified = 0" type="submit" class="ml-2"
-                                v-if="['kepala-divisi-logistik', 'pejabat-teknis', 'pimpinan'].includes(role)">
+                                v-if="(['kepala-divisi-logistik', 'pejabat-teknis'].includes(role) && rfq.user.department == department) || role == 'pimpinan'">
                                 Tolak
                             </Button>
                             <Button color="green" @click="form.verified = 1" type="submit" class="ml-2">

@@ -47,7 +47,8 @@ class RfqController extends Controller
             SUM(CASE WHEN status = 'sedang-dalam-pengiriman' THEN 1 ELSE 0 END) AS pengiriman_count,
             SUM(CASE WHEN status = 'disproses' THEN 1 ELSE 0 END) AS diproses_count,
             SUM(CASE WHEN status = 'siap-diambil' THEN 1 ELSE 0 END) AS siap_diambil_count,
-            SUM(CASE WHEN status = 'selesai' THEN 1 ELSE 0 END) AS selesai_count
+            SUM(CASE WHEN status = 'selesai' THEN 1 ELSE 0 END) AS selesai_count,
+            SUM(CASE WHEN status = 'ditolak' THEN 1 ELSE 0 END) AS ditolak_count
             ")
             ->first();
 
@@ -86,6 +87,8 @@ class RfqController extends Controller
                     $query->where('status', '!=', 'selesai');
                 } elseif ($rfqStatus === 'selesai') {
                     $query->where('status', '=', 'selesai');
+                } elseif ($rfqStatus === 'ditolak') {
+                    $query->where('status', '=', 'ditolak');
                 }
             })
             ->orderBy('updated_at', 'desc')
@@ -159,7 +162,7 @@ class RfqController extends Controller
     {
         $data = $request->validated();
         $data['user_id'] = auth()->id();
-        $data['step'] = 1;
+        $data['step'][] = 1;
         $data['status'] = RfqStatus::PENDING;
         $data['total_amount'] = 0;
         try {
@@ -240,6 +243,8 @@ class RfqController extends Controller
             ->orderBy('rfq_histories.created_at', 'desc')
             ->get();
 
+        $data['user'] = $rfq->user;
+
         return Inertia::render('Rfqs/Show', [
             'suppliers' => $suppliers,
             'tagSuppliers' => $tagSuppliers,
@@ -286,6 +291,7 @@ class RfqController extends Controller
         $data = $request->validated();
 
         $data['request_date'] = date_create($data['request_date'])->format('Y-m-d');
+        $data['step'] = $rfq->step ?? [];
 
         foreach ($data['suppliers'] as $i => $supplierData) {
             if (isset($supplierData['file_proof_path'])) {
@@ -308,7 +314,7 @@ class RfqController extends Controller
                 case 'kepala-divisi-logistik':
                     $data['verified_1'] = $verified;
                     $data['verified_1_user_id'] = auth()->id();
-                    $data['step'] = 2;
+                    $data['step'][] = 2;
                     RfqHistory::create([
                         'rfq_id' => $rfq->id,
                         'user_id' => auth()->id(),
@@ -357,29 +363,30 @@ class RfqController extends Controller
                     } elseif ($rfq->verified_4 && ($rfq->status === RfqStatus::DIPROSES || $rfq->status === RfqStatus::SIAP_DIAMBIL)) {
                         if ($rfq->status === RfqStatus::SIAP_DIAMBIL) {
                             foreach ($rfq->rfqDetails()->get() as $product) {
-                                $rfqSupplier = $rfq->rfqSuppliers()->where('tag', $product->product->tag)->first();
-                                InventoryTransaction::create([
-                                    'product_id' => $product->product_id,
-                                    'quantity_change' => -$product->quantity,
-                                    'transaction_type' => 'DIAMBIL',
-                                    'reference_id' => $rfqSupplier->po_number,
-                                    'transaction_date' => $product->created_at,
-                                    'user_id' => auth()->id(),
-                                    'note' => 'Barang diambil melalui penerimaan Purchase Order No. '.
-                                        $rfqSupplier->po_number.
-                                        ' dari Pengajuan No. '.
-                                        $rfq->rfq_number,
-                                ]);
-                                $inv = Inventory::where('product_id', $product->product_id)->first();
-                                Inventory::updateOrCreate(
-                                    ['product_id' => $product->product_id],
-                                    ['quantity' => ($inv->quantity ?? 0) - $product->quantity]
-                                );
+                                // $rfqSupplier = $rfq->rfqSuppliers()->where('tag', $product->product->tag)->first();
+                                // InventoryTransaction::create([
+                                //     'product_id' => $product->product_id,
+                                //     'quantity_change' => -$product->quantity,
+                                //     'transaction_type' => 'DIAMBIL',
+                                //     'reference_id' => $rfqSupplier->po_number,
+                                //     'transaction_date' => $product->created_at,
+                                //     'user_id' => auth()->id(),
+                                //     'note' => 'Barang diambil melalui penerimaan Purchase Order No. '.
+                                //         $rfqSupplier->po_number.
+                                //         ' dari Pengajuan No. '.
+                                //         $rfq->rfq_number,
+                                // ]);
+                                // $inv = Inventory::where('product_id', $product->product_id)->first();
+                                // Inventory::updateOrCreate(
+                                //     ['product_id' => $product->product_id],
+                                //     ['quantity' => ($inv->quantity ?? 0) - $product->quantity]
+                                // );
                             }
                         }
                         $data['verified_2'] = $rfq->status === RfqStatus::DIPROSES ? null : true;
                         $data['status'] = $rfq->status === RfqStatus::DIPROSES ? RfqStatus::SIAP_DIAMBIL->value : RfqStatus::SELESAI->value;
                     } else {
+                        $data['step'][] = 3;
                         if ($rfq->status === RfqStatus::SIAP_DIAMBIL) {
                             $data['status'] = RfqStatus::SELESAI->value;
                         }
@@ -395,6 +402,9 @@ class RfqController extends Controller
                             ->where('sent', false)
                             ->update(['date_sent' => date('Y-m-d'), 'sent' => true]);
                         $data['status'] = 'sedang-dalam-pengiriman';
+                        $data['step'][] = 6;
+                    } else {
+                        $data['step'][] = 4;
                     }
                     break;
                 case 'pejabat-teknis':
@@ -403,6 +413,7 @@ class RfqController extends Controller
                     }
                     $data['verified_4'] = $verified;
                     $data['verified_4_user_id'] = auth()->id();
+                    $data['step'][] = 5;
                     RfqHistory::create([
                         'rfq_id' => $rfq->id,
                         'user_id' => auth()->id(),
@@ -418,6 +429,7 @@ class RfqController extends Controller
                     }
                     $data['verified_4'] = $verified;
                     $data['verified_4_user_id'] = auth()->id();
+                    $data['step'][] = 5;
                     RfqHistory::create([
                         'rfq_id' => $rfq->id,
                         'user_id' => auth()->id(),
@@ -478,7 +490,7 @@ class RfqController extends Controller
                 // Suppliers
                 foreach ($data['suppliers'] as $key => $s) {
                     $s['tag'] = $s['tag']['slug'];
-                    $no = RfqDetail::whereYear('request_date', date('Y'))
+                    $no = Rfq::whereYear('request_date', date('Y'))
                         ->whereMonth('request_date', date('m'))
                         ->count() + 1;
                     $supplier_name = Supplier::find($s['supplier_id'])?->supplier_name;
@@ -520,7 +532,9 @@ class RfqController extends Controller
         }
 
         if ($rfq->rfqSuppliers()->where('received', false)->count() == 0) {
-            $rfq->update(['status' => RfqStatus::DIPROSES, 'verified_3' => true, 'verified_3_user_id' => auth()->user()->id, 'verified_2' => null]);
+            $step = $rfq->step;
+            $step[] = 7;
+            $rfq->update(['status' => RfqStatus::DIPROSES, 'verified_3' => true, 'verified_3_user_id' => auth()->user()->id, 'verified_2' => null, 'step' => $step]);
         }
 
         $rfqDetails = $rfq->rfqDetails()->with('product')->whereHas('product', function ($query) use ($tag) {
@@ -544,6 +558,24 @@ class RfqController extends Controller
             Inventory::updateOrCreate(
                 ['product_id' => $product->product_id],
                 ['quantity' => ($inv->quantity ?? 0) + $product->quantity]
+            );
+
+            InventoryTransaction::create([
+                'product_id' => $product->product_id,
+                'quantity_change' => -$product->quantity,
+                'transaction_type' => 'DIAMBIL',
+                'reference_id' => $rfqSupplier->po_number,
+                'transaction_date' => date('Y-m-d H:i:s', strtotime($product->created_at) + 1),
+                'user_id' => auth()->id(),
+                'note' => 'Barang diambil melalui penerimaan Purchase Order No. '.
+                    $rfqSupplier->po_number.
+                    ' dari Pengajuan No. '.
+                    $rfq->rfq_number,
+            ]);
+            $inv = Inventory::where('product_id', $product->product_id)->first();
+            Inventory::updateOrCreate(
+                ['product_id' => $product->product_id],
+                ['quantity' => ($inv->quantity ?? 0) - $product->quantity]
             );
         }
 
@@ -610,6 +642,15 @@ class RfqController extends Controller
     {
         // try {
         // $rfq = $rfq->where('rfq_number', $rfq->rfq_number)->first();
+        // $rfq = $rfq->with(['user', 'verified_1User', 'verified_2User', 'verified_3User', 'verified_4User'])->where('id', $rfq->id)->first();
+        $verified_user_1 = $rfq->verified_1User;
+        $verified_user_2 = $rfq->verified_2User;
+        $verified_user_3 = $rfq->verified_3User;
+        $verified_user_4 = $rfq->verified_4User;
+        $verified_user_1_role = $rfq->verified_1User->teamRole($rfq->verified_1User->currentTeam)->name;
+        $verified_user_2_role = $rfq->verified_2User->teamRole($rfq->verified_2User->currentTeam)->name;
+        $verified_user_3_role = $rfq->verified_3User->teamRole($rfq->verified_3User->currentTeam)->name;
+        $verified_user_4_role = $rfq->verified_4User->teamRole($rfq->verified_4User->currentTeam)->name;
         $supplier = $rfq->rfqSuppliers()->with(['supplier'])->where('tag', $tag)->first();
         $products = $rfq->rfqDetails()->with(['product', 'unit'])->whereHas('product', function ($query) use ($tag) {
             $query->where('tag', $tag);
@@ -619,6 +660,14 @@ class RfqController extends Controller
             'rfq' => $rfq,
             'supplier' => $supplier,
             'products' => $products,
+            'verified_user_1' => $verified_user_1,
+            'verified_user_2' => $verified_user_2,
+            'verified_user_3' => $verified_user_3,
+            'verified_user_4' => $verified_user_4,
+            'verified_user_1_role' => $verified_user_1_role,
+            'verified_user_2_role' => $verified_user_2_role,
+            'verified_user_3_role' => $verified_user_3_role,
+            'verified_user_4_role' => $verified_user_4_role,
         ]);
         // } catch (\Exception $e) {
         //     return response()->json(['message' => 'Failed'], 500);

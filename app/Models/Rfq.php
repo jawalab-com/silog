@@ -35,7 +35,7 @@ class Rfq extends Model implements CommentableContract
         'verified_3_user_id',
         'verified_4_user_id',
         'payment_status',
-        // 'step',
+        'step',
         'status',
         'comments',
     ];
@@ -54,9 +54,19 @@ class Rfq extends Model implements CommentableContract
         $this->attributes['rfq_number'] = implode('/', [$no, 0, auth()->user()->division, date('m'), date('Y')]);
     }
 
-    public function geCommentsAttribute($value): array
+    public function geCommentsAttribute($value): string
     {
         return json_decode($value, true) ?? [];
+    }
+
+    public function getStepAttribute($value): array
+    {
+        return json_decode($value, true) ?? [];
+    }
+
+    public function setStepAttribute($value): void
+    {
+        $this->attributes['step'] = json_encode($value);
     }
 
     public function user(): BelongsTo
