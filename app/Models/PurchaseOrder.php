@@ -15,15 +15,12 @@ class PurchaseOrder extends Model
     use HasUuids;
 
     protected $fillable = [
+        'name',
         'supplier_id',
+        'date_order',
+        'state',
+        'amount_total',
         'user_id',
-        'submission_number',
-        'po_number',
-        'subject',
-        'order_date',
-        'total_amount',
-        'status',
-        'comment',
     ];
 
     protected $casts = [

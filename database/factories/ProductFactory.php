@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Brand;
+use App\Models\Unit;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -185,6 +186,9 @@ class ProductFactory extends Factory
             'product_description' => fake()->sentence(),
             'price' => fake()->randomFloat(2, 0, 1000),
             'verified' => fake()->boolean(),
+            'unit_id' => function () {
+                return Unit::inRandomOrder()->first()->id;
+            },
             'created_at' => fake()->dateTimeBetween('-1 year', 'now'),
             'updated_at' => fake()->dateTimeBetween('-1 year', 'now'),
         ];

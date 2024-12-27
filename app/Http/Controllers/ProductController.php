@@ -2,15 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\ProductsExport;
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
 use App\Models\Brand;
 use App\Models\InventoryTransaction;
 use App\Models\Product;
+use App\Models\ProductUnitConversion;
 use App\Models\Tag;
+use App\Models\Unit;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ProductController extends Controller
 {
@@ -19,10 +23,46 @@ class ProductController extends Controller
      */
     public function index(Request $request)
     {
-        $products = Product::with(['brand', 'tag', 'inventory'])->orderBy('product_name')->get();
+        $stockStatus = $request->input('stock_status', 'all');
+
+        $inventorySummary = Product::leftJoin('inventories', 'products.id', '=', 'inventories.product_id')
+            ->selectRaw('
+                COUNT(1) AS all_count,
+                SUM(CASE WHEN COALESCE(inventories.quantity, 0) > products.minimum_quantity THEN 1 ELSE 0 END) AS available_count,
+                SUM(CASE WHEN COALESCE(inventories.quantity, 0) < products.minimum_quantity AND COALESCE(inventories.quantity, 0) > 0 THEN 1 ELSE 0 END) AS less_count,
+                SUM(CASE WHEN COALESCE(inventories.quantity, 0) <= 0 THEN 1 ELSE 0 END) AS empty_count
+            ')
+            ->first();
+
+        $products = Product::with(['brand', 'tag', 'inventory']);
+        switch ($stockStatus) {
+            case 'available':
+                $products->whereHas('inventory', function ($query) {
+                    $query->whereRaw('COALESCE(inventories.quantity, 0) > products.minimum_quantity');
+                });
+                break;
+
+            case 'less':
+                $products->whereHas('inventory', function ($query) {
+                    $query->whereRaw('COALESCE(inventories.quantity, 0) < products.minimum_quantity')
+                        ->whereRaw('COALESCE(inventories.quantity, 0) > 0');
+                });
+                break;
+
+            case 'empty':
+                $products->where(function ($query) {
+                    $query->whereDoesntHave('inventory') // Products without inventory
+                        ->orWhereHas('inventory', function ($subQuery) {
+                            $subQuery->whereRaw('COALESCE(inventories.quantity, 0) = 0');
+                        });
+                });
+                break;
+        }
+        $products = $products->orderBy('product_name')->get();
 
         return Inertia::render('Products/Index', [
             'products' => $products,
+            'inventorySummary' => $inventorySummary,
         ]);
     }
 
@@ -56,6 +96,7 @@ class ProductController extends Controller
             'product' => new Product,
             'brands' => $brands,
             'tags' => $tags,
+            'units' => Unit::orderBy('unit_name')->get(),
         ]);
     }
 
@@ -66,6 +107,11 @@ class ProductController extends Controller
     {
         try {
             $product = Product::create($request->validated());
+            $unit_conversions = $request->validated()['unit_conversions'];
+            $product->unitConversions()->delete();
+            foreach ($unit_conversions as $unit_conversion) {
+                $product->unitConversions()->create($unit_conversion);
+            }
             $productAttribute = [
                 'nama' => $product->product_name,
                 'merk' => $product->brand->brand_name,
@@ -111,7 +157,22 @@ class ProductController extends Controller
 
     public function get(Product $product)
     {
-        return response()->json($product->load('brand'));
+        $p = $product->load(['brand', 'unit'])->toArray();
+        $p['units'][] = [
+            'id' => $p['unit_id'],
+            'unit_name' => $p['unit']['unit_name'],
+        ];
+        ProductUnitConversion::where('product_id', $product->id)
+            ->join('units', 'units.id', '=', 'product_unit_conversions.to_unit_id')
+            ->get(['product_unit_conversions.*', 'units.unit_name'])
+            ->each(function ($unitConversion) use (&$p) {
+                $p['units'][] = [
+                    'id' => $unitConversion->to_unit_id,
+                    'unit_name' => $unitConversion->unit_name,
+                ];
+            });
+
+        return response()->json($p);
     }
 
     /**
@@ -123,9 +184,10 @@ class ProductController extends Controller
         $tags = Tag::orderBy('tag_name')->get();
 
         return Inertia::render('Products/Form', [
-            'product' => $product->with('inventory')->first(),
+            'product' => $product->with(['inventory', 'unitConversions.fromUnit', 'unitConversions.toUnit'])->where('id', $product->id)->first(),
             'brands' => $brands,
             'tags' => $tags,
+            'units' => Unit::orderBy('unit_name')->get(),
         ]);
     }
 
@@ -141,6 +203,11 @@ class ProductController extends Controller
             'spesifikasi' => $product->description,
         ];
         $product->update($request->validated());
+        $unit_conversions = $request->validated()['unit_conversions'];
+        $product->unitConversions()->delete();
+        foreach ($unit_conversions as $unit_conversion) {
+            $product->unitConversions()->create($unit_conversion);
+        }
         $updatedProduct = Product::find($product->id);
         $updatedProductAttribute = [
             'nama' => $updatedProduct->product_name,
@@ -175,5 +242,12 @@ class ProductController extends Controller
 
         return redirect()->route('products.index')
             ->with('success', 'Data deleted successfully.');
+    }
+
+    public function export(Request $request)
+    {
+        $status = $request->status;
+
+        return Excel::download(new ProductsExport($status), 'stock.xlsx');
     }
 }

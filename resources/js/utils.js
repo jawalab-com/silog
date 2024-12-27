@@ -25,6 +25,16 @@ const utils = {
         return new Intl.NumberFormat(options.locale, options).format(amount);
     },
 
+    generateSlug: function (text) {
+        return text
+            .toString() // Convert to string
+            .toLowerCase() // Convert to lowercase
+            .trim() // Trim whitespace from both ends
+            .replace(/\s+/g, "-") // Replace spaces with dashes
+            .replace(/[^\w\-]+/g, "") // Remove all non-word characters
+            .replace(/\-\-+/g, "-"); // Replace multiple dashes with a single dash
+    },
+
     image: {
         // Returns a random placeholder image URL
         placeholder: function (width = 300, height = 300) {
@@ -44,8 +54,8 @@ const utils = {
         },
     },
 
-    confirm: function (options = {}) {
-        return Swal.fire({
+    confirm: function (options = { confirmButtonText: "No" }) {
+        let confirmed = Swal.fire({
             title:
                 options.title || "Apakah Anda yakin ingin menghapus data ini?",
             text:
@@ -54,9 +64,9 @@ const utils = {
             icon: options.icon || "warning",
             width: options.width || "32em",
             showCancelButton: true,
-            confirmButtonColor: "#d33",
+            // confirmButtonColor: "#d33",
             cancelButtonColor: "#3085d6",
-            confirmButtonText: "Delete Data",
+            confirmButtonText: options.confirmButtonText,
             customClass: {
                 popup: "bg-white dark:bg-gray-800",
                 title: "text-gray-900 dark:text-gray-100",
@@ -67,6 +77,8 @@ const utils = {
                     "bg-gray-600 hover:bg-gray-700 text-white dark:bg-gray-500 dark:hover:bg-gray-600 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-800 rounded-full",
             },
         });
+        alert(confirmed);
+        return confirmed;
     },
 
     isLog: false,

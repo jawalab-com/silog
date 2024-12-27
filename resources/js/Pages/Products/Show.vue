@@ -24,7 +24,8 @@ const columns = [
 ];
 const data = props.transactions.map(item => ({
     ...item,
-    quantity_change: item.quantity_change > 0 ? `+${item.quantity_change}` : item.quantity_change,
+    reference_id: `<a class="text-blue-700 dark:text-blue-300" href="${route('rfqs.torfq', { po_number: encodeURIComponent(item.reference_id) })}">` + item.reference_id + `</a>`,
+    quantity_change: `<span class="text-${item.quantity_change >= 0 ? 'green' : 'red'}-500">` + (item.quantity_change > 0 ? `+${item.quantity_change}` : item.quantity_change) + `<span>`,
     user_name: item.user.name,
     created_at: utils.formatDateTime(item.created_at),
 

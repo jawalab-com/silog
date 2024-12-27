@@ -8,6 +8,8 @@ import { createApp, h } from "vue";
 import { createInertiaApp, router } from "@inertiajs/vue3";
 import { resolvePageComponent } from "laravel-vite-plugin/inertia-helpers";
 import { ZiggyVue } from "../../vendor/tightenco/ziggy";
+import PrimeVue from "primevue/config";
+import Aura from "@primevue/themes/aura";
 
 window.utils = utils;
 
@@ -23,6 +25,11 @@ createInertiaApp({
     setup({ el, App, props, plugin }) {
         return createApp({ render: () => h(App, props) })
             .use(plugin)
+            .use(PrimeVue, {
+                theme: {
+                    preset: Aura,
+                },
+            })
             .use(ZiggyVue)
             .mount(el);
     },
@@ -36,5 +43,9 @@ createInertiaApp({
 
 router.on("success", (event) => {
     // on each router load
+    initFlowbite();
+});
+
+router.on("navigate", (event) => {
     initFlowbite();
 });

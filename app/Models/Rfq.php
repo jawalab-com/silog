@@ -8,11 +8,16 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use LakM\Comments\Concerns\Commentable;
+use LakM\Comments\Contracts\CommentableContract;
 
-class Rfq extends Model
+class Rfq extends Model implements CommentableContract
 {
+    use Commentable;
     use HasFactory;
     use HasUuids;
+
+    private $guestMode = false;
 
     protected $fillable = [
         'user_id',
@@ -25,9 +30,14 @@ class Rfq extends Model
         'verified_2',
         'verified_3',
         'verified_4',
+        'verified_1_user_id',
+        'verified_2_user_id',
+        'verified_3_user_id',
+        'verified_4_user_id',
         'payment_status',
+        'step',
         'status',
-        'comment',
+        'comments',
     ];
 
     protected $casts = [
@@ -41,12 +51,47 @@ class Rfq extends Model
             ->count();
         $no++;
 
-        $this->attributes['rfq_number'] = implode('/', [$no, 0, 'ADMIN', date('m'), date('Y')]);
+        $this->attributes['rfq_number'] = implode('/', [$no, 0, auth()->user()->division, date('m'), date('Y')]);
+    }
+
+    public function geCommentsAttribute($value): string
+    {
+        return json_decode($value, true) ?? [];
+    }
+
+    public function getStepAttribute($value): array
+    {
+        return json_decode($value, true) ?? [];
+    }
+
+    public function setStepAttribute($value): void
+    {
+        $this->attributes['step'] = json_encode($value);
     }
 
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function verified_1User(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'verified_1_user_id');
+    }
+
+    public function verified_2User(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'verified_1_user_id');
+    }
+
+    public function verified_3User(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'verified_1_user_id');
+    }
+
+    public function verified_4User(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'verified_1_user_id');
     }
 
     public function rfqDetails(): HasMany

@@ -11,7 +11,9 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Laravel\Jetstream\Contracts\InvitesTeamMembers;
+use Laravel\Jetstream\Events\AddingTeamMember;
 use Laravel\Jetstream\Events\InvitingTeamMember;
+use Laravel\Jetstream\Events\TeamMemberAdded;
 use Laravel\Jetstream\Jetstream;
 use Laravel\Jetstream\Mail\TeamInvitation;
 use Laravel\Jetstream\Rules\Role;
@@ -23,18 +25,60 @@ class InviteTeamMember implements InvitesTeamMembers
      */
     public function invite(User $user, Team $team, string $email, ?string $role = null): void
     {
+        $name = request()->name;
+        $division = request()->division;
+
         Gate::forUser($user)->authorize('addTeamMember', $team);
 
         $this->validate($team, $email, $role);
 
-        InvitingTeamMember::dispatch($team, $email, $role);
+        // InvitingTeamMember::dispatch($team, $email, $role);
 
-        $invitation = $team->teamInvitations()->create([
-            'email' => $email,
-            'role' => $role,
-        ]);
+        // $invitation = $team->teamInvitations()->create([
+        //     'email' => $email,
+        //     'role' => $role,
+        // ]);
 
-        Mail::to($email)->send(new TeamInvitation($invitation));
+        // Mail::to($email)->send(new TeamInvitation($invitation));
+        // $newTeamMember = Jetstream::findUserByEmailOrFail($email);
+
+        $password = fake()->asciify('********');
+
+        \DB::transaction(function () use ($name, $email, $role, $password, $division) {
+            return tap(User::create([
+                'name' => $name,
+                'email' => $email,
+                'role' => $role,
+                'password' => $password,
+                'division' => $division,
+            ]), function (User $user) {
+                // $user->ownedTeams()->save(Team::forceCreate([
+                //     'user_id' => $user->id,
+                //     'name' => explode(' ', $user->name, 2)[0]."'s Team",
+                //     'personal_team' => true,
+                // ]));
+            });
+        });
+
+        $newTeamMember = Jetstream::findUserByEmailOrFail($email);
+
+        AddingTeamMember::dispatch($team, $newTeamMember);
+
+        $team->users()->attach(
+            $newTeamMember, ['role' => $role]
+        );
+
+        TeamMemberAdded::dispatch($team, $newTeamMember);
+
+        Mail::send([], [], function ($message) use ($email, $name, $role, $password) {
+            $message->to($email)
+                ->subject('Registrasi SILOG - Solo Technopark')
+                ->html(
+                    "<h1>Selamat datang $name</h1>
+                    <p>Anda telah didaftarkan sebagai $role pada SILOG dengan password: <b>$password</b></p>
+                    <p>Segera ganti password anda.</p>"
+                );
+        });
     }
 
     /**

@@ -2,11 +2,15 @@
 
 use App\Http\Controllers\Auth\SocialiteController;
 use App\Http\Controllers\BrandController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PurchaseOrderController;
+use App\Http\Controllers\PurchaseRequisitionController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RfqController;
 use App\Http\Controllers\RoomTypeController;
 use App\Http\Controllers\SalesOrderController;
+use App\Http\Controllers\StockOpnameController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\TagController;
 use App\Http\Controllers\UnitController;
@@ -49,10 +53,12 @@ Route::get('/page/{page}', function ($page) {
 
 Route::get('/updaterole/{role}', function ($role) {
     $user = auth()->user();
-    $user->division = $role;
-    $user->save();
-
-    // return redirect()->route('dashboard');
+    $team = $user->allTeams()->find($user->currentTeam->id);
+    if ($team) {
+        $user->teams()->updateExistingPivot($team->id, [
+            'role' => $role,
+        ]);
+    }
 })->name('updaterole');
 
 Route::get('/book', function () {
@@ -72,20 +78,29 @@ if (App::environment('local')) {
     });
 }
 
-Route::get('auth/redirect/{provider}', [SocialiteController::class, 'redirectToProvider'])->name('auth.redirect');
-Route::get('auth/callback/{provider}', [SocialiteController::class, 'handleProviderCallback'])->name('auth.callback');
+Route::get('/auth/redirect/{provider}', [SocialiteController::class, 'redirectToProvider'])->name('auth.redirect');
+Route::get('/auth/callback/{provider}', [SocialiteController::class, 'handleProviderCallback'])->name('auth.callback');
+Route::post('/rfqs/{rfq}/{tag}/received', [RfqController::class, 'received'])->name('rfqs.received');
+Route::post('/rfqs/{rfq}/{tag}/paid', [RfqController::class, 'paid'])->name('rfqs.paid');
+Route::get('/rfqs/{rfq}/{tag}/po-print', [RfqController::class, 'poPrint'])->name('rfqs.po.print');
+Route::get('/rfqs/to-rfq', [RfqController::class, 'toRfq'])->name('rfqs.torfq');
+Route::post('/rfqs/{rfq}/{product_id}/tolak', [RfqController::class, 'tolak'])->name('rfqs.tolak');
+Route::post('/rfqs/{rfq}/tolak-supplier', [RfqController::class, 'tolakSupplier'])->name('rfqs.tolak-supplier');
+Route::post('/rfqs/{rfq}/comment', [RfqController::class, 'submitComment'])->name('rfqs.submit-comment');
+Route::get('/rfqs/export/', [RfqController::class, 'export'])->name('rfqs.export');
+Route::get('/products/export/', [ProductController::class, 'export'])->name('products.export');
+Route::get('/auth/redirect/{provider}', [SocialiteController::class, 'redirectToProvider'])->name('auth.redirect');
 
 Route::middleware([
     'auth:sanctum',
     config('jetstream.auth_session'),
     'verified',
 ])->group(function () {
-    Route::get('/dashboard', function () {
-        return Inertia::render('Dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [HomeController::class, 'dashboard'])->name('dashboard');
     Route::resources([
         'brands' => BrandController::class,
         'products' => ProductController::class,
+        'stock-opnames' => StockOpnameController::class,
         'room-types' => RoomTypeController::class,
         'suppliers' => SupplierController::class,
         'purchase-orders' => PurchaseOrderController::class,
@@ -93,5 +108,7 @@ Route::middleware([
         'rfqs' => RfqController::class,
         'tags' => TagController::class,
         'units' => UnitController::class,
+        'purchase-requisitions' => PurchaseRequisitionController::class,
+        'reports' => ReportController::class,
     ]);
 });

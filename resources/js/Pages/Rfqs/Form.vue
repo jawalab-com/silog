@@ -1,46 +1,69 @@
 <script setup>
-import { useForm, Link } from '@inertiajs/vue3';
-import { ref, computed, watch } from 'vue';
-import axios from 'axios';
-import AppLayout from '@/Layouts/AppLayout.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import { AutoComplete, Breadcrumb, Button, Card, DataTable, Icon, InputError, InputLabel, Select, TextInput } from '@/Components';
+import { useForm, Link } from "@inertiajs/vue3";
+import { ref, computed, watch } from "vue";
+import axios from "axios";
+import AppLayout from "@/Layouts/AppLayout.vue";
+import PrimaryButton from "@/Components/PrimaryButton.vue";
+import {
+    AutoComplete,
+    Breadcrumb,
+    Button,
+    Card,
+    DataTable,
+    Icon,
+    InputError,
+    InputLabel,
+    Select,
+    TextInput,
+} from "@/Components";
 
 const props = defineProps({
     rfq: Object,
     units: Array,
 });
+// var formattedDate;
+// if (props.rfq?.request_date == null) {
+//     const isoDate = new Date().toISOString().split("T")[0]; // YYYY-MM-DD format
+//     const [year, month, day] = isoDate.split("-");
+//     formattedDate = `${day}-${month}-${year}`; // dd-mm-YYYY format
+// } else {
+//     const [year, month, day] = props.rfq?.request_date.split("-");
+//     formattedDate = `${day}-${month}-${year}`; // dd-mm-YYYY format
+// }
 
 const form = useForm({
-    _method: props.rfq.id ? 'put' : 'post',
+    _method: props.rfq.id ? "put" : "post",
     // supplier_id: props.rfq?.supplier_id || '',
-    user_id: props.rfq?.user_id || '',
+    user_id: props.rfq?.user_id || "",
     rfq_number: props.rfq?.rfq_number,
     request_date: props.rfq?.request_date || new Date().toISOString().split('T')[0],
     allocation_date: props.rfq?.allocation_date || new Date().toISOString().split('T')[0],
-    title: props.rfq?.title || '',
-    total_amount: props.rfq?.total_amount || '',
-    status: props.rfq?.status || '',
-    comment: props.rfq?.comment || '',
+    title: props.rfq?.title || "",
+    total_amount: props.rfq?.total_amount || "",
+    status: props.rfq?.status || "",
+    comment: props.rfq?.comment || "",
     products: props.rfq?.products || [],
     suppliers: props.rfq?.suppliers || [],
 });
 
 const newProduct = ref({
-    product_id: '',
-    product_name: '',
+    product_id: "",
+    product_name: "",
     quantity: 1,
     unit_id: 1,
+    units: [],
 });
 
 const productDetails = ref(null);
 
 const addRow = () => {
+    console.log(newProduct.value);
     form.products.push({
         product_id: newProduct.value.product_id,
         product_name: newProduct.value.product_name,
         quantity: newProduct.value.quantity,
-        unit_id: newProduct.value.unit_id
+        unit_id: newProduct.value.unit_id,
+        units: newProduct.value.units,
     });
 };
 
@@ -48,11 +71,11 @@ const removeRow = (index) => {
     form.products.splice(index, 1);
 };
 
-const title = (!!props.rfq.id ? 'Edit' : 'Tambah') + ' Pengajuan Barang';
+const title = (!!props.rfq.id ? "Edit" : "Tambah") + " Pengajuan Barang";
 const breadcrumbs = [
-    { name: 'Home', href: route('dashboard') },
-    { name: 'Purchase Order', href: route('rfqs.index') },
-    { name: !!props.rfq ? 'Edit' : 'Tambah', href: '#' },
+    { name: "Home", href: route("dashboard") },
+    { name: "Purchase Order", href: route("rfqs.index") },
+    { name: !!props.rfq ? "Edit" : "Tambah", href: "#" },
 ];
 
 const saveAction = () => {
@@ -67,20 +90,26 @@ const goBack = () => {
     window.history.back();
 };
 
-watch(() => newProduct.value.product_id, async (newVal) => {
-    if (newVal) {
-        try {
-            const response = await axios.get(route('products.get', { id: newVal }));
-            productDetails.value = response.data;
-        } catch (error) {
-            console.error('Error fetching product:', error);
+watch(
+    () => newProduct.value.product_id,
+    async (newVal) => {
+        if (newVal) {
+            try {
+                const response = await axios.get(
+                    route("products.get", { id: newVal })
+                );
+                productDetails.value = response.data;
+                newProduct.value.units = response.data.units;
+                newProduct.value.unit_id = response.data.unit_id;
+            } catch (error) {
+                console.error("Error fetching product:", error);
+                productDetails.value = null;
+            }
+        } else {
             productDetails.value = null;
         }
-    } else {
-        productDetails.value = null;
     }
-});
-
+);
 </script>
 
 <template>
@@ -96,7 +125,10 @@ watch(() => newProduct.value.product_id, async (newVal) => {
                 <div class="grid grid-cols-2 gap-2">
                     <div>
                         <InputLabel for="rfq_number" value="Nomor Pengajuan" />
-                        <TextInput id="rfq_number" v-model="form.rfq_number" disabled />
+                        <p class="dark:text-white mt-2">
+                            {{ form.rfq_number }}
+                        </p>
+                        <TextInput type="hidden" id="rfq_number" v-model="form.rfq_number" />
                         <InputError :message="form.errors.rfq_number" />
                     </div>
 
@@ -108,7 +140,14 @@ watch(() => newProduct.value.product_id, async (newVal) => {
 
                     <div>
                         <InputLabel for="request_date" value="Tanggal Pengajuan" />
-                        <TextInput type="date" id="request_date" v-model="form.request_date" />
+                        <p class="dark:text-white mt-2">
+                            {{ new Date(form.request_date).toLocaleDateString('id-ID', {
+                                day: '2-digit', month: 'long',
+                                year:
+                                    'numeric'
+                            }) }}
+                        </p>
+                        <TextInput type="hidden" id="request_date" v-model="form.request_date" />
                         <InputError :message="form.errors.request_date" />
                     </div>
 
@@ -153,11 +192,15 @@ watch(() => newProduct.value.product_id, async (newVal) => {
                     </div>
                     <div>
                         <InputLabel for="brand" value="Merk" />
-                        <p class="dark:text-white mt-2">{{ productDetails?.brand?.brand_name }}</p>
+                        <p class="dark:text-white mt-2">
+                            {{ productDetails?.brand?.brand_name }}
+                        </p>
                     </div>
                     <div>
                         <InputLabel for="unit" value="Kategori" />
-                        <p class="dark:text-white mt-2">{{ productDetails?.tag }}</p>
+                        <p class="dark:text-white mt-2">
+                            {{ productDetails?.tag }}
+                        </p>
                     </div>
                     <!-- <div>
                         <InputLabel for="quantity" value="Jumlah" />
@@ -178,7 +221,9 @@ watch(() => newProduct.value.product_id, async (newVal) => {
                 </div>
                 <div class="mt-2">
                     <InputLabel for="unit" value="Spesifikasi" />
-                    <p class="dark:text-white mt-2">{{ productDetails?.product_description }}&nbsp;</p>
+                    <p class="dark:text-white mt-2">
+                        {{ productDetails?.product_description }}&nbsp;
+                    </p>
                 </div>
 
                 <!-- Display product products returned from the API -->
@@ -202,14 +247,16 @@ watch(() => newProduct.value.product_id, async (newVal) => {
                         <tbody>
                             <tr v-for="(item, index) in form.products" :key="index"
                                 class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                                <td class="px-4 py-1">{{ item.product_name }}</td>
+                                <td class="px-4 py-1">
+                                    {{ item.product_name }}
+                                </td>
                                 <td class="px-4 py-1">
                                     <TextInput class="py-1" type="number" v-model="item.quantity" />
                                 </td>
                                 <td class="px-4 py-1">
                                     <!-- <TextInput class="py-1" type="text" v-model="item.unit" /> -->
                                     <Select v-model="item.unit_id">
-                                        <option v-for="option in units" :value="option.id" :key="option.id">
+                                        <option v-for="option in item.units" :value="option.id" :key="option.id">
                                             {{ option.unit_name }}
                                         </option>
                                     </Select>
@@ -230,9 +277,7 @@ watch(() => newProduct.value.product_id, async (newVal) => {
                     <Button color="gray" @click="goBack" type="button">
                         Kembali
                     </Button>
-                    <PrimaryButton type="submit">
-                        Simpan
-                    </PrimaryButton>
+                    <PrimaryButton type="submit"> Simpan </PrimaryButton>
                 </div>
             </form>
         </Card>

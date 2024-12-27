@@ -38,15 +38,15 @@ class TagController extends Controller
      */
     public function store(StoreTagRequest $request)
     {
-        try {
-            Tag::create($request->validated());
+        // try {
+        Tag::create($request->validated());
 
-            return redirect()->route('tags.index')
-                ->with('success', 'Tag created successfully.');
-        } catch (\Exception $e) {
-            return redirect()->back()
-                ->with('error', 'Failed to store data. Please try again.');
-        }
+        return redirect()->route('tags.index')
+            ->with('success', 'Tag created successfully.');
+        // } catch (\Exception $e) {
+        //     return redirect()->back()
+        //         ->with('error', 'Failed to store data. Please try again.');
+        // }
     }
 
     /**

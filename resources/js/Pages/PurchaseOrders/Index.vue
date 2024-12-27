@@ -16,7 +16,7 @@ const props = defineProps({
     purchaseOrders: Array,
 });
 
-const title = props.formType == 'submission' ? 'Pengajuan' : 'Purchasing';
+const title = props.formType == 'submission' ? 'Pengajuan' : 'purchasing';
 const breadcrumbs = [
     { name: 'Home', href: route('dashboard') },
     { name: title, href: '#' },
@@ -48,7 +48,7 @@ const data = props.purchaseOrders.map(item => ({
     supplier_name: item.supplier?.supplier_name || '',
     user_name: item.user.name,
     // status: orderStatus.find(status => status.value === item.status)?.label || item.status,
-    verifikasi: "Pimpinan Gudang: ✔️<br/>Admin Gudang: ✔️<br/>Purchasing: ❌<br/>Pimpinan STP: ✔️",
+    verifikasi: "kepala-divisi-logistik: ✔️<br/>admin-gudang: ✔️<br/>Purchasing: ❌<br/>Pimpinan STP: ✔️",
     payment_status: "Belum Lunas",
     status: "Pending",
 }));

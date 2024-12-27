@@ -11,13 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('sales_orders', function (Blueprint $table) {
+        Schema::create('rfq_histories', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('customer_id')->constrained('customers')->onDelete('cascade')->onUpdate('cascade');
-            $table->foreignUuid('user_id')->constrained('users')->onDelete('cascade')->onUpdate('cascade');
-            $table->date('order_date');
+            $table->foreignUuid('rfq_id')->references('id')->on('rfqs')->onDelete('cascade');
+            $table->foreignId('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->string('status');
-            $table->decimal('total_amount', 10, 2);
+            $table->text('description')->nullable();
             $table->timestamps();
         });
     }
@@ -27,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('sales_orders');
+        Schema::dropIfExists('rfq_histories');
     }
 };

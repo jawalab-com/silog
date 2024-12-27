@@ -130,7 +130,7 @@ const submit = () => {
         <div class="flex-1 justify-around items-center text-white lg:w-1/2">
             <div
                 class="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0 bg-gray-200 dark:bg-gray-800">
-                <a href="#" class="flex items-center mb-6 text-2xl font-semibold text-gray-900 dark:text-white">
+                <!-- <a href="#" class="flex items-center mb-6 text-2xl font-semibold text-gray-900 dark:text-white">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="h-8 mr-2">
                         <path fill="#E34F26" d="M71,460 L30,0 481,0 440,460 255,512"></path>
                         <path fill="#EF652A" d="M256,472 L405,431 440,37 256,37"></path>
@@ -142,7 +142,7 @@ const submit = () => {
                         </path>
                     </svg>
                     Demo App
-                </a>
+                </a> -->
                 <div
                     class="w-full bg-white rounded-lg shadow border md:mt-0 sm:max-w-md xl:p-0 dark:bg-gray-900 dark:border-gray-700">
                     <div class="p-6 space-y-4 md:space-y-6 sm:p-8">
@@ -152,7 +152,7 @@ const submit = () => {
 
                         <form @submit.prevent="submit">
                             <h3 class="mb-4 font-semibold">Sign in to your account</h3>
-                            <div class="flex items-center justify-between">
+                            <!-- <div class="flex items-center justify-between">
                                 <a class="w-full inline-flex items-center justify-center px-4 py-1 bg-gray-800 dark:bg-gray-200 border border-transparent rounded-md font-semibold text-sm text-white dark:text-gray-800 hover:bg-gray-700 dark:hover:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150"
                                     :href="route('auth.redirect', { 'provider': 'google' })">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
@@ -176,13 +176,13 @@ const submit = () => {
                                     </svg>
                                     Continue with Google
                                 </a>
-                            </div>
+                            </div> -->
 
-                            <div class="flex items-center py-4">
+                            <!-- <div class="flex items-center py-4">
                                 <div class="flex-grow border-t border-gray-400 dark:border-gray-600"></div>
                                 <span class="mx-4 text-gray-600 dark:text-gray-400">or</span>
                                 <div class="flex-grow border-t border-gray-400 dark:border-gray-600"></div>
-                            </div>
+                            </div> -->
                             <div>
                                 <InputLabel for="email" value="Email" />
                                 <TextInput id="email" v-model="form.email" type="email" class="mt-1 block w-full"
@@ -210,7 +210,7 @@ const submit = () => {
                             </div>
 
                             <div class="flex items-center justify-between mt-4">
-                                <div>
+                                <div class="hidden">
                                     <span class=" text-sm text-gray-600 dark:text-gray-400">Don't have an
                                         account?</span>
                                     <Link v-if="canResetPassword" :href="route('register')"
@@ -218,6 +218,7 @@ const submit = () => {
                                     Register
                                     </Link>
                                 </div>
+                                <div></div>
 
                                 <PrimaryButton class="ms-4" :class="{ 'opacity-25': form.processing }"
                                     :disabled="form.processing">
@@ -225,7 +226,7 @@ const submit = () => {
                                 </PrimaryButton>
                             </div>
 
-                            <div v-if="$page.props.jetstream.hasTermsAndPrivacyPolicyFeature" class="mt-2">
+                            <div v-if="$page.props.jetstream.hasTermsAndPrivacyPolicyFeature" class="mt-2 hidden">
                                 <span class=" text-sm text-gray-800 dark:text-gray-200">By continuing, you are agree to
                                     the
                                     <a target="_blank" :href="route('terms.show')"
@@ -241,9 +242,9 @@ const submit = () => {
         </div>
 
         <div class="hidden lg:flex flex-1 items-center justify-center">
-            <div class="w-2/3 flex justify-center">
-                <img src="https://www.svgheart.com/wp-content/uploads/2022/07/135_Fishing-min.png" alt="login-welcome"
-                    class="w-50 h-auto rounded-lg" />
+            <div class="w-2/3 flex flex-col items-center">
+                <img src="images/logo-sl.png" alt="login-welcome" class="w-50 h-auto rounded-lg mb-4" />
+                <img src="images/silog.png" alt="login-welcome" class="w-50 h-auto rounded-lg" />
             </div>
         </div>
     </section>

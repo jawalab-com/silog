@@ -15,6 +15,18 @@ class RfqSupplier extends Model
         'rfq_id',
         'tag',
         'supplier_id',
+        'po_number',
+        'discount',
+        'tax',
+        'transportation',
+        'file_proof',
+        'file_invoice',
+        'file_receipt',
+        'date_sent',
+        'date_received',
+        'sent',
+        'received',
+        'paid',
     ];
 
     public function rfq()

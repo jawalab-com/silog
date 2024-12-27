@@ -56,4 +56,32 @@ const props = defineProps({
                 d="m15 19-7-7 7-7" />
         </svg>
     </template>
+
+    <template v-else-if="name === 'upload'">
+        <svg :class="{ 'w-4 h-4': true }" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+            fill="currentColor" viewBox="0 0 24 24">
+            <path fill-rule="evenodd"
+                d="M12 3a1 1 0 0 1 .78.375l4 5a1 1 0 1 1-1.56 1.25L13 6.85V14a1 1 0 1 1-2 0V6.85L8.78 9.626a1 1 0 1 1-1.56-1.25l4-5A1 1 0 0 1 12 3ZM9 14v-1H5a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2h-4v1a3 3 0 1 1-6 0Zm8 2a1 1 0 1 0 0 2h.01a1 1 0 1 0 0-2H17Z"
+                clip-rule="evenodd" />
+        </svg>
+    </template>
+
+    <template v-else-if="name === 'file'">
+        <svg :class="{ 'w-4 h-4': true }" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+            fill="currentColor" viewBox="0 0 24 24">
+            <path fill-rule="evenodd"
+                d="M9 2.221V7H4.221a2 2 0 0 1 .365-.5L8.5 2.586A2 2 0 0 1 9 2.22ZM11 2v5a2 2 0 0 1-2 2H4v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2h-7Z"
+                clip-rule="evenodd" />
+        </svg>
+    </template>
+
+    <template v-else-if="name === 'archive'">
+        <svg :class="{ 'w-4 h-4': true }" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+            fill="currentColor" viewBox="0 0 24 24">
+            <path fill-rule="evenodd"
+                d="M20 10H4v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8ZM9 13v-1h6v1a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1Z"
+                clip-rule="evenodd" />
+            <path d="M2 6a2 2 0 0 1 2-2h16a2 2 0 1 1 0 4H4a2 2 0 0 1-2-2Z" />
+        </svg>
+    </template>
 </template>

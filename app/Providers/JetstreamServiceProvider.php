@@ -45,38 +45,75 @@ class JetstreamServiceProvider extends ServiceProvider
     {
         Jetstream::defaultApiTokenPermissions(['read']);
 
-        Jetstream::role('superuser', 'Superuser', [
-            'create',
-            'read',
-            'update',
-            'delete',
-        ])->description('Superuser users have full access and control over the application.');
+        // Jetstream::role('admin', 'Administrator', [
+        //     'create',
+        //     'read',
+        //     'update',
+        //     'delete',
+        // ])->description('Administrator users can perform any action.');
 
-        Jetstream::role('owner', 'Owner', [
-            'create',
-            'read',
-            'update',
-            'delete',
-        ])->description('Owner users have full access and control over the team.');
+        // Jetstream::role('editor', 'Editor', [
+        //     'read',
+        //     'create',
+        //     'update',
+        // ])->description('Editor users have the ability to read, create, and update.');
 
-        Jetstream::role('admin', 'Administrator', [
-            'create',
-            'read',
-            'update',
-            'delete',
-        ])->description('Administrator users can perform any action.');
+        Jetstream::role('pengaju', 'Pengaju', [
+            'rfq:read',
+            'rfq:create',
+        ])->description('Pengaju users can read and create RFQs.');
 
-        Jetstream::role('editor', 'Editor', [
-            'read',
-            'create',
-            'update',
-        ])->description('Editor users have the ability to read, create, and update.');
+        Jetstream::role('kepala-divisi-logistik', 'Kepala Divisi Logistik', [
+            'rfq:read',
+            'rfq:update',
+        ])->description('kepala-divisi-logistik users can read and update RFQs.');
 
-        Jetstream::role('divisi-lain', 'Divisi Lain', [
-            'create',
-            'read',
-            'update',
-            'delete',
-        ])->description('Divisi Lain users have full access and control over the application.');
+        Jetstream::role('admin-gudang', 'Admin Gudang', [
+            'rfq:read',
+            'rfq:create',
+            'rfq:update',
+            'rfq:delete',
+            'po:read',
+            'po:create',
+            'po:update',
+            'po:delete',
+            'payment:read',
+            'payment:create',
+            'payment:update',
+            'payment:delete',
+        ])->description('admin-gudang users can perform any action on RFQs, POs, and Payments.');
+
+        Jetstream::role('purchasing', 'Purchasing', [
+            'po:read',
+            'po:create',
+            'po:update',
+        ])->description('Purchasing users can read, create, and update POs.');
+
+        Jetstream::role('pejabat-teknis', 'Pejabat Teknis', [
+            'rfq:read',
+            'rfq:update',
+            'po:read',
+            'po:update',
+        ])->description('Pejabat Teknis users can read and update RFQs and POs.');
+
+        Jetstream::role('pimpinan', 'Pimpinan', [
+            'rfq:read',
+            'rfq:create',
+            'rfq:update',
+            'rfq:delete',
+            'po:read',
+            'po:create',
+            'po:update',
+            'po:delete',
+            'payment:read',
+            'payment:create',
+            'payment:update',
+            'payment:delete',
+        ])->description('Pimpinan users can perform any action on RFQs, POs, and Payments.');
+
+        Jetstream::role('keuangan', 'Keuangan', [
+            'payment:read',
+            'payment:update',
+        ])->description('Keuangan users can read and update Payments.');
     }
 }
