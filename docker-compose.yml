@@ -16,7 +16,7 @@ services:
       - DB_PORT=3306
       - DB_DATABASE=silog
       - DB_USERNAME=silog
-      - DB_PASSWORD=silog
+      - DB_PASSWORD=7rlK0wLCM0exeut
 
   # Nginx container
   nginx:
@@ -48,16 +48,16 @@ services:
       - backend
 
   # Cloudbeaver container (for DB management)
-  cloudbeaver:
-    image: dbeaver/cloudbeaver:latest
-    container_name: silog-cloudbeaver
-    ports:
-      - "8978:8978"
-    environment:
-      - CB_USER=admin
-      - CB_PASSWORD=7rlK0wLCM0exeut
-    networks:
-      - backend
+#   cloudbeaver:
+#     image: dbeaver/cloudbeaver:latest
+#     container_name: silog-cloudbeaver
+#     ports:
+#       - "8978:8978"
+#     environment:
+#       - CB_USER=admin
+#       - CB_PASSWORD=7rlK0wLCM0exeut
+#     networks:
+#       - backend
 
 networks:
   backend:

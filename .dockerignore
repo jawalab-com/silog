@@ -1,5 +1,4 @@
 node_modules/
-storage/
 vendor/
 *.log
 .env
