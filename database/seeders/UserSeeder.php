@@ -23,7 +23,7 @@ class UserSeeder extends Seeder
 
         $owner = User::factory()->withPersonalTeam()->create([
             'name' => 'Owner',
-            'email' => 'owner@example.com',
+            'email' => 'owner@silog.app',
         ]);
 
         $team = $owner->ownedTeams()->first();
@@ -31,7 +31,7 @@ class UserSeeder extends Seeder
         foreach ($roles as $role) {
             $user = User::factory()->create([
                 'name' => ucfirst($role).' User',
-                'email' => $role.'@example.com',
+                'email' => $role.'@silog.app',
             ]);
             $user->teams()->attach($team, ['role' => $role]);
             $user->switchTeam($team);

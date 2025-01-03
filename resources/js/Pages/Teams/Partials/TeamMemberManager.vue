@@ -250,10 +250,11 @@ const displayableRole = (role) => {
                     <div class="space-y-6">
                         <div v-for="user in team.users" :key="user.id" class="flex items-center justify-between">
                             <div class="flex items-center">
-                                <img class="w-10 h-10 rounded-full object-cover" :src="user.profile_photo_url"
+                                <img class="w-12 h-12 rounded-full object-cover" :src="user.profile_photo_url"
                                     :alt="user.name">
                                 <div class="ms-4 dark:text-white">
                                     {{ user.name }}<br>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">{{ user.email }}</p>
                                     <p class="text-sm text-gray-600 dark:text-gray-400">{{ user.division }}</p>
                                 </div>
                             </div>
