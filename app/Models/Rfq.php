@@ -8,12 +8,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use LakM\Comments\Concerns\Commentable;
-use LakM\Comments\Contracts\CommentableContract;
 
-class Rfq extends Model implements CommentableContract
+class Rfq extends Model
 {
-    use Commentable;
     use HasFactory;
     use HasUuids;
 
