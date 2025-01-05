@@ -111,9 +111,9 @@ const logout = () => {
                 <div id="role"
                     class="z-10 hidden font-normal bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700 dark:divide-gray-600">
                     <div class="py-1">
-                        <Link
-                            v-for="role in ['pengaju', 'kepala-divisi-logistik', 'admin-gudang', 'purchasing', 'pejabat-teknis', 'pimpinan', 'keuangan']"
-                            :key="role" :href="route('updaterole', { role: role })"
+                        <!-- ['pengaju', 'kepala-divisi-logistik', 'admin-gudang', 'purchasing', 'pejabat-teknis', 'pimpinan', 'keuangan'] -->
+                        <Link v-for="role in ['pengaju', 'kepala-divisi-logistik', 'purchasing']" :key="role"
+                            :href="route('updaterole', { role: role })"
                             class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">
                         {{ role.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) }}
                         </Link>
@@ -148,6 +148,7 @@ const logout = () => {
                             d="m1 1 4 4 4-4" />
                     </svg>
                 </button>
+
                 <!-- Dropdown menu -->
                 <div v-if="$page.props.jetstream.hasTeamFeatures" id="teamDropdownNavbar"
                     class="z-10 hidden font-normal bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700 dark:divide-gray-600">
