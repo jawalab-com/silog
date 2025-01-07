@@ -22,6 +22,7 @@ const columns = [
     { name: 'address', label: 'Alamat' },
     { name: 'phone', label: 'Telepon' },
     { name: 'email', label: 'Email' },
+    { name: 'account_number', label: 'No Rekening' },
 ];
 const data = props.suppliers.map(item => ({
     ...item,

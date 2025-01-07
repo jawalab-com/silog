@@ -29,7 +29,7 @@ class UnitController extends Controller
     public function create()
     {
         return Inertia::render('Units/Form', [
-            'unit' => null,
+            'unit' => new Unit,
         ]);
     }
 
