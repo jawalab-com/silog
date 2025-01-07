@@ -63,9 +63,9 @@ const deleteAction = async (id) => {
                     <Button color="yellow" class="p-0 py-1" :href="route('brands.edit', item.id)">
                         <Icon name="pencil" class="w-4.5 h-4.5" />
                     </Button>
-                    <Button color="red" class="p-0 py-1" @click="deleteAction(item.id)">
+                    <!-- <Button color="red" class="p-0 py-1" @click="deleteAction(item.id)">
                         <Icon name="close" class="w-4.5 h-4.5" />
-                    </Button>
+                    </Button> -->
                 </fwb-button-group>
             </template>
         </DataTable>
