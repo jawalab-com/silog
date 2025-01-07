@@ -135,7 +135,7 @@ watch(() => form.unit_id, (newUnitId) => {
                         <InputError :message="form.errors.tag" />
                     </div>
 
-                    <div>
+                    <div v-if="role != 'pengaju'">
                         <InputLabel for="minimum_quantity" value="Stok Minimum" />
                         <TextInput id="minimum_quantity" v-model="form.minimum_quantity" />
                         <InputError :message="form.errors.minimum_quantity" />
@@ -163,58 +163,64 @@ watch(() => form.unit_id, (newUnitId) => {
 
                 </div>
 
-                <div class="card-header px-4 pb-2 pt-8 border-b border-gray-200 dark:border-gray-700"></div>
+                <template v-if="role != 'pengaju'">
+                    <div class="card-header px-4 pb-2 pt-8 border-b border-gray-200 dark:border-gray-700"></div>
 
-                <h2 class="text-lg py-4">Konversi Satuan</h2>
-                <p>Konversi satuan memungkinkan Anda untuk mengatur konversi dari satu satuan ke satuan lainnya.
-                    Misalnya, Anda dapat
-                    mengonversi dari kilogram ke gram atau dari liter ke mililiter. Setiap konversi memerlukan satuan
-                    tujuan dan faktor
-                    konversi yang sesuai.</p>
+                    <h2 class="text-lg py-4">Konversi Satuan</h2>
+                    <p>Konversi satuan memungkinkan Anda untuk mengatur konversi dari satu satuan ke satuan lainnya.
+                        Misalnya, Anda dapat
+                        mengonversi dari kilogram ke gram atau dari liter ke mililiter. Setiap konversi memerlukan
+                        satuan
+                        tujuan dan faktor
+                        konversi yang sesuai.</p>
 
-                <div class="relative overflow-x-auto overflow-y-hidden shadow-md sm:rounded-lg mt-2">
-                    <table class="w-full text-sm text-left rtl:text-right text-gray-700 dark:text-gray-300">
-                        <thead class="text-xs text-gray-700 uppercase bg-gray-200 dark:bg-gray-700 dark:text-gray-300">
-                            <tr>
-                                <th class="px-4 py-3 w-40">Satuan</th>
-                                <th class="px-4 py-3 w-12">&nbsp;</th>
-                                <th class="px-4 py-3 w-40">Jumlah konversi</th>
-                                <th class="px-4 py-3 w-12">&nbsp;</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-for="(item, index) in form.unit_conversions" :key="index"
-                                class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                                <td class="px-4 py-1">
-                                    <Select v-model="item.to_unit_id" :options="units" filter optionLabel="unit_name"
-                                        optionValue="id" placeholder="Pilih satuan terkecil" class="w-full" />
-                                </td>
-                                <td class="px-4 py-1 font-bold text-lg">=</td>
-                                <td class="px-4 py-1">
-                                    <TextInput type="number" v-model="item.factor" />
-                                </td>
-                                <td class="px-4 py-1">{{ item.from_unit.unit_name }}</td>
-                                <td class="px-4 py-1">
-                                    <button type="button" class="text-red-500 font-bold hover:text-red-700 mt-2"
-                                        @click="removeRow(index)">
-                                        <Icon name="close" class="w-6 h-6 font-bold text-red-500 hover:text-red-700" />
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="px-4 py-3" colspan="5">
-                                    <button type="button"
-                                        class="w-full text-blue-700 hover:text-blue-500 dark:text-blue-300 font-bold"
-                                        @click="addRow">
-                                        <Icon name="plus" class="w-6 h-6 inline-block" /> Tambah Satuan Konversi
-                                    </button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <InputError :message="form.errors.products" />
-                </div>
+                    <div class="relative overflow-x-auto overflow-y-hidden shadow-md sm:rounded-lg mt-2">
+                        <table class="w-full text-sm text-left rtl:text-right text-gray-700 dark:text-gray-300">
+                            <thead
+                                class="text-xs text-gray-700 uppercase bg-gray-200 dark:bg-gray-700 dark:text-gray-300">
+                                <tr>
+                                    <th class="px-4 py-3 w-40">Satuan</th>
+                                    <th class="px-4 py-3 w-12">&nbsp;</th>
+                                    <th class="px-4 py-3 w-40">Jumlah konversi</th>
+                                    <th class="px-4 py-3 w-12">&nbsp;</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="(item, index) in form.unit_conversions" :key="index"
+                                    class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                                    <td class="px-4 py-1">
+                                        <Select v-model="item.to_unit_id" :options="units" filter
+                                            optionLabel="unit_name" optionValue="id" placeholder="Pilih satuan terkecil"
+                                            class="w-full" />
+                                    </td>
+                                    <td class="px-4 py-1 font-bold text-lg">=</td>
+                                    <td class="px-4 py-1">
+                                        <TextInput type="number" v-model="item.factor" />
+                                    </td>
+                                    <td class="px-4 py-1">{{ item.from_unit.unit_name }}</td>
+                                    <td class="px-4 py-1">
+                                        <button type="button" class="text-red-500 font-bold hover:text-red-700 mt-2"
+                                            @click="removeRow(index)">
+                                            <Icon name="close"
+                                                class="w-6 h-6 font-bold text-red-500 hover:text-red-700" />
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="px-4 py-3" colspan="5">
+                                        <button type="button"
+                                            class="w-full text-blue-700 hover:text-blue-500 dark:text-blue-300 font-bold"
+                                            @click="addRow">
+                                            <Icon name="plus" class="w-6 h-6 inline-block" /> Tambah Satuan Konversi
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <InputError :message="form.errors.products" />
+                    </div>
+                </template>
 
                 <!-- <div class="flex items-center my-4">
                     <input id="changeStock" type="checkbox" v-model="changeStock"
