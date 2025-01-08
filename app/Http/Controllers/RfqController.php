@@ -221,20 +221,15 @@ class RfqController extends Controller
         $rfq->rfqSuppliers()->whereNotIn('tag', $tags)->delete();
         foreach ($tags as $tag) {
             $supplier = Supplier::where('tag', $tag)->first();
-            if (! $supplier) {
-                dd($tag);
-            }
+            // if (! $supplier) {
+            //     dd($tag);
+            // }
             if (! $rfq->rfqSuppliers()->where('tag', $tag)->first()) {
                 // $rfq->rfqSuppliers()->create(['tag' => $tag, 'supplier_id' => $supplier->id]);
                 $rfq->rfqSuppliers()->create(['tag' => $tag, 'supplier_id' => null]);
             }
             $tagSuppliers[$tag] = Supplier::where('tag', $tag)->get();
         }
-
-        // $tags = Tag::whereIn('slug', $tags)->get()->toArray();
-        // $tags = array_map(function ($tag) {
-        //     return $tag['slug'];
-        // }, $tags);
 
         $data['suppliers'] = $rfq->rfqSuppliers()->with(['tag', 'supplier'])->get()->toArray();
 
