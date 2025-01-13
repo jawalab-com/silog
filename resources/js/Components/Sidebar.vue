@@ -76,7 +76,7 @@ const isLog = true;
                         <span class="ml-3">Barang</span>
                         </Link>
                     </li>
-                    <li v-if="role != 'pengaju'">
+                    <li>
                         <Link :href="route('brands.index')"
                             class="flex items-center p-2 font-medium text-lime-900 rounded-lg dark:text-lime-100 hover:bg-gray-100 dark:hover:bg-gray-700 group">
                         <span class="ml-3">Merk</span>
@@ -88,7 +88,7 @@ const isLog = true;
                         <span class="ml-3">Kategori</span>
                         </Link>
                     </li>
-                    <li v-if="role != 'pengaju'">
+                    <li>
                         <Link :href="route('units.index')"
                             class="flex items-center p-2 font-medium text-lime-900 rounded-lg dark:text-lime-100 hover:bg-gray-100 dark:hover:bg-gray-700 group">
                         <span class="ml-3">Satuan</span>

@@ -59,7 +59,16 @@ class SupplierController extends Controller
     public function store(StoreSupplierRequest $request)
     {
         try {
-            Supplier::create($request->validated());
+            $supplier = Supplier::create($request->validated());
+
+            Log::create([
+                'log_type' => 'supplier',
+                'message' => 'Supplier dibuat',
+                'severity' => 'info',
+                'user_id' => auth()->id(),
+                'ip_address' => request()->ip(),
+                'context' => json_encode($supplier),
+            ]);
 
             return redirect()->route('suppliers.index')
                 ->with('success', 'Supplier created successfully.');
@@ -99,6 +108,15 @@ class SupplierController extends Controller
     {
         $supplier->update($request->validated());
 
+        Log::create([
+            'log_type' => 'supplier',
+            'message' => 'Supplier diubah',
+            'severity' => 'info',
+            'user_id' => auth()->id(),
+            'ip_address' => request()->ip(),
+            'context' => json_encode(['before' => $supplier, 'after' => $request->validated()]),
+        ]);
+
         return redirect()->route('suppliers.index')
             ->with('success', 'Data updated successfully.');
     }
@@ -109,6 +127,15 @@ class SupplierController extends Controller
     public function destroy(Supplier $supplier)
     {
         $supplier->delete();
+
+        Log::create([
+            'log_type' => 'supplier',
+            'message' => 'Supplier dihapus',
+            'severity' => 'info',
+            'user_id' => auth()->id(),
+            'ip_address' => request()->ip(),
+            'context' => json_encode($supplier),
+        ]);
 
         return redirect()->route('suppliers.index')
             ->with('success', 'Data deleted successfully.');

@@ -2,6 +2,7 @@
 import { useForm } from '@inertiajs/vue3';
 import { AppLayout } from '@/Layouts';
 import { Breadcrumb, Button, DataTable, Icon } from '@/Components';
+import Log from '@/Components/Log.vue';
 import { FwbButtonGroup } from 'flowbite-vue';
 
 const props = defineProps({
@@ -80,5 +81,7 @@ const deleteAction = async (id) => {
                 </fwb-button-group>
             </template>
         </DataTable>
+
+        <Log logtype="supplier" />
     </AppLayout>
 </template>

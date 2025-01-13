@@ -3,6 +3,7 @@ import { computed } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 import { AppLayout } from '@/Layouts';
 import { Breadcrumb, Button, DataTable, Icon } from '@/Components';
+import Log from '@/Components/Log.vue';
 import { FwbButtonGroup } from 'flowbite-vue';
 
 const props = defineProps({
@@ -29,12 +30,7 @@ const data = computed(() => {
 });
 
 const deleteAction = async (id) => {
-    const result = await utils.confirm({
-        title: "Hapus Data",
-        text: "Apakah Anda yakin ingin menghapus data ini? Tindakan ini tidak dapat dibatalkan!",
-    });
-
-    if (result.isConfirmed) {
+    if (confirm("Apakah Anda yakin ingin menghapus data ini? Tindakan ini tidak dapat dibatalkan!")) {
         form.delete(route("tags.destroy", id), {
             preserveScroll: true,
         });
@@ -69,5 +65,7 @@ const deleteAction = async (id) => {
                 </fwb-button-group>
             </template>
         </DataTable>
+
+        <Log logtype="tag" />
     </AppLayout>
 </template>
