@@ -385,6 +385,14 @@ class RfqController extends Controller
                         if ($rfq->status === RfqStatus::SIAP_DIAMBIL) {
                             $data['status'] = RfqStatus::SELESAI->value;
                         }
+                        RfqHistory::create([
+                            'rfq_id' => $rfq->id,
+                            'user_id' => auth()->id(),
+                            'status' => RfqStatus::PENDING->value,
+                            'description' => $rfq->status === RfqStatus::SIAP_DIAMBIL ?
+                                "Menolak pengajuan barang dengan nomor pengajuan $rfq->rfq_number dan akan diteruskan ke admin gudang" :
+                                "Menerima pengajuan barang dengan nomor pengajuan $rfq->rfq_number selesai diambil",
+                        ]);
                         $data['verified_2'] = $verified;
                         $data['verified_2_user_id'] = auth()->id();
                     }
