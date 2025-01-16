@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreSupplierRequest;
 use App\Http\Requests\UpdateSupplierRequest;
+use App\Models\Log;
 use App\Models\Supplier;
 use App\Models\Tag;
 use Illuminate\Http\Request;
