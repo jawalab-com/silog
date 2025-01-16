@@ -390,8 +390,8 @@ class RfqController extends Controller
                             'user_id' => auth()->id(),
                             'status' => RfqStatus::PENDING->value,
                             'description' => $rfq->status === RfqStatus::SIAP_DIAMBIL ?
-                                "Menolak pengajuan barang dengan nomor pengajuan $rfq->rfq_number dan akan diteruskan ke admin gudang" :
-                                "Menerima pengajuan barang dengan nomor pengajuan $rfq->rfq_number selesai diambil",
+                                "Menerima pengajuan barang dengan nomor pengajuan $rfq->rfq_number dan akan diteruskan ke admin gudang" :
+                                "Pengajuan barang dengan nomor pengajuan $rfq->rfq_number selesai diambil",
                         ]);
                         $data['verified_2'] = $verified;
                         $data['verified_2_user_id'] = auth()->id();
@@ -409,6 +409,16 @@ class RfqController extends Controller
                     } else {
                         $data['step'][] = 4;
                     }
+
+                    RfqHistory::create([
+                        'rfq_id' => $rfq->id,
+                        'user_id' => auth()->id(),
+                        'status' => RfqStatus::PENDING->value,
+                        'description' => $rfq->verified_4 ?
+                            "Purchasing telah mengirimkan pengajuan barang dengan nomor pengajuan $rfq->rfq_number dan akan diterima oleh admin gudang dan oleh sistem" :
+                            "Purchasing telah mengirimkan pengajuan barang dengan nomor pengajuan $rfq->rfq_number dan akan diterima ke pimpinan",
+                    ]);
+
                     break;
                 case 'pejabat-teknis':
                     if ($verified && $rfq->verified_3) {
