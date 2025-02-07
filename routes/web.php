@@ -87,6 +87,7 @@ Route::get('/rfqs/to-rfq', [RfqController::class, 'toRfq'])->name('rfqs.torfq');
 Route::post('/rfqs/{rfq}/{product_id}/tolak', [RfqController::class, 'tolak'])->name('rfqs.tolak');
 Route::post('/rfqs/{rfq}/tolak-supplier', [RfqController::class, 'tolakSupplier'])->name('rfqs.tolak-supplier');
 Route::post('/rfqs/{rfq}/comment', [RfqController::class, 'submitComment'])->name('rfqs.submit-comment');
+Route::post('/rfqs/{rfq}/addSupplier', [RfqController::class, 'addSupplier'])->name('rfqs.add-supplier');
 Route::get('/rfqs/export/', [RfqController::class, 'export'])->name('rfqs.export');
 Route::get('/products/export/', [ProductController::class, 'export'])->name('products.export');
 Route::get('/auth/redirect/{provider}', [SocialiteController::class, 'redirectToProvider'])->name('auth.redirect');

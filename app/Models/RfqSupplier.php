@@ -43,4 +43,9 @@ class RfqSupplier extends Model
     {
         return $this->belongsTo(Supplier::class);
     }
+
+    public function rfqDetails()
+    {
+        return $this->hasMany(RfqDetail::class);
+    }
 }

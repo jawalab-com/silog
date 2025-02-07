@@ -1,5 +1,5 @@
 <script setup>
-import { useForm, usePage, Link } from "@inertiajs/vue3";
+import { useForm, usePage, Link, router } from "@inertiajs/vue3";
 import { ref, computed, watch } from "vue";
 import axios from "axios";
 import AppLayout from "@/Layouts/AppLayout.vue";
@@ -26,6 +26,8 @@ const props = defineProps({
     suppliers: Array,
     rfqComments: Array,
     histories: Array,
+    selectedSupplier: String,
+    rfqSuppliers: Array,
 });
 
 props.suppliers.unshift({
@@ -48,6 +50,8 @@ props.suppliers.unshift({
     paid: false,
 });
 
+const visible = ref(false);
+const addProductVisible = ref(false);
 const page = usePage();
 const role = (page.props.auth.user.all_teams.find(team => team.id === page.props.auth.user.current_team_id)).membership?.role || 'owner';
 const department = page.props.auth.user.department;
@@ -85,6 +89,11 @@ if (props.rfq?.request_date == null) {
     formattedDate = `${day}-${month}-${year}`; // dd-mm-YYYY format
 }
 
+const formSupplierDialog = useForm({
+    _method: "post",
+    supplier_id: props.rfq?.supplier_id || '',
+});
+
 const form = useForm({
     _method: props.rfq.id ? "put" : "post",
     // supplier_id: props.rfq?.supplier_id || '',
@@ -101,6 +110,7 @@ const form = useForm({
         : Object.values(props.rfq?.products || {}),
     suppliers:
         props.rfq?.suppliers?.map((supplier) => ({
+            id: supplier.id || "",
             rfq_id: supplier.rfq_id || "",
             tag: supplier.tag || "",
             supplier_id: supplier.supplier_id || "",
@@ -118,6 +128,10 @@ const form = useForm({
             date_received: supplier.date_received || "",
             received: supplier.received || false,
             paid: supplier.paid || false,
+            products:
+                props.rfq?.suppliers?.rfq_details?.map((product) => ({
+                    id: product.id || "",
+                })) || [],
         })) || [],
 });
 
@@ -317,7 +331,37 @@ watch(
     }
 );
 
+const addSupplier = (id) => {
+    formSupplierDialog.post(route("rfqs.add-supplier", { rfq: props.rfq.id, supplier_id: id }), {
+        onSuccess: () => {
+            console.log("Purchase order updated successfully");
+        },
+        onError: (errors) => {
+            console.error("Failed to update purchase order:", errors);
+        },
+        forceFormData: true,
+    });
+    visible.value = false;
+};
+
 </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 <template>
     <AppLayout :title="title">
@@ -334,41 +378,457 @@ watch(
                 </div>
             </template>
 
-            <form @submit.prevent="saveAction" enctype="multipart/form-data">
-                <div class="grid grid-cols-2 gap-2">
-                    <div>
-                        <InputLabel for="number" value="Nomor" />
-                        <p class="dark:text-white mt-2">{{ rfq.rfq_number }}</p>
-                    </div>
-
-                    <div>
-                        <InputLabel for="order_date" value="Perihal" />
-                        <p class="dark:text-white mt-2">{{ rfq.title }}</p>
-                    </div>
-
-                    <div>
-                        <InputLabel for="order_date" value="Tanggal Pengajuan" />
-                        <p class="dark:text-white mt-2">
-                            {{ new Date(rfq.request_date).toLocaleDateString('id-ID', {
-                                day: '2-digit', month: 'long',
-                                year:
-                                    'numeric'
-                            }) }}
-                        </p>
-                    </div>
-
-                    <div>
-                        <InputLabel for="order_date" value="Tanggal Peruntukan" />
-                        <p class="dark:text-white mt-2">
-                            {{ new Date(rfq.allocation_date).toLocaleDateString('id-ID', {
-                                day: '2-digit', month: 'long',
-                                year:
-                                    'numeric'
-                            }) }}
-                        </p>
-                    </div>
+            <div class="grid grid-cols-2 gap-2">
+                <div>
+                    <InputLabel for="number" value="Nomor" />
+                    <p class="dark:text-white mt-2">{{ rfq.rfq_number }}</p>
                 </div>
 
+                <div>
+                    <InputLabel for="order_date" value="Perihal" />
+                    <p class="dark:text-white mt-2">{{ rfq.title }}</p>
+                </div>
+
+                <div>
+                    <InputLabel for="order_date" value="Tanggal Pengajuan" />
+                    <p class="dark:text-white mt-2">
+                        {{ new Date(rfq.request_date).toLocaleDateString('id-ID', {
+                            day: '2-digit', month: 'long',
+                            year:
+                                'numeric'
+                        }) }}
+                    </p>
+                </div>
+
+                <div>
+                    <InputLabel for="order_date" value="Tanggal Peruntukan" />
+                    <p class="dark:text-white mt-2">
+                        {{ new Date(rfq.allocation_date).toLocaleDateString('id-ID', {
+                            day: '2-digit', month: 'long',
+                            year:
+                                'numeric'
+                        }) }}
+                    </p>
+                </div>
+            </div>
+
+            <h2 class="font-semibold text-gray-800 dark:text-gray-200 leading-tight mt-4">
+                Barang Diajukan
+            </h2>
+
+            <div class="relative overflow-x-auto overflow-y-hidden border border-gray-500 shadow-md sm:rounded-lg mt-2">
+                <table class="w-full text-sm text-left rtl:text-right text-gray-700 dark:text-gray-300">
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-200 dark:bg-gray-700 dark:text-gray-300">
+                        <tr>
+                            <th class="px-4 py-3">Kategori</th>
+                            <th class="px-4 py-3">Barang</th>
+                            <th class="px-4 py-3 text-right">Jumlah</th>
+                            <!-- <th v-if="(['admin-gudang', 'purchasing', 'pimpinan'].includes(role) && rfq.verified_3)"
+                                    class="px-4 py-3 text-right">
+                                    Jumlah Tervalidasi
+                                </th> -->
+                            <th class="px-4 py-3">Satuan</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(item, index) in form.products" :key="index"
+                            class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                            <td class="px-4 py-1">{{ item.tag_name }}</td>
+                            <td class="px-4 py-1">
+                                {{ item.product_name }}
+                            </td>
+                            <td class="px-4 py-1 text-right pr-4">
+                                {{ item.quantity }}
+                            </td>
+                            <td class="px-4 py-1">{{ item.unit_name }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h2 class="font-semibold text-gray-800 dark:text-gray-200 leading-tight mt-4">
+                Supplier
+            </h2>
+
+            <div class="bg-gray-50 dark:bg-zinc-900 p-4 rounded-lg mt-2">
+                <!-- <Tabs :value="selectedSupplier" class="">
+                    <TabList>
+                        <Tab :value="item.id" v-for="(item, index) in form.suppliers"
+                            @click="router.visit(route('rfqs.show', { rfq: rfq.id, supplier: item.id }))">
+                            {{ rfqSuppliers.find(x => x.id === item.id)?.supplier?.supplier_name || '-' }}
+                        </Tab>
+                    </TabList>
+                </Tabs> -->
+
+
+                <Tabs value="0">
+                    <TabList>
+                        <Tab :value="item.id" v-for="(item, index) in form.suppliers">
+                            {{ rfqSuppliers.find(x => x.id === item.id)?.supplier?.supplier_name || '-' }}
+                        </Tab>
+                        <Button @click="visible = true" class="hover:text-green-500">
+                            <p class="text-lg">+</p>
+
+                            <Dialog v-model:visible="visible" modal header="Pilih Supplier" :style="{ width: '25rem' }">
+                                <div class="flex items-center gap-4 mb-4">
+                                    <Select v-model="formSupplierDialog.supplier_id" class="py-1 px-2">
+                                        <option></option>
+                                        <option v-for="supplier in suppliers" :value="supplier.id" :key="supplier.id">
+                                            {{ supplier.supplier_name }}
+                                        </option>
+                                    </Select>
+                                </div>
+                                <div class="flex justify-end gap-2">
+                                    <Button color="blue" type="button"
+                                        @click="addSupplier(formSupplierDialog.supplier_id)">Simpan</Button>
+                                </div>
+                            </Dialog>
+                        </Button>
+                    </TabList>
+                    <TabPanels>
+                        <TabPanel :value="item.id" v-for="(item, index) in form.suppliers">
+                            <Button type="button" :outline="true" class="mt-2">Ganti Supplier</Button>
+                            <Button type="button" :outline="true" class="mt-2 ms-2" @click="addProductVisible = true">
+                                Tambah Barang
+                                <Dialog v-model:visible="addProductVisible" modal header="Pilih Supplier"
+                                    :style="{ width: '25rem' }">
+                                    <div class="flex items-center gap-4 mb-4">
+                                        <PickList v-model="products" dataKey="id" breakpoint="1400px">
+                                            <template #option="{ option }">
+                                                {{ option.name }}
+                                            </template>
+                                        </PickList>
+
+                                    </div>
+                                    <div class="flex justify-end gap-2">
+                                        <Button color="blue" type="button"
+                                            @click="addProductVisible = false">Tambah</Button>
+                                    </div>
+                                </Dialog>
+                            </Button>
+                            <div
+                                class="relative overflow-x-auto overflow-y-hidden border border-gray-500 shadow-md sm:rounded-lg mt-2">
+                                <table class="w-full text-sm text-left rtl:text-right text-gray-700 dark:text-gray-300">
+                                    <thead
+                                        class="text-xs text-gray-700 uppercase bg-gray-200 dark:bg-gray-700 dark:text-gray-300">
+                                        <tr>
+                                            <th class="px-4 py-3">Kategori</th>
+                                            <th class="px-4 py-3">Barang</th>
+                                            <th v-if="
+                                                [
+                                                    'admin-gudang',
+                                                    'purchasing',
+                                                    'pejabat-teknis',
+                                                    'pimpinan',
+                                                ].includes(role)
+                                            " class="px-4 py-3 text-center" colspan="2">
+                                                Stok
+                                            </th>
+                                            <th class="px-4 py-3 text-right">Jumlah</th>
+                                            <!-- <th v-if="(['admin-gudang', 'purchasing', 'pimpinan'].includes(role) && rfq.verified_3)"
+                                    class="px-4 py-3 text-right">
+                                    Jumlah Tervalidasi
+                                </th> -->
+                                            <th class="px-4 py-3">Satuan</th>
+                                            <th v-if="
+                                                ['purchasing',
+                                                    'pejabat-teknis', 'pimpinan'].includes(
+                                                        role
+                                                    )
+                                            " class="px-4 py-3 text-right">
+                                                Harga Estimasi
+                                            </th>
+                                            <th v-if="
+                                                ['purchasing',
+                                                    'pejabat-teknis', 'pimpinan'].includes(
+                                                        role
+                                                    )
+                                            " class="px-4 py-3 text-right">
+                                                Subtotal Estimasi
+                                            </th>
+                                            <th v-if="
+                                                ['purchasing',
+                                                    'pejabat-teknis', 'pimpinan'].includes(
+                                                        role
+                                                    ) && rfq.verified_4
+                                            " class="px-4 py-3 text-right">
+                                                Harga
+                                            </th>
+                                            <th v-if="
+                                                ['purchasing',
+                                                    'pejabat-teknis', 'pimpinan'].includes(
+                                                        role
+                                                    ) && rfq.verified_4
+                                            " class="px-4 py-3 text-right">
+                                                Subtotal
+                                            </th>
+                                            <th v-if="
+                                                ['pejabat-teknis',
+                                                    'pejabat-teknis', 'pimpinan'].includes(
+                                                        role
+                                                    ) && rfq.status === 'pending'
+                                            " class="px-4 py-1 text-right pr-4">
+                                                &nbsp;
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="(item, index) in form.products" :key="index"
+                                            class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                                            <td class="px-4 py-1">{{ item.tag_name }}</td>
+                                            <td class="px-4 py-1">
+                                                {{ item.product_name }}
+                                            </td>
+                                            <td v-if="
+                                                [
+                                                    'admin-gudang',
+                                                    'purchasing',
+                                                    'pejabat-teknis',
+                                                    'pimpinan',
+                                                ].includes(role)
+                                            " class="px-4 py-1 text-right pr-4">
+                                                {{ item.stock }}
+                                            </td>
+                                            <td v-if="
+                                                [
+                                                    'admin-gudang',
+                                                    'purchasing',
+                                                    'pejabat-teknis',
+                                                    'pimpinan',
+                                                ].includes(role)
+                                            " class="px-0 py-1 text-right">
+                                                <span v-if="['siap-diambil', 'diproses'].includes(rfq.status)"
+                                                    class="ml-2 bg-blue-100 text-blue-800 text-xs font-medium me-2 px-1.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">
+                                                    Sudah diambil
+                                                </span>
+                                                <span v-else-if="item.stock - item.quantity >= 0"
+                                                    class="ml-2 bg-green-100 text-green-800 text-xs font-medium me-2 px-1.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300">
+                                                    Tersedia
+                                                </span>
+                                                <span v-else-if="item.stock > 0"
+                                                    class="ml-2 bg-yellow-100 text-yellow-800 text-xs font-medium me-2 px-1.5 py-0.5 rounded dark:bg-yellow-900 dark:text-yellow-300">
+                                                    Kurang
+                                                </span>
+                                                <span v-else
+                                                    class="ml-2 bg-red-100 text-red-800 text-xs font-medium me-2 px-1.5 py-0.5 rounded dark:bg-red-900 dark:text-red-300">
+                                                    Habis
+                                                </span>
+                                            </td>
+                                            <td class="px-4 py-1 text-right pr-4">
+                                                <!-- {{ item.quantity }} -->
+                                                <TextInput class="py-1" type="number" v-model="item.quantity" />
+                                            </td>
+                                            <td class="px-4 py-1">{{ item.unit_name }}</td>
+                                            <td v-if="
+                                                ['purchasing',
+                                                    'pejabat-teknis', 'pimpinan'].includes(
+                                                        role
+                                                    )
+                                            " class="px-4 py-1 text-right pr-4">
+                                                <template v-if="
+                                                    rfq.verified_2 &&
+                                                    ['purchasing'].includes(role) &&
+                                                    !rfq.verified_4 &&
+                                                    !rfq.verified_3
+                                                ">
+                                                    <TextInput class="py-1" type="number"
+                                                        v-model="item.estimation_price" step="0.01" />
+                                                </template>
+                                                <template v-else>
+                                                    {{
+                                                        utils.formatDecimal(
+                                                            item.estimation_price
+                                                        )
+                                                    }}
+                                                    <TextInput class="py-1" type="hidden"
+                                                        v-model="item.estimation_price" step="0.01" />
+                                                </template>
+                                            </td>
+                                            <td v-if="
+                                                ['purchasing',
+                                                    'pejabat-teknis', 'pimpinan'].includes(
+                                                        role
+                                                    )
+                                            " class="px-4 py-1 text-right pr-4">
+                                                <p class="py-1">
+                                                    <TextInput class="py-1" type="hidden"
+                                                        v-model="item.total_estimation_price" />
+                                                    {{
+                                                        utils.formatDecimal(
+                                                            (item.total_estimation_price = isNaN(
+                                                                item.quantity *
+                                                                item.estimation_price
+                                                            )
+                                                                ? 0.0
+                                                                : (
+                                                                    item.quantity *
+                                                                    item.estimation_price
+                                                                ).toFixed(2))
+                                                        )
+                                                    }}
+                                                </p>
+                                            </td>
+                                            <td v-if="
+                                                ['purchasing',
+                                                    'pejabat-teknis', 'pimpinan'].includes(
+                                                        role
+                                                    ) && rfq.verified_4
+                                            " class="px-4 py-1 text-right pr-4">
+                                                <template v-if="
+                                                    rfq.verified_2 &&
+                                                    ['purchasing'].includes(role) &&
+                                                    rfq.verified_4 &&
+                                                    !rfq.verified_3
+                                                ">
+                                                    <TextInput class="py-1" type="number" v-model="item.unit_price"
+                                                        step="0.01" />
+                                                </template>
+                                                <template v-else>
+                                                    {{
+                                                        utils.formatDecimal(item.unit_price)
+                                                    }}
+                                                    <TextInput class="py-1" type="hidden" v-model="item.unit_price"
+                                                        step="0.01" />
+                                                </template>
+                                            </td>
+                                            <td v-if="
+                                                ['purchasing',
+                                                    'pejabat-teknis', 'pimpinan'].includes(
+                                                        role
+                                                    ) && rfq.verified_4
+                                            " class="px-4 py-1 text-right pr-4">
+                                                <p class="py-1">
+                                                    <TextInput class="py-1" type="hidden" v-model="item.total_price" />
+                                                    {{
+                                                        utils.formatDecimal(
+                                                            (item.total_price = isNaN(
+                                                                item.quantity *
+                                                                item.unit_price
+                                                            )
+                                                                ? 0.0
+                                                                : (
+                                                                    item.quantity *
+                                                                    item.unit_price
+                                                                ).toFixed(2))
+                                                        )
+                                                    }}
+                                                </p>
+                                            </td>
+                                            <td v-if="
+                                                ['pejabat-teknis', 'pimpinan'].includes(
+                                                    role
+                                                ) && rfq.status === 'pending' && (
+                                                    (form.products.reduce((sum, item) =>
+                                                        sum +
+                                                        item.estimation_price *
+                                                        item.quantity, 0) > 1000000 && role === 'pimpinan') ||
+                                                    (form.products.reduce((sum, item) =>
+                                                        sum +
+                                                        item.estimation_price *
+                                                        item.quantity, 0) <= 1000000 && role === 'pejabat-teknis' && rfq.user.department == department)) &&
+                                                item.quantity > 0
+                                            " class="px-4 py-1 text-right pr-4">
+                                                <a href="#" class="text-red-500 hover:text-red-300 font-bold" @click="
+                                                    setTolak(item.product_id, index)
+                                                    " type="button">
+                                                    Tolak
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-4 py-3">&nbsp;</td>
+                                            <td class="px-4 py-3">&nbsp;</td>
+                                            <td v-if="
+                                                [
+                                                    'admin-gudang',
+                                                    'purchasing',
+                                                    'pejabat-teknis',
+                                                    'pimpinan',
+                                                ].includes(role)
+                                            " class="px-4 py-3 text-center" colspan="2">
+                                                &nbsp;
+                                            </td>
+                                            <td class="px-4 py-3 text-right">&nbsp;</td>
+                                            <td class="px-4 py-3">&nbsp;</td>
+                                            <td v-if="
+                                                ['purchasing',
+                                                    'pejabat-teknis', 'pimpinan'].includes(
+                                                        role
+                                                    )
+                                            " class="px-4 py-3 text-right">
+                                                TOTAL
+                                            </td>
+                                            <td v-if="
+                                                ['purchasing',
+                                                    'pejabat-teknis', 'pimpinan'].includes(
+                                                        role
+                                                    )
+                                            " class="px-4 py-3 text-right">
+                                                {{
+                                                    utils.formatDecimal(
+                                                        form.products
+                                                            .reduce(
+                                                                (sum, item) =>
+                                                                    sum +
+                                                                    item.estimation_price *
+                                                                    item.quantity,
+                                                                0
+                                                            )
+                                                            .toFixed(2)
+                                                    )
+                                                }}
+                                            </td>
+                                            <td v-if="
+                                                ['purchasing',
+                                                    'pejabat-teknis', 'pimpinan'].includes(
+                                                        role
+                                                    ) && rfq.verified_4
+                                            " class="px-4 py-3">&nbsp;</td>
+                                            <td v-if="
+                                                [
+                                                    'purchasing',
+                                                    'pejabat-teknis',
+                                                    'pimpinan'
+                                                ].includes(
+                                                    role
+                                                ) && rfq.verified_4
+                                            " class="px-4 py-3 text-right">
+                                                {{
+                                                    utils.formatDecimal(
+                                                        form.products
+                                                            .reduce(
+                                                                (sum, item) =>
+                                                                    sum +
+                                                                    item.unit_price *
+                                                                    item.quantity,
+                                                                0
+                                                            )
+                                                            .toFixed(2)
+                                                    )
+                                                }}
+                                            </td>
+                                            <td v-if="
+                                                ['pejabat-teknis', 'pimpinan'].includes(
+                                                    role
+                                                ) && rfq.status === 'pending'
+                                            " class="px-4 py-1 text-right pr-4">
+                                                &nbsp;
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </TabPanel>
+                    </TabPanels>
+                </Tabs>
+
+
+
+
+            </div>
+
+
+            <form @submit.prevent="saveAction" enctype="multipart/form-data" class="mx-4">
                 <div v-if="role !== 'pengaju' &&
                     (rfq.verified_3 || (rfq.verified_2 && ['purchasing'].includes(role)))
                 ">
@@ -619,7 +1079,7 @@ watch(
                                                         " />
                                                     <span class="text-md" v-else>{{
                                                         item.transportation
-                                                    }}</span>
+                                                        }}</span>
                                                 </p>
                                                 <p class="w-32 ps-2">
                                                     Lama Pengiriman
@@ -805,329 +1265,7 @@ watch(
                 </div>
 
                 <div class="card-header px-4 py-2 border-b border-gray-200 dark:border-gray-700"></div>
-                <h2 class="font-semibold text-lg text-gray-800 dark:text-gray-200 leading-tight my-4">
-                    Daftar Barang
-                </h2>
 
-                <div
-                    class="relative overflow-x-auto overflow-y-hidden border border-gray-500 shadow-md sm:rounded-lg mt-2">
-                    <table class="w-full text-sm text-left rtl:text-right text-gray-700 dark:text-gray-300">
-                        <thead class="text-xs text-gray-700 uppercase bg-gray-200 dark:bg-gray-700 dark:text-gray-300">
-                            <tr>
-                                <th class="px-4 py-3">Kategori</th>
-                                <th class="px-4 py-3">Barang</th>
-                                <th v-if="
-                                    [
-                                        'admin-gudang',
-                                        'purchasing',
-                                        'pejabat-teknis',
-                                        'pimpinan',
-                                    ].includes(role)
-                                " class="px-4 py-3 text-center" colspan="2">
-                                    Stok
-                                </th>
-                                <th class="px-4 py-3 text-right">Jumlah</th>
-                                <!-- <th v-if="(['admin-gudang', 'purchasing', 'pimpinan'].includes(role) && rfq.verified_3)"
-                                    class="px-4 py-3 text-right">
-                                    Jumlah Tervalidasi
-                                </th> -->
-                                <th class="px-4 py-3">Satuan</th>
-                                <th v-if="
-                                    ['purchasing',
-                                        'pejabat-teknis', 'pimpinan'].includes(
-                                            role
-                                        )
-                                " class="px-4 py-3 text-right">
-                                    Harga Estimasi
-                                </th>
-                                <th v-if="
-                                    ['purchasing',
-                                        'pejabat-teknis', 'pimpinan'].includes(
-                                            role
-                                        )
-                                " class="px-4 py-3 text-right">
-                                    Subtotal Estimasi
-                                </th>
-                                <th v-if="
-                                    ['purchasing',
-                                        'pejabat-teknis', 'pimpinan'].includes(
-                                            role
-                                        ) && rfq.verified_4
-                                " class="px-4 py-3 text-right">
-                                    Harga
-                                </th>
-                                <th v-if="
-                                    ['purchasing',
-                                        'pejabat-teknis', 'pimpinan'].includes(
-                                            role
-                                        ) && rfq.verified_4
-                                " class="px-4 py-3 text-right">
-                                    Subtotal
-                                </th>
-                                <th v-if="
-                                    ['pejabat-teknis',
-                                        'pejabat-teknis', 'pimpinan'].includes(
-                                            role
-                                        ) && rfq.status === 'pending'
-                                " class="px-4 py-1 text-right pr-4">
-                                    &nbsp;
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-for="(item, index) in form.products" :key="index"
-                                class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                                <td class="px-4 py-1">{{ item.tag_name }}</td>
-                                <td class="px-4 py-1">
-                                    {{ item.product_name }}
-                                </td>
-                                <td v-if="
-                                    [
-                                        'admin-gudang',
-                                        'purchasing',
-                                        'pejabat-teknis',
-                                        'pimpinan',
-                                    ].includes(role)
-                                " class="px-4 py-1 text-right pr-4">
-                                    {{ item.stock }}
-                                </td>
-                                <td v-if="
-                                    [
-                                        'admin-gudang',
-                                        'purchasing',
-                                        'pejabat-teknis',
-                                        'pimpinan',
-                                    ].includes(role)
-                                " class="px-0 py-1 text-right">
-                                    <span v-if="['siap-diambil', 'diproses'].includes(rfq.status)"
-                                        class="ml-2 bg-blue-100 text-blue-800 text-xs font-medium me-2 px-1.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">
-                                        Sudah diambil
-                                    </span>
-                                    <span v-else-if="item.stock - item.quantity >= 0"
-                                        class="ml-2 bg-green-100 text-green-800 text-xs font-medium me-2 px-1.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300">
-                                        Tersedia
-                                    </span>
-                                    <span v-else-if="item.stock > 0"
-                                        class="ml-2 bg-yellow-100 text-yellow-800 text-xs font-medium me-2 px-1.5 py-0.5 rounded dark:bg-yellow-900 dark:text-yellow-300">
-                                        Kurang
-                                    </span>
-                                    <span v-else
-                                        class="ml-2 bg-red-100 text-red-800 text-xs font-medium me-2 px-1.5 py-0.5 rounded dark:bg-red-900 dark:text-red-300">
-                                        Habis
-                                    </span>
-                                </td>
-                                <td class="px-4 py-1 text-right pr-4">
-                                    {{ item.quantity }}
-                                </td>
-                                <!-- <td v-if="(['admin-gudang', 'purchasing', 'pimpinan'].includes(role) && rfq.verified_3)"
-                                    class="px-4 py-3 text-right">
-                                    <template v-if="
-                                        (rfq.verified_2 && ['purchasing'].includes(role)) && form.suppliers.find(supplier => supplier.tag.slug ===
-                                            item.product.tag).received
-                                    ">
-                                        <TextInput class="py-1" type="number" v-model="item.quantity_verified"
-                                            step="0.01" />
-                                    </template>
-                                    <template v-else>
-
-                                    </template>
-                                </td> -->
-                                <td class="px-4 py-1">{{ item.unit_name }}</td>
-                                <td v-if="
-                                    ['purchasing',
-                                        'pejabat-teknis', 'pimpinan'].includes(
-                                            role
-                                        )
-                                " class="px-4 py-1 text-right pr-4">
-                                    <template v-if="
-                                        rfq.verified_2 &&
-                                        ['purchasing'].includes(role) &&
-                                        !rfq.verified_4 &&
-                                        !rfq.verified_3
-                                    ">
-                                        <TextInput class="py-1" type="number" v-model="item.estimation_price"
-                                            step="0.01" />
-                                    </template>
-                                    <template v-else>
-                                        {{
-                                            utils.formatDecimal(
-                                                item.estimation_price
-                                            )
-                                        }}
-                                        <TextInput class="py-1" type="hidden" v-model="item.estimation_price"
-                                            step="0.01" />
-                                    </template>
-                                </td>
-                                <td v-if="
-                                    ['purchasing',
-                                        'pejabat-teknis', 'pimpinan'].includes(
-                                            role
-                                        )
-                                " class="px-4 py-1 text-right pr-4">
-                                    <p class="py-1">
-                                        <TextInput class="py-1" type="hidden" v-model="item.total_estimation_price" />
-                                        {{
-                                            utils.formatDecimal(
-                                                (item.total_estimation_price = isNaN(
-                                                    item.quantity *
-                                                    item.estimation_price
-                                                )
-                                                    ? 0.0
-                                                    : (
-                                                        item.quantity *
-                                                        item.estimation_price
-                                                    ).toFixed(2))
-                                            )
-                                        }}
-                                    </p>
-                                </td>
-                                <td v-if="
-                                    ['purchasing',
-                                        'pejabat-teknis', 'pimpinan'].includes(
-                                            role
-                                        ) && rfq.verified_4
-                                " class="px-4 py-1 text-right pr-4">
-                                    <template v-if="
-                                        rfq.verified_2 &&
-                                        ['purchasing'].includes(role) &&
-                                        rfq.verified_4 &&
-                                        !rfq.verified_3
-                                    ">
-                                        <TextInput class="py-1" type="number" v-model="item.unit_price" step="0.01" />
-                                    </template>
-                                    <template v-else>
-                                        {{
-                                            utils.formatDecimal(item.unit_price)
-                                        }}
-                                        <TextInput class="py-1" type="hidden" v-model="item.unit_price" step="0.01" />
-                                    </template>
-                                </td>
-                                <td v-if="
-                                    ['purchasing',
-                                        'pejabat-teknis', 'pimpinan'].includes(
-                                            role
-                                        ) && rfq.verified_4
-                                " class="px-4 py-1 text-right pr-4">
-                                    <p class="py-1">
-                                        <TextInput class="py-1" type="hidden" v-model="item.total_price" />
-                                        {{
-                                            utils.formatDecimal(
-                                                (item.total_price = isNaN(
-                                                    item.quantity *
-                                                    item.unit_price
-                                                )
-                                                    ? 0.0
-                                                    : (
-                                                        item.quantity *
-                                                        item.unit_price
-                                                    ).toFixed(2))
-                                            )
-                                        }}
-                                    </p>
-                                </td>
-                                <td v-if="
-                                    ['pejabat-teknis', 'pimpinan'].includes(
-                                        role
-                                    ) && rfq.status === 'pending' && (
-                                        (form.products.reduce((sum, item) =>
-                                            sum +
-                                            item.estimation_price *
-                                            item.quantity, 0) > 1000000 && role === 'pimpinan') ||
-                                        (form.products.reduce((sum, item) =>
-                                            sum +
-                                            item.estimation_price *
-                                            item.quantity, 0) <= 1000000 && role === 'pejabat-teknis' && rfq.user.department == department)) &&
-                                    item.quantity > 0
-                                " class="px-4 py-1 text-right pr-4">
-                                    <a href="#" class="text-red-500 hover:text-red-300 font-bold" @click="
-                                        setTolak(item.product_id, index)
-                                        " type="button">
-                                        Tolak
-                                    </a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="px-4 py-3">&nbsp;</td>
-                                <td class="px-4 py-3">&nbsp;</td>
-                                <td v-if="
-                                    [
-                                        'admin-gudang',
-                                        'purchasing',
-                                        'pejabat-teknis',
-                                        'pimpinan',
-                                    ].includes(role)
-                                " class="px-4 py-3 text-center" colspan="2">
-                                    &nbsp;
-                                </td>
-                                <td class="px-4 py-3 text-right">&nbsp;</td>
-                                <!-- <th v-if="(['admin-gudang', 'purchasing', 'pimpinan'].includes(role) && rfq.verified_3)"
-                                    class="px-4 py-3 text-right">
-                                    &nbsp;
-                                </th> -->
-                                <td class="px-4 py-3">&nbsp;</td>
-                                <td v-if="
-                                    ['purchasing',
-                                        'pejabat-teknis', 'pimpinan'].includes(
-                                            role
-                                        )
-                                " class="px-4 py-3 text-right">
-                                    TOTAL
-                                </td>
-                                <td v-if="
-                                    ['purchasing',
-                                        'pejabat-teknis', 'pimpinan'].includes(
-                                            role
-                                        )
-                                " class="px-4 py-3 text-right">
-                                    {{
-                                        utils.formatDecimal(
-                                            form.products
-                                                .reduce(
-                                                    (sum, item) =>
-                                                        sum +
-                                                        item.estimation_price *
-                                                        item.quantity,
-                                                    0
-                                                )
-                                                .toFixed(2)
-                                        )
-                                    }}
-                                </td>
-                                <td class="px-4 py-3">&nbsp;</td>
-                                <td v-if="
-                                    [
-                                        'purchasing',
-                                        'pejabat-teknis',
-                                        'pimpinan'
-                                    ].includes(
-                                        role
-                                    ) && rfq.verified_4
-                                " class="px-4 py-3 text-right">
-                                    {{
-                                        utils.formatDecimal(
-                                            form.products
-                                                .reduce(
-                                                    (sum, item) =>
-                                                        sum +
-                                                        item.unit_price *
-                                                        item.quantity,
-                                                    0
-                                                )
-                                                .toFixed(2)
-                                        )
-                                    }}
-                                </td>
-                                <td v-if="
-                                    ['pejabat-teknis', 'pimpinan'].includes(
-                                        role
-                                    ) && rfq.status === 'pending'
-                                " class="px-4 py-1 text-right pr-4">
-                                    &nbsp;
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
 
                 <div v-if="rfq.status === 'siap-diambil'" class="mt-4">
                     <h2 class=" text-sm">Bukti Penyerahan</h2>

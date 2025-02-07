@@ -187,11 +187,31 @@ class RfqController extends Controller
         }
     }
 
+    public function addSupplier(Request $request, Rfq $rfq)
+    {
+        $data = $request->validate([
+            'supplier_id' => 'required',
+        ]);
+
+        $no = Rfq::whereYear('request_date', date('Y'))
+            ->whereMonth('request_date', date('m'))
+            ->count() + 1;
+        $supplier_name = Supplier::find($data['supplier_id'])->supplier_name;
+        $data['po_number'] = implode('/', [$no, $supplier_name, date('m'), date('Y')]);
+        // $data['tag'] = Tag::where('slug', $data['tag'])->first()->slug;
+        $rfqSupplier = $rfq->rfqSuppliers()->create($data);
+
+        return redirect()->route('rfqs.show', ['rfq' => $rfq->id, 'supplier' => $rfqSupplier->id])
+            ->with('success', 'Supplier berhasil ditambahkan');
+        }
+
     /**
      * Display the specified resource.
      */
     public function show(Rfq $rfq, Request $request): Response
     {
+        $selectedSupplier = $request->input('supplier', $rfq->rfqSuppliers()->first()->id ?? null);
+
         $suppliers = Supplier::orderBy('supplier_name')->get();
         $rfqComments = RfqComment::where('rfq_id', $rfq->id)
             ->with('user')
@@ -231,7 +251,7 @@ class RfqController extends Controller
             $tagSuppliers[$tag] = Supplier::where('tag', $tag)->get();
         }
 
-        $data['suppliers'] = $rfq->rfqSuppliers()->with(['tag', 'supplier'])->get()->toArray();
+        $data['suppliers'] = $rfq->rfqSuppliers()->with(['tag', 'supplier', 'rfqDetails'])->get()->toArray();
 
         $histories = RfqHistory::with(['rfq', 'user'])
             ->where('rfq_id', $rfq->id)
@@ -240,6 +260,8 @@ class RfqController extends Controller
 
         $data['user'] = $rfq->user;
 
+        $rfqSuppliers = $rfq->rfqSuppliers()->with('supplier')->get();
+
         return Inertia::render('Rfqs/Show', [
             'suppliers' => $suppliers,
             'tagSuppliers' => $tagSuppliers,
@@ -247,6 +269,13 @@ class RfqController extends Controller
             'rfq' => $data,
             'rfqComments' => $rfqComments,
             'histories' => $histories,
+            'rfqSuppliers' => $rfqSuppliers,
+            'rfqDetails' => $rfq->rfqDetails()
+                ->with('product')
+                ->where('rfq_id', $rfq->id)
+                ->where('rfq_supplier_id', $selectedSupplier)
+                ->get(),
+            'selectedSupplier' => $selectedSupplier,
         ]);
     }
 

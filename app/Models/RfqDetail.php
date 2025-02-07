@@ -14,6 +14,7 @@ class RfqDetail extends Model
     protected $fillable = [
         'rfq_id',
         'product_id',
+        'rfq_supplier_id',
         'quantity',
         'quantity_verified',
         'unit_id',
@@ -36,5 +37,10 @@ class RfqDetail extends Model
     public function unit()
     {
         return $this->belongsTo(Unit::class);
+    }
+
+    public function rfqSupplier()
+    {
+        return $this->belongsTo(RfqSupplier::class);
     }
 }
