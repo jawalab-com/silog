@@ -408,9 +408,15 @@ watch(
                                                             rfq.verified_4 &&
                                                             !item.date_sent
                                                         )"></option>
-                                                        <option v-for="supplier in tagSuppliers[
+                                                        <!-- <option v-for="supplier in tagSuppliers[
                                                             item.tag.slug
                                                         ]" :value="supplier.id" :key="supplier.id">
+                                                            {{
+                                                                supplier.supplier_name
+                                                            }}
+                                                        </option> -->
+                                                        <option v-for="supplier in suppliers" :value="supplier.id"
+                                                            :key="supplier.id">
                                                             {{
                                                                 supplier.supplier_name
                                                             }}
@@ -515,7 +521,7 @@ watch(
                                                     " class="py-1 px-2" type="number" v-model="item.discount" />
                                                     <span class="text-md" v-else>{{
                                                         item.discount
-                                                    }}</span>
+                                                        }}</span>
                                                 </p>
                                                 <p class="w-32 ps-2">
                                                     Tanggal Dikirim
@@ -619,7 +625,7 @@ watch(
                                                         " />
                                                     <span class="text-md" v-else>{{
                                                         item.transportation
-                                                    }}</span>
+                                                        }}</span>
                                                 </p>
                                                 <p class="w-32 ps-2">
                                                     Lama Pengiriman
