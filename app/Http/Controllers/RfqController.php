@@ -198,13 +198,15 @@ class RfqController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
         $tags = [];
-        $data = $rfq->toArray();
+        $data = $rfq->load('rfqSuppliers', 'rfqSuppliers.supplier', 'rfqSuppliers.products', 'rfqDetails.unit', 'rfqDetails.product', 'rfqDetails.product.tag')->toArray();
         $rfqDetails = $rfq->rfqDetails()
-            ->with('product') // Load the related Product model
+            ->with('product')
+            ->with('unit')
             ->get()
             ->sortBy(function ($detail) {
-                return $detail->product->tag; // Access the `tag` attribute from the related Product model
+                return $detail->product->tag;
             });
+
         foreach ($rfqDetails as $key => $detail) {
             $tags[] = $detail->product->tag;
             $data['products'][$key] = $detail->toArray();

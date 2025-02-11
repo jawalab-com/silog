@@ -1,6 +1,7 @@
 import "./bootstrap";
 import "../css/app.css";
 import "/node_modules/flowbite-vue/dist/index.css";
+import "primeicons/primeicons.css";
 import utils from "./utils";
 import { initFlowbite } from "flowbite";
 
