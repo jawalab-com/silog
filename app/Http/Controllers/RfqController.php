@@ -38,6 +38,8 @@ class RfqController extends Controller
 	{
 		$rfqStatus = $request->input('rfq_status', 'pending');
 		$rfqTotal = $request->input('rfq_total', 'est_lt');
+		$rfqTotal = $request->input('rfq_total', 'est_gt');
+
 		$rfqPaid = $request->input('rfq_paid', null);
 
 		$rfqSummary = Rfq::selectRaw("
@@ -110,7 +112,7 @@ class RfqController extends Controller
 			->filter(function ($rfq) use ($rfqTotal) {
 				switch ($rfqTotal) {
 					case 'est_gt':
-						return $rfq->total_amount > 1000000;
+						return $rfq->total_estimation_amount > 1000000;
 					case 'price_lt':
 						return $rfq->total_amount <= 1000000;
 					case 'price_gt':
