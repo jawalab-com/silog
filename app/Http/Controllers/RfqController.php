@@ -38,7 +38,6 @@ class RfqController extends Controller
 	{
 		$rfqStatus = $request->input('rfq_status', 'pending');
 		$rfqTotal = $request->input('rfq_total', 'est_lt');
-		$rfqTotal = $request->input('rfq_total', 'est_gt');
 
 		$rfqPaid = $request->input('rfq_paid', null);
 
@@ -117,8 +116,10 @@ class RfqController extends Controller
 						return $rfq->total_amount <= 1000000;
 					case 'price_gt':
 						return $rfq->total_amount > 1000000;
-					default:
+					case 'est_lt':
 						return $rfq->total_amount <= 1000000;
+					default:
+						return true;
 				}
 			});
 		// ->filter(function ($rfq) use ($role) {
