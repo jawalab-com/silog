@@ -613,6 +613,8 @@ watch(
                                                     class="flex items-center me-4"
                                                     v-if="
                                                         [
+                                                            'pejabat-teknis',
+                                                            'pimpinan',
                                                             'purchasing',
                                                             'keuangan',
                                                             'kepala-divisi-logistik',
