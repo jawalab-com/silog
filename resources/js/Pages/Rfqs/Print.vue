@@ -154,8 +154,8 @@ let total = 0;
                             <br />
                             <br />
                             <br />
-                            <p class="font-semibold">{{ verified_user_4.name }}</p>
-                            <p>{{ verified_user_4_role }}</p>
+                            <p class="font-semibold">{{ verified_user_3.name }}</p>
+                            <p>{{ verified_user_3_role }}</p>
                         </div>
                         <div class="text-center">
                             <p>Diterima,</p>

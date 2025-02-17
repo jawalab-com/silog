@@ -81,17 +81,17 @@ class Rfq extends Model implements CommentableContract
 
     public function verified_2User(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'verified_1_user_id');
+        return $this->belongsTo(User::class, 'verified_2_user_id');
     }
 
     public function verified_3User(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'verified_1_user_id');
+        return $this->belongsTo(User::class, 'verified_3_user_id');
     }
 
     public function verified_4User(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'verified_1_user_id');
+        return $this->belongsTo(User::class, 'verified_4_user_id');
     }
 
     public function rfqDetails(): HasMany
