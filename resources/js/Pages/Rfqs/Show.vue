@@ -503,9 +503,7 @@ watch(
                                                             "
                                                         ></option>
                                                         <option
-                                                            v-for="supplier in tagSuppliers[
-                                                                item.tag.slug
-                                                            ]"
+                                                            v-for="supplier in suppliers"
                                                             :value="supplier.id"
                                                             :key="supplier.id"
                                                         >

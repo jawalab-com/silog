@@ -102,6 +102,13 @@ class UserSeeder extends Seeder
                 'email' => 'logistiknya@solotechnopark.id',
             ],
             [
+                'name' => 'Purchasing',
+                'division' => 'Divisi Logistik',
+                'department' => 'pelayanan',
+                'role' => 'purchasing',
+                'email' => 'logistiknya2@solotechnopark.id',
+            ],
+            [
                 'name' => 'Divisi Information Technology',
                 'division' => 'Divisi Information Technology',
                 'department' => 'pelayanan',
