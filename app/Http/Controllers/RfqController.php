@@ -36,8 +36,8 @@ class RfqController extends Controller
 	 */
 	public function index(Request $request)
 	{
-		$rfqStatus = $request->input('rfq_status', 'pending');
-		$rfqTotal = $request->input('rfq_total', 'est_lt');
+		$rfqStatus = $request->input('rfq_status', true);
+		$rfqTotal = $request->input('rfq_total', true);
 
 		$rfqPaid = $request->input('rfq_paid', null);
 
