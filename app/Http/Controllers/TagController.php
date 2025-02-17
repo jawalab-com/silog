@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreTagRequest;
 use App\Http\Requests\UpdateTagRequest;
+use App\Models\Log;
 use App\Models\Tag;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -39,7 +40,16 @@ class TagController extends Controller
     public function store(StoreTagRequest $request)
     {
         // try {
-        Tag::create($request->validated());
+        $tag = Tag::create($request->validated());
+
+        Log::create([
+            'log_type' => 'tag',
+            'message' => 'Kategori dibuat',
+            'severity' => 'info',
+            'user_id' => auth()->id(),
+            'ip_address' => request()->ip(),
+            'context' => json_encode($tag),
+        ]);
 
         return redirect()->route('tags.index')
             ->with('success', 'Tag created successfully.');
@@ -76,6 +86,15 @@ class TagController extends Controller
     {
         $tag->update($request->validated());
 
+        Log::create([
+            'log_type' => 'tag',
+            'message' => 'Kategori diubah',
+            'severity' => 'info',
+            'user_id' => auth()->id(),
+            'ip_address' => request()->ip(),
+            'context' => json_encode(['before' => $tag, 'after' => $request->validated()]),
+        ]);
+
         return redirect()->route('tags.index')
             ->with('success', 'Data updated successfully.');
     }
@@ -86,6 +105,15 @@ class TagController extends Controller
     public function destroy(Tag $tag)
     {
         $tag->delete();
+
+        Log::create([
+            'log_type' => 'tag',
+            'message' => 'Kategori dihapus',
+            'severity' => 'info',
+            'user_id' => auth()->id(),
+            'ip_address' => request()->ip(),
+            'context' => json_encode($tag),
+        ]);
 
         return redirect()->route('tags.index')
             ->with('success', 'Data deleted successfully.');

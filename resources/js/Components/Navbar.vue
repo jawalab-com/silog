@@ -52,13 +52,15 @@ const logout = () => {
                     </span>
                 </a> -->
                 <!-- ========================  -->
-                <p class="text-lg font-semibold ml-4">
-                    {{
-                        role.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
-                    }}
-                </p>
-                <span v-if="role === 'owner'" class="
-                            hidden
+                <template v-if="page.props.auth.user.email !== 'logistiknya@solotechnopark.id'">
+                    <p class="text-lg font-semibold ml-4">
+                        {{
+                            role.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+                        }}
+                    </p>
+                </template>
+                <template v-else>
+                    <span v-if="role === 'owner'" class="
                             flex
                             items-center
                             justify-between
@@ -74,10 +76,9 @@ const logout = () => {
                             dark:focus:text-white
                             dark:border-gray-700
                         ">
-                    Owner
-                </span>
-                <button v-else id="roleLink" data-dropdown-toggle="role" class="
-                            hidden
+                        Owner
+                    </span>
+                    <button v-else id="roleLink" data-dropdown-toggle="role" class="
                             flex
                             items-center
                             justify-between
@@ -97,21 +98,22 @@ const logout = () => {
                             dark:border-gray-700
                             dark:hover:bg-gray-700
                         ">
-                    {{
-                        role.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
-                    }}
-                    <svg class="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
-                        viewBox="0 0 10 6">
-                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="m1 1 4 4 4-4" />
-                    </svg>
-                </button>
+                        {{
+                            role.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+                        }}
+                        <svg class="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
+                            viewBox="0 0 10 6">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="m1 1 4 4 4-4" />
+                        </svg>
+                    </button>
+                </template>
                 <div id="role"
                     class="z-10 hidden font-normal bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700 dark:divide-gray-600">
                     <div class="py-1">
-                        <Link
-                            v-for="role in ['pengaju', 'kepala-divisi-logistik', 'admin-gudang', 'purchasing', 'pejabat-teknis', 'pimpinan', 'keuangan']"
-                            :key="role" :href="route('updaterole', { role: role })"
+                        <!-- ['pengaju', 'kepala-divisi-logistik', 'admin-gudang', 'purchasing', 'pejabat-teknis', 'pimpinan', 'keuangan'] -->
+                        <Link v-for="role in ['pengaju', 'kepala-divisi-logistik', 'purchasing']" :key="role"
+                            :href="route('updaterole', { role: role })"
                             class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">
                         {{ role.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) }}
                         </Link>
@@ -146,6 +148,7 @@ const logout = () => {
                             d="m1 1 4 4 4-4" />
                     </svg>
                 </button>
+
                 <!-- Dropdown menu -->
                 <div v-if="$page.props.jetstream.hasTeamFeatures" id="teamDropdownNavbar"
                     class="z-10 hidden font-normal bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700 dark:divide-gray-600">

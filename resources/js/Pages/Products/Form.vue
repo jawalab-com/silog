@@ -135,7 +135,7 @@ watch(() => form.unit_id, (newUnitId) => {
                         <InputError :message="form.errors.tag" />
                     </div>
 
-                    <div>
+                    <div v-if="role != 'pengaju'">
                         <InputLabel for="minimum_quantity" value="Stok Minimum" />
                         <TextInput id="minimum_quantity" v-model="form.minimum_quantity" />
                         <InputError :message="form.errors.minimum_quantity" />
@@ -168,7 +168,8 @@ watch(() => form.unit_id, (newUnitId) => {
                 <h2 class="text-lg py-4">Konversi Satuan</h2>
                 <p>Konversi satuan memungkinkan Anda untuk mengatur konversi dari satu satuan ke satuan lainnya.
                     Misalnya, Anda dapat
-                    mengonversi dari kilogram ke gram atau dari liter ke mililiter. Setiap konversi memerlukan satuan
+                    mengonversi dari kilogram ke gram atau dari liter ke mililiter. Setiap konversi memerlukan
+                    satuan
                     tujuan dan faktor
                     konversi yang sesuai.</p>
 

@@ -29,7 +29,7 @@ class UnitController extends Controller
     public function create()
     {
         return Inertia::render('Units/Form', [
-            'unit' => null,
+            'unit' => new Unit,
         ]);
     }
 
@@ -39,7 +39,16 @@ class UnitController extends Controller
     public function store(StoreUnitRequest $request)
     {
         try {
-            Unit::create($request->validated());
+            $unit = Unit::create($request->validated());
+
+            Log::create([
+                'log_type' => 'unit',
+                'message' => 'Satuan dibuat',
+                'severity' => 'info',
+                'user_id' => auth()->id(),
+                'ip_address' => request()->ip(),
+                'context' => json_encode($unit),
+            ]);
 
             return redirect()->route('units.index')
                 ->with('success', 'Unit created successfully.');
@@ -76,6 +85,15 @@ class UnitController extends Controller
     {
         $unit->update($request->validated());
 
+        Log::create([
+            'log_type' => 'unit',
+            'message' => 'Satuan diubah',
+            'severity' => 'info',
+            'user_id' => auth()->id(),
+            'ip_address' => request()->ip(),
+            'context' => json_encode(['before' => $unit, 'after' => $request->validated()]),
+        ]);
+
         return redirect()->route('units.index')
             ->with('success', 'Data updated successfully.');
     }
@@ -86,6 +104,15 @@ class UnitController extends Controller
     public function destroy(Unit $unit)
     {
         $unit->delete();
+
+        Log::create([
+            'log_type' => 'unit',
+            'message' => 'Satuan diubah',
+            'severity' => 'info',
+            'user_id' => auth()->id(),
+            'ip_address' => request()->ip(),
+            'context' => json_encode(['before' => $unit, 'after' => $request->validated()]),
+        ]);
 
         return redirect()->route('units.index')
             ->with('success', 'Data deleted successfully.');

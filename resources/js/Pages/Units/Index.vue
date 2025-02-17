@@ -3,6 +3,7 @@ import { computed } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 import { AppLayout } from '@/Layouts';
 import { Breadcrumb, Button, DataTable, Icon } from '@/Components';
+import Log from '@/Components/Log.vue';
 import { FwbButtonGroup } from 'flowbite-vue';
 
 const props = defineProps({
@@ -63,11 +64,13 @@ const deleteAction = async (id) => {
                     <Button color="yellow" class="p-0 py-1" :href="route('units.edit', item.id)">
                         <Icon name="pencil" class="w-4.5 h-4.5" />
                     </Button>
-                    <Button color="red" class="p-0 py-1" @click="deleteAction(item.id)">
+                    <!-- <Button color="red" class="p-0 py-1" @click="deleteAction(item.id)">
                         <Icon name="close" class="w-4.5 h-4.5" />
-                    </Button>
+                    </Button> -->
                 </fwb-button-group>
             </template>
         </DataTable>
+
+        <Log logtype="unit" />
     </AppLayout>
 </template>

@@ -510,6 +510,12 @@ watch(
                                                             {{
                                                                 supplier.supplier_name
                                                             }}
+                                                        </option> -->
+                                                        <option v-for="supplier in suppliers" :value="supplier.id"
+                                                            :key="supplier.id">
+                                                            {{
+                                                                supplier.supplier_name
+                                                            }}
                                                         </option>
                                                     </Select>
                                                     <!-- <span

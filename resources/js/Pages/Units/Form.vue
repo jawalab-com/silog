@@ -8,7 +8,7 @@ import { FwbButton } from 'flowbite-vue';
 const props = defineProps({
     unit: Object,
 });
-
+console.log(props.unit);
 const form = useForm({
     unit_name: props.unit?.unit_name,
     unit_description: props.unit?.unit_description,

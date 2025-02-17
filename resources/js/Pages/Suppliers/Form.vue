@@ -17,6 +17,7 @@ const form = useForm({
     address: props.supplier?.address || '',
     phone: props.supplier?.phone || '',
     email: props.supplier?.email || '',
+    account_number: props.supplier?.account_number || '',
     tag: props.supplier?.tag || '',
 });
 
@@ -74,13 +75,18 @@ const saveAction = () => {
                         <InputError :message="form.errors.email" />
                     </div>
                     <div>
+                        <InputLabel for="account_number" value="Nomor Rekening" />
+                        <TextInput id="account_number" v-model="form.account_number" type="text" />
+                        <InputError :message="form.errors.account_number" />
+                    </div>
+                    <div>
                         <InputLabel for="tag" value="Kategori" />
                         <Select id="tag" v-model="form.tag">
                             <option v-for="tag in tags" :value="tag.slug" :key="tag.slug">
                                 {{ tag.tag_name }}
                             </option>
                         </Select>
-                        <InputError :message="form.errors.email" />
+                        <InputError :message="form.errors.tag_name" />
                     </div>
                 </div>
                 <div class="flex justify-end mt-2">

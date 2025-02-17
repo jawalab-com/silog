@@ -18,6 +18,7 @@ class Supplier extends Model
         'address',
         'phone',
         'email',
+        'account_number',
         'tag',
     ];
 

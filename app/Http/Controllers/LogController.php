@@ -4,13 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreBrandRequest;
 use App\Http\Requests\UpdateBrandRequest;
-use App\Models\Brand;
 use App\Models\Log;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
-class BrandController extends Controller
+class LogController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -22,6 +21,13 @@ class BrandController extends Controller
         return Inertia::render('Brands/Index', [
             'brands' => $brands,
         ]);
+    }
+
+    public function logs(Request $request)
+    {
+        $logs = Log::where('log_type', $request->log_type)->orderBy('created_at', 'desc')->get();
+
+        return response()->json($logs);
     }
 
     /**
@@ -40,16 +46,7 @@ class BrandController extends Controller
     public function store(StoreBrandRequest $request)
     {
         try {
-            $brand = Brand::create($request->validated());
-
-            Log::create([
-                'log_type' => 'brand',
-                'message' => 'Merk dibuat',
-                'severity' => 'info',
-                'user_id' => auth()->id(),
-                'ip_address' => request()->ip(),
-                'context' => json_encode($brand),
-            ]);
+            Brand::create($request->validated());
 
             return redirect()->route('brands.index')
                 ->with('success', 'Brand created successfully.');
@@ -86,15 +83,6 @@ class BrandController extends Controller
     {
         $brand->update($request->validated());
 
-        Log::create([
-            'log_type' => 'brand',
-            'message' => 'Merk diubah',
-            'severity' => 'info',
-            'user_id' => auth()->id(),
-            'ip_address' => request()->ip(),
-            'context' => json_encode(['before' => $brand, 'after' => $request->validated()]),
-        ]);
-
         return redirect()->route('brands.index')
             ->with('success', 'Data updated successfully.');
     }
@@ -105,15 +93,6 @@ class BrandController extends Controller
     public function destroy(Brand $brand)
     {
         $brand->delete();
-
-        Log::create([
-            'log_type' => 'brand',
-            'message' => 'Merk dihapus',
-            'severity' => 'info',
-            'user_id' => auth()->id(),
-            'ip_address' => request()->ip(),
-            'context' => json_encode($brand),
-        ]);
 
         return redirect()->route('brands.index')
             ->with('success', 'Data deleted successfully.');

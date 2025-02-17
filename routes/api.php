@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ChatBotController;
+use App\Http\Controllers\LogController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SupplierController;
 use Illuminate\Http\Request;
@@ -16,4 +17,5 @@ Route::post('/chat-bot', [ChatBotController::class, 'listenToReplies']);
 Route::get('/products/suggestions', [ProductController::class, 'suggestions'])->name('products.suggestions');
 Route::get('/products/get/{product}', [ProductController::class, 'get'])->name('products.get');
 Route::get('/suppliers/suggestions', [SupplierController::class, 'suggestions'])->name('suppliers.suggestions');
+Route::get('/logs', [LogController::class, 'logs'])->name('logs.log');
 // });

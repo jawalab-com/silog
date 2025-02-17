@@ -2,6 +2,7 @@
 import { useForm } from '@inertiajs/vue3';
 import { AppLayout } from '@/Layouts';
 import { Breadcrumb, Button, DataTable, Icon } from '@/Components';
+import Log from '@/Components/Log.vue';
 import { FwbButtonGroup } from 'flowbite-vue';
 
 const props = defineProps({
@@ -22,6 +23,7 @@ const columns = [
     { name: 'address', label: 'Alamat' },
     { name: 'phone', label: 'Telepon' },
     { name: 'email', label: 'Email' },
+    { name: 'account_number', label: 'No Rekening' },
 ];
 const data = props.suppliers.map(item => ({
     ...item,
@@ -73,11 +75,13 @@ const deleteAction = async (id) => {
                     <!-- <Button color="green" class="p-0 py-1" :href="route('suppliers.show', item.id)">
                         <Icon name="info" class="w-4.5 h-4.5" />
                     </Button> -->
-                    <Button color="red" class="p-0 py-1" @click="deleteAction(item.id)">
+                    <!-- <Button color="red" class="p-0 py-1" @click="deleteAction(item.id)">
                         <Icon name="close" class="w-4.5 h-4.5" />
-                    </Button>
+                    </Button> -->
                 </fwb-button-group>
             </template>
         </DataTable>
+
+        <Log logtype="supplier" />
     </AppLayout>
 </template>
