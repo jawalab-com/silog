@@ -76,6 +76,7 @@ const addSupplier = () => {
         tag: supplier?.tag,
         supplier_id: supplier?.id,
         supplier: { supplier_name: supplier?.supplier_name },
+        products: [],
     });
     selectedSupplier.value = supplierNewId;
     selectedAddSupplier.value = null;
@@ -105,7 +106,6 @@ const addProduct = () => {
         unit: { unit_name: product?.unit?.unit_name },
         quantity: product?.quantity,
     });
-    selectedProduct.value = productNewId;
     selectedAddProduct.value = null;
     productNewId -= 1;
 }
@@ -173,12 +173,12 @@ const addProduct = () => {
                                 </DataTable>
                             </div>
 
-                            {{ tab.products }}
+                            <!-- {{ tab.products }} -->
 
-                            <p class="m-0">
+                            <p class="mt-4">
                                 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
                                 incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
-                                {{ tab }}
+                                <!-- {{ tab }} -->
                             </p>
                         </TabPanel>
                     </TabPanels>
