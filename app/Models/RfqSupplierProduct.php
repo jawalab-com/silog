@@ -5,15 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class RfqDetail extends Model
+class RfqSupplierProduct extends Model
 {
     use HasFactory;
     use HasUuids;
 
     protected $fillable = [
-        'rfq_id',
+        'rfq_detail_id',
+        'rfq_supplier_id',
         'product_id',
         'quantity',
         'quantity_verified',
@@ -24,9 +24,14 @@ class RfqDetail extends Model
         'total_price',
     ];
 
-    public function rfq()
+    public function rfqDetail()
     {
-        return $this->belongsTo(Rfq::class);
+        return $this->belongsTo(RfqDetail::class);
+    }
+
+    public function supplier()
+    {
+        return $this->belongsTo(Supplier::class);
     }
 
     public function product()
@@ -37,10 +42,5 @@ class RfqDetail extends Model
     public function unit()
     {
         return $this->belongsTo(Unit::class);
-    }
-
-    public function rfqSupplierProducts(): HasMany
-    {
-        return $this->hasMany(RfqSupplierProduct::class);
     }
 }

@@ -51,11 +51,37 @@ props.suppliers.unshift({
 const page = usePage();
 const role =
     page.props.auth.user.all_teams.find(
-        (team) => team.id === page.props.auth.user.current_team_id
+        (team) => team.id === page.props.auth.user.current_team_id,
     ).membership?.role || "owner";
 const department = page.props.auth.user.department;
 const comments = ref(props.rfqComments);
 // const allAvailable = computed(() => form.products.filter(item => item.stock - item.quantity >= 0).length == form.products.length);
+
+const uniqueSuppliers = computed(() => {
+    const supplierMap = new Map();
+
+    form.supplier_products.forEach((supplier) => {
+        if (!supplierMap.has(supplier.supplier_id)) {
+            // Initialize supplier entry with total_estimation_price
+            supplierMap.set(supplier.supplier_id, {
+                ...supplier,
+                total_estimation_price_2: 0,
+            });
+        }
+        // Accumulate total_estimation_price
+        let total = Number(
+            supplierMap.get(supplier.supplier_id).total_estimation_price_2,
+        );
+        total += Number(supplier.total_estimation_price);
+        supplierMap.set(supplier.supplier_id, {
+            ...supplier,
+            total_estimation_price_2: total,
+        });
+    });
+
+    return Array.from(supplierMap.values());
+});
+
 const actionLabel = computed(() => {
     const allAvailable =
         form.products.filter((item) => item.stock - item.quantity >= 0)
@@ -129,7 +155,18 @@ const form = useForm({
             received: supplier.received || false,
             paid: supplier.paid || false,
         })) || [],
+    supplier_products: Array.isArray(props.rfq?.supplier_products)
+        ? props.rfq.supplier_products
+        : Object.values(props.rfq?.supplier_products || {}),
 });
+
+const addSupplierRow = () => {
+    form.supplier_products.push({});
+};
+
+const removeSupplierRow = (index) => {
+    form.supplier_products.splice(index, 1);
+};
 
 const newProduct = ref({
     product_id: "",
@@ -279,7 +316,7 @@ const setTolak = (product_id, index) => {
 
     if (
         confirm(
-            "Apakah Anda yakin ingin menghapus barang ini? Tindakan ini tidak dapat dibatalkan!"
+            "Apakah Anda yakin ingin menghapus barang ini? Tindakan ini tidak dapat dibatalkan!",
         )
     ) {
         try {
@@ -288,7 +325,7 @@ const setTolak = (product_id, index) => {
                     route("rfqs.tolak", {
                         rfq: props.rfq.id,
                         product_id: product_id,
-                    })
+                    }),
                 )
                 .then((response) => {
                     form.products[index].quantity = 0;
@@ -347,7 +384,7 @@ watch(
         if (newVal) {
             try {
                 const response = await axios.get(
-                    route("products.get", { id: newVal })
+                    route("products.get", { id: newVal }),
                 );
                 productDetails.value = response.data;
             } catch (error) {
@@ -357,7 +394,7 @@ watch(
         } else {
             productDetails.value = null;
         }
-    }
+    },
 );
 </script>
 
@@ -409,7 +446,7 @@ watch(
                                         day: "2-digit",
                                         month: "long",
                                         year: "numeric",
-                                    }
+                                    },
                                 )
                             }}
                         </p>
@@ -423,7 +460,7 @@ watch(
                         <p class="dark:text-white mt-2">
                             {{
                                 new Date(
-                                    rfq.allocation_date
+                                    rfq.allocation_date,
                                 ).toLocaleDateString("id-ID", {
                                     day: "2-digit",
                                     month: "long",
@@ -510,9 +547,13 @@ watch(
                                                             {{
                                                                 supplier.supplier_name
                                                             }}
-                                                        </option> -->
-                                                        <option v-for="supplier in suppliers" :value="supplier.id"
-                                                            :key="supplier.id">
+                                                        </option>
+                                                        -->
+                                                        <option
+                                                            v-for="supplier in suppliers"
+                                                            :value="supplier.id"
+                                                            :key="supplier.id"
+                                                        >
                                                             {{
                                                                 supplier.supplier_name
                                                             }}
@@ -534,7 +575,7 @@ watch(
                                                             ].find(
                                                                 (supplier) =>
                                                                     supplier.id ===
-                                                                    item.supplier_id
+                                                                    item.supplier_id,
                                                             )?.supplier_name
                                                         }}
                                                     </span>
@@ -578,7 +619,7 @@ watch(
                                                         @click="
                                                             setReceived(
                                                                 item.tag.slug,
-                                                                index
+                                                                index,
                                                             )
                                                         "
                                                         type="button"
@@ -606,7 +647,7 @@ watch(
                                                         @click="
                                                             setPaid(
                                                                 item.tag.slug,
-                                                                index
+                                                                index,
                                                             )
                                                         "
                                                         type="button"
@@ -639,7 +680,7 @@ watch(
                                                                     tag: item
                                                                         .tag
                                                                         .slug,
-                                                                }
+                                                                },
                                                             )
                                                         "
                                                         class="text-blue-700 dark:text-blue-300 hover:underline"
@@ -842,15 +883,15 @@ watch(
                                                         item.date_received
                                                             ? Math.ceil(
                                                                   (new Date(
-                                                                      item.date_received
+                                                                      item.date_received,
                                                                   ) -
                                                                       new Date(
-                                                                          item.date_sent
+                                                                          item.date_sent,
                                                                       )) /
                                                                       (1000 *
                                                                           60 *
                                                                           60 *
-                                                                          24)
+                                                                          24),
                                                               ) + " hari"
                                                             : "-"
                                                     }}
@@ -1246,7 +1287,7 @@ watch(
                                     <template v-else>
                                         {{
                                             utils.formatDecimal(
-                                                item.estimation_price
+                                                item.estimation_price,
                                             )
                                         }}
                                         <TextInput
@@ -1280,13 +1321,13 @@ watch(
                                                 (item.total_estimation_price =
                                                     isNaN(
                                                         item.quantity *
-                                                            item.estimation_price
+                                                            item.estimation_price,
                                                     )
                                                         ? 0.0
                                                         : (
                                                               item.quantity *
                                                               item.estimation_price
-                                                          ).toFixed(2))
+                                                          ).toFixed(2)),
                                             )
                                         }}
                                     </p>
@@ -1348,13 +1389,13 @@ watch(
                                             utils.formatDecimal(
                                                 (item.total_price = isNaN(
                                                     item.quantity *
-                                                        item.unit_price
+                                                        item.unit_price,
                                                 )
                                                     ? 0.0
                                                     : (
                                                           item.quantity *
                                                           item.unit_price
-                                                      ).toFixed(2))
+                                                      ).toFixed(2)),
                                             )
                                         }}
                                     </p>
@@ -1362,7 +1403,7 @@ watch(
                                 <td
                                     v-if="
                                         ['pejabat-teknis', 'pimpinan'].includes(
-                                            role
+                                            role,
                                         ) &&
                                         rfq.status === 'pending' &&
                                         ((form.products.reduce(
@@ -1370,7 +1411,7 @@ watch(
                                                 sum +
                                                 item.estimation_price *
                                                     item.quantity,
-                                            0
+                                            0,
                                         ) > 1000000 &&
                                             role === 'pimpinan') ||
                                             (form.products.reduce(
@@ -1378,7 +1419,7 @@ watch(
                                                     sum +
                                                     item.estimation_price *
                                                         item.quantity,
-                                                0
+                                                0,
                                             ) <= 1000000 &&
                                                 role === 'pejabat-teknis' &&
                                                 rfq.user.department ==
@@ -1452,9 +1493,9 @@ watch(
                                                         sum +
                                                         item.estimation_price *
                                                             item.quantity,
-                                                    0
+                                                    0,
                                                 )
-                                                .toFixed(2)
+                                                .toFixed(2),
                                         )
                                     }}
                                 </td>
@@ -1477,16 +1518,16 @@ watch(
                                                         sum +
                                                         item.unit_price *
                                                             item.quantity,
-                                                    0
+                                                    0,
                                                 )
-                                                .toFixed(2)
+                                                .toFixed(2),
                                         )
                                     }}
                                 </td>
                                 <td
                                     v-if="
                                         ['pejabat-teknis', 'pimpinan'].includes(
-                                            role
+                                            role,
                                         ) && rfq.status === 'pending'
                                     "
                                     class="px-4 py-1 text-right pr-4"
@@ -1497,6 +1538,852 @@ watch(
                         </tbody>
                     </table>
                 </div>
+
+                <div
+                    class="card-header px-4 py-2 border-b border-gray-200 dark:border-gray-700"
+                ></div>
+                <!-- Tabel Supplier Barang -->
+                <h2
+                    class="font-semibold text-lg text-gray-800 dark:text-gray-200 leading-tight my-4"
+                >
+                    Daftar Supplier Barang
+                </h2>
+
+                <div
+                    class="relative overflow-x-auto overflow-y-hidden border border-gray-500 shadow-md sm:rounded-lg mt-2"
+                >
+                    <table
+                        class="w-full text-sm text-left rtl:text-right text-gray-700 dark:text-gray-300"
+                    >
+                        <thead
+                            class="text-xs text-gray-700 uppercase bg-gray-200 dark:bg-gray-700 dark:text-gray-300"
+                        >
+                            <tr>
+                                <th class="px-4 py-3">Supplier</th>
+                                <th class="px-4 py-3">Barang</th>
+                                <th class="px-4 py-3">Jumlah</th>
+                                <th
+                                    v-if="
+                                        [
+                                            'purchasing',
+                                            'pejabat-teknis',
+                                            'pimpinan',
+                                        ].includes(role)
+                                    "
+                                    class="px-4 py-3 text-right"
+                                >
+                                    Harga Estimasi
+                                </th>
+                                <th
+                                    v-if="
+                                        [
+                                            'purchasing',
+                                            'pejabat-teknis',
+                                            'pimpinan',
+                                        ].includes(role)
+                                    "
+                                    class="px-4 py-3 text-right"
+                                >
+                                    Subtotal Estimasi
+                                </th>
+                                <th
+                                    v-if="
+                                        [
+                                            'purchasing',
+                                            'pejabat-teknis',
+                                            'pimpinan',
+                                        ].includes(role) && rfq.verified_4
+                                    "
+                                    class="px-4 py-3 text-right"
+                                >
+                                    Harga
+                                </th>
+                                <th
+                                    v-if="
+                                        [
+                                            'purchasing',
+                                            'pejabat-teknis',
+                                            'pimpinan',
+                                        ].includes(role) && rfq.verified_4
+                                    "
+                                    class="px-4 py-3 text-right"
+                                >
+                                    Subtotal
+                                </th>
+                                <th
+                                    v-if="
+                                        [
+                                            'pejabat-teknis',
+                                            'pejabat-teknis',
+                                            'pimpinan',
+                                        ].includes(role) &&
+                                        rfq.status === 'pending'
+                                    "
+                                    class="px-4 py-1 text-right pr-4"
+                                >
+                                    &nbsp;
+                                </th>
+                                <th class="px-4 py-1 text-right pr-4">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr
+                                v-for="(item, index) in form.supplier_products"
+                                :key="index"
+                                class="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
+                            >
+                                <td class="px-4 py-1">
+                                    <Select
+                                        v-if="
+                                            rfq.verified_2 &&
+                                            !rfq.verified_3 &&
+                                            ['purchasing'].includes(role) &&
+                                            !item.date_sent // && !rfq.verified_4
+                                        "
+                                        v-model="item.supplier_id"
+                                        class="py-1 px-2"
+                                    >
+                                        <option
+                                            :value="null"
+                                            v-if="
+                                                !(
+                                                    role === 'purchasing' &&
+                                                    rfq.verified_4 &&
+                                                    !item.date_sent
+                                                )
+                                            "
+                                        ></option>
+                                        <option
+                                            v-for="supplier in suppliers"
+                                            :value="supplier.id"
+                                            :key="supplier.id"
+                                        >
+                                            {{ supplier.supplier_name }}
+                                        </option>
+                                        -->
+                                        <option
+                                            v-for="supplier in suppliers"
+                                            :value="supplier.id"
+                                            :key="supplier.id"
+                                        >
+                                            {{ supplier.supplier_name }}
+                                        </option>
+                                    </Select>
+                                </td>
+                                <td class="px-4 py-1">
+                                    <Select
+                                        v-if="
+                                            rfq.verified_2 &&
+                                            !rfq.verified_3 &&
+                                            ['purchasing'].includes(role) &&
+                                            !item.date_sent // && !rfq.verified_4
+                                        "
+                                        v-model="item.product_id"
+                                        class="py-1 px-2"
+                                    >
+                                        <option
+                                            :value="null"
+                                            v-if="
+                                                !(
+                                                    role === 'purchasing' &&
+                                                    rfq.verified_4 &&
+                                                    !item.date_sent
+                                                )
+                                            "
+                                        ></option>
+                                        <option
+                                            v-for="product in rfq.products"
+                                            :value="product.id"
+                                            :key="product.id"
+                                        >
+                                            {{ product.product_name }}
+                                        </option>
+                                    </Select>
+                                </td>
+                                <td class="px-4 py-1 pr-4">
+                                    <TextInput
+                                        class="py-1"
+                                        type="number"
+                                        v-model="item.quantity"
+                                        step="0.01"
+                                    />
+                                </td>
+                                <td
+                                    v-if="
+                                        [
+                                            'purchasing',
+                                            'pejabat-teknis',
+                                            'pimpinan',
+                                        ].includes(role)
+                                    "
+                                    class="px-4 py-1 text-right pr-4"
+                                >
+                                    <template
+                                        v-if="
+                                            rfq.verified_2 &&
+                                            ['purchasing'].includes(role) &&
+                                            !rfq.verified_4 &&
+                                            !rfq.verified_3
+                                        "
+                                    >
+                                        <TextInput
+                                            class="py-1"
+                                            type="number"
+                                            v-model="item.estimation_price"
+                                            step="0.01"
+                                        />
+                                    </template>
+                                    <template v-else>
+                                        {{
+                                            utils.formatDecimal(
+                                                item.estimation_price,
+                                            )
+                                        }}
+                                        <TextInput
+                                            class="py-1"
+                                            type="hidden"
+                                            v-model="item.estimation_price"
+                                            step="0.01"
+                                        />
+                                    </template>
+                                </td>
+                                <td
+                                    v-if="
+                                        [
+                                            'purchasing',
+                                            'pejabat-teknis',
+                                            'pimpinan',
+                                        ].includes(role)
+                                    "
+                                    class="px-4 py-1 text-right pr-4"
+                                >
+                                    <p class="py-1">
+                                        <TextInput
+                                            class="py-1"
+                                            type="hidden"
+                                            v-model="
+                                                item.total_estimation_price
+                                            "
+                                        />
+                                        {{
+                                            utils.formatDecimal(
+                                                (item.total_estimation_price =
+                                                    isNaN(
+                                                        item.quantity *
+                                                            item.estimation_price,
+                                                    )
+                                                        ? 0.0
+                                                        : (
+                                                              item.quantity *
+                                                              item.estimation_price
+                                                          ).toFixed(2)),
+                                            )
+                                        }}
+                                    </p>
+                                </td>
+                                <td
+                                    v-if="
+                                        [
+                                            'purchasing',
+                                            'pejabat-teknis',
+                                            'pimpinan',
+                                        ].includes(role) && rfq.verified_4
+                                    "
+                                    class="px-4 py-1 text-right pr-4"
+                                >
+                                    <template
+                                        v-if="
+                                            rfq.verified_2 &&
+                                            ['purchasing'].includes(role) &&
+                                            rfq.verified_4 &&
+                                            !rfq.verified_3
+                                        "
+                                    >
+                                        <TextInput
+                                            class="py-1"
+                                            type="number"
+                                            v-model="item.unit_price"
+                                            step="0.01"
+                                        />
+                                    </template>
+                                    <template v-else>
+                                        {{
+                                            utils.formatDecimal(item.unit_price)
+                                        }}
+                                        <TextInput
+                                            class="py-1"
+                                            type="hidden"
+                                            v-model="item.unit_price"
+                                            step="0.01"
+                                        />
+                                    </template>
+                                </td>
+                                <td
+                                    v-if="
+                                        [
+                                            'purchasing',
+                                            'pejabat-teknis',
+                                            'pimpinan',
+                                        ].includes(role) && rfq.verified_4
+                                    "
+                                    class="px-4 py-1 text-right pr-4"
+                                >
+                                    <p class="py-1">
+                                        <TextInput
+                                            class="py-1"
+                                            type="hidden"
+                                            v-model="item.total_price"
+                                        />
+                                        {{
+                                            utils.formatDecimal(
+                                                (item.total_price = isNaN(
+                                                    item.quantity *
+                                                        item.unit_price,
+                                                )
+                                                    ? 0.0
+                                                    : (
+                                                          item.quantity *
+                                                          item.unit_price
+                                                      ).toFixed(2)),
+                                            )
+                                        }}
+                                    </p>
+                                </td>
+                                <td
+                                    v-if="
+                                        ['pejabat-teknis', 'pimpinan'].includes(
+                                            role,
+                                        ) &&
+                                        rfq.status === 'pending' &&
+                                        ((form.products.reduce(
+                                            (sum, item) =>
+                                                sum +
+                                                item.estimation_price *
+                                                    item.quantity,
+                                            0,
+                                        ) > 1000000 &&
+                                            role === 'pimpinan') ||
+                                            (form.products.reduce(
+                                                (sum, item) =>
+                                                    sum +
+                                                    item.estimation_price *
+                                                        item.quantity,
+                                                0,
+                                            ) <= 1000000 &&
+                                                role === 'pejabat-teknis' &&
+                                                rfq.user.department ==
+                                                    department)) &&
+                                        item.quantity > 0
+                                    "
+                                    class="px-4 py-1 text-right pr-4"
+                                >
+                                    <a
+                                        href="#"
+                                        class="text-red-500 hover:text-red-300 font-bold"
+                                        @click="
+                                            setTolak(item.product_id, index)
+                                        "
+                                        type="button"
+                                    >
+                                        Tolak
+                                    </a>
+                                </td>
+                                <td class="px-4 py-1">
+                                    <button
+                                        type="button"
+                                        class="text-red-500 font-bold hover:text-red-700 mt-2"
+                                        @click="removeSupplierRow(index)"
+                                    >
+                                        <Icon
+                                            name="close"
+                                            class="w-6 h-6 font-bold text-red-500 hover:text-red-700"
+                                        />
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td
+                                    v-if="
+                                        [
+                                            'admin-gudang',
+                                            'purchasing',
+                                            'pejabat-teknis',
+                                            'pimpinan',
+                                        ].includes(role)
+                                    "
+                                    class="px-4 py-3 text-center"
+                                    colspan="2"
+                                >
+                                    &nbsp;
+                                </td>
+                                <td class="px-4 py-3 text-right">&nbsp;</td>
+                                <td
+                                    v-if="
+                                        [
+                                            'purchasing',
+                                            'pejabat-teknis',
+                                            'pimpinan',
+                                        ].includes(role)
+                                    "
+                                    class="px-4 py-3 text-right"
+                                >
+                                    TOTAL
+                                </td>
+                                <td
+                                    v-if="
+                                        [
+                                            'purchasing',
+                                            'pejabat-teknis',
+                                            'pimpinan',
+                                        ].includes(role)
+                                    "
+                                    class="px-4 py-3 text-right"
+                                >
+                                    {{
+                                        utils.formatDecimal(
+                                            form.supplier_products
+                                                .reduce(
+                                                    (sum, item) =>
+                                                        sum +
+                                                        item.estimation_price *
+                                                            item.quantity,
+                                                    0,
+                                                )
+                                                .toFixed(2),
+                                        )
+                                    }}
+                                </td>
+                                <td class="px-4 py-3">&nbsp;</td>
+                                <td
+                                    v-if="
+                                        [
+                                            'purchasing',
+                                            'pejabat-teknis',
+                                            'pimpinan',
+                                        ].includes(role) && rfq.verified_4
+                                    "
+                                    class="px-4 py-3 text-right"
+                                >
+                                    {{
+                                        utils.formatDecimal(
+                                            form.supplier_products
+                                                .reduce(
+                                                    (sum, item) =>
+                                                        sum +
+                                                        item.unit_price *
+                                                            item.quantity,
+                                                    0,
+                                                )
+                                                .toFixed(2),
+                                        )
+                                    }}
+                                </td>
+                                <td
+                                    v-if="
+                                        ['pejabat-teknis', 'pimpinan'].includes(
+                                            role,
+                                        ) && rfq.status === 'pending'
+                                    "
+                                    class="px-4 py-1 text-right pr-4"
+                                >
+                                    &nbsp;
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="px-4 py-3" colspan="8">
+                                    <button
+                                        type="button"
+                                        class="w-full text-blue-700 hover:text-blue-500 dark:text-blue-300 font-bold"
+                                        @click="addSupplierRow"
+                                    >
+                                        <Icon
+                                            name="plus"
+                                            class="w-6 h-6 inline-block"
+                                        />
+                                        Tambah Supplier
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- ./ Tabel Supplier Barang -->
+
+                <div
+                    class="card-header px-4 py-2 border-b border-gray-200 dark:border-gray-700"
+                ></div>
+                <!-- Tabel Summary Supplier -->
+                <h2
+                    class="font-semibold text-lg text-gray-800 dark:text-gray-200 leading-tight my-4"
+                >
+                    Daftar Summary Supplier
+                </h2>
+
+                <div
+                    class="relative overflow-x-auto overflow-y-hidden border border-gray-500 shadow-md sm:rounded-lg mt-2"
+                >
+                    <table
+                        class="w-full text-sm text-left rtl:text-right text-gray-700 dark:text-gray-300"
+                    >
+                        <thead
+                            class="text-xs text-gray-700 uppercase bg-gray-200 dark:bg-gray-700 dark:text-gray-300"
+                        >
+                            <tr>
+                                <th class="px-4 py-3">Supplier</th>
+                                <th class="px-4 py-3">Bukti</th>
+                                <th class="px-4 py-3">Total Estimasi</th>
+                                <th class="px-4 py-3">Diskon</th>
+                                <th class="px-4 py-3">Pajak</th>
+                                <th class="px-4 py-3">Transport</th>
+                                <th class="px-4 py-3">Tanggal Dikirim</th>
+                                <th class="px-4 py-3">Tanggal Diterima</th>
+                                <th class="px-4 py-3">Lama Pengiriman</th>
+                                <th class="px-4 py-3">Lihat PO</th>
+                                <th class="px-4 py-3">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr
+                                v-for="(item, index) in uniqueSuppliers"
+                                :key="index"
+                                class="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
+                            >
+                                <td class="px-4 py-1">
+                                    {{
+                                        suppliers.find(
+                                            (supplier) =>
+                                                supplier.id ===
+                                                item.supplier_id,
+                                        )?.supplier_name
+                                    }}
+                                </td>
+                                <td class="px-4 py-1">
+                                    <!-- Hidden File Input -->
+                                    <input
+                                        ref="fileInputs"
+                                        type="file"
+                                        class="hidden"
+                                        @change="
+                                            (event) =>
+                                                (form.suppliers_products[
+                                                    index
+                                                ].file_proof_path =
+                                                    event.target.files[0])
+                                        "
+                                    />
+
+                                    <!-- Upload Icon (Click to Trigger File Input) -->
+                                    <Icon
+                                        name="upload"
+                                        class="w-6 h-6 text-blue-500 cursor-pointer hover:text-blue-700"
+                                        @click="$refs.fileInputs[index].click()"
+                                    />
+                                </td>
+                                <td class="px-4 py-1">
+                                    {{ item.total_estimation_price_2 }}
+                                </td>
+                                <td class="px-4 py-1 text-right pr-4">
+                                    <TextInput
+                                        class="py-1"
+                                        type="number"
+                                        v-model="item.discount"
+                                        step="0.01"
+                                    />
+                                </td>
+                                <td class="px-4 py-1">
+                                    <TextInput
+                                        class="py-1"
+                                        type="number"
+                                        v-model="item.tax"
+                                        step="0.01"
+                                    />
+                                </td>
+                                <td
+                                    v-if="
+                                        [
+                                            'purchasing',
+                                            'pejabat-teknis',
+                                            'pimpinan',
+                                        ].includes(role)
+                                    "
+                                    class="px-4 py-1 text-right pr-4"
+                                >
+                                    <template
+                                        v-if="
+                                            rfq.verified_2 &&
+                                            ['purchasing'].includes(role) &&
+                                            !rfq.verified_4 &&
+                                            !rfq.verified_3
+                                        "
+                                    >
+                                        <TextInput
+                                            class="py-1"
+                                            type="number"
+                                            v-model="item.estimation_price"
+                                            step="0.01"
+                                        />
+                                    </template>
+                                    <template v-else>
+                                        {{
+                                            utils.formatDecimal(
+                                                item.estimation_price,
+                                            )
+                                        }}
+                                        <TextInput
+                                            class="py-1"
+                                            type="hidden"
+                                            v-model="item.estimation_price"
+                                            step="0.01"
+                                        />
+                                    </template>
+                                </td>
+                                <td
+                                    v-if="
+                                        [
+                                            'purchasing',
+                                            'pejabat-teknis',
+                                            'pimpinan',
+                                        ].includes(role)
+                                    "
+                                    class="px-4 py-1 text-right pr-4"
+                                >
+                                    <p class="py-1">
+                                        <TextInput
+                                            class="py-1"
+                                            type="hidden"
+                                            v-model="
+                                                item.total_estimation_price
+                                            "
+                                        />
+                                        {{
+                                            utils.formatDecimal(
+                                                (item.total_estimation_price =
+                                                    isNaN(
+                                                        item.quantity *
+                                                            item.estimation_price,
+                                                    )
+                                                        ? 0.0
+                                                        : (
+                                                              item.quantity *
+                                                              item.estimation_price
+                                                          ).toFixed(2)),
+                                            )
+                                        }}
+                                    </p>
+                                </td>
+                                <td
+                                    v-if="
+                                        [
+                                            'purchasing',
+                                            'pejabat-teknis',
+                                            'pimpinan',
+                                        ].includes(role) && rfq.verified_4
+                                    "
+                                    class="px-4 py-1 text-right pr-4"
+                                >
+                                    <template
+                                        v-if="
+                                            rfq.verified_2 &&
+                                            ['purchasing'].includes(role) &&
+                                            rfq.verified_4 &&
+                                            !rfq.verified_3
+                                        "
+                                    >
+                                        <TextInput
+                                            class="py-1"
+                                            type="number"
+                                            v-model="item.unit_price"
+                                            step="0.01"
+                                        />
+                                    </template>
+                                    <template v-else>
+                                        {{
+                                            utils.formatDecimal(item.unit_price)
+                                        }}
+                                        <TextInput
+                                            class="py-1"
+                                            type="hidden"
+                                            v-model="item.unit_price"
+                                            step="0.01"
+                                        />
+                                    </template>
+                                </td>
+                                <td
+                                    v-if="
+                                        [
+                                            'purchasing',
+                                            'pejabat-teknis',
+                                            'pimpinan',
+                                        ].includes(role) && rfq.verified_4
+                                    "
+                                    class="px-4 py-1 text-right pr-4"
+                                >
+                                    <p class="py-1">
+                                        <TextInput
+                                            class="py-1"
+                                            type="hidden"
+                                            v-model="item.total_price"
+                                        />
+                                        {{
+                                            utils.formatDecimal(
+                                                (item.total_price = isNaN(
+                                                    item.quantity *
+                                                        item.unit_price,
+                                                )
+                                                    ? 0.0
+                                                    : (
+                                                          item.quantity *
+                                                          item.unit_price
+                                                      ).toFixed(2)),
+                                            )
+                                        }}
+                                    </p>
+                                </td>
+                                <td
+                                    v-if="
+                                        ['pejabat-teknis', 'pimpinan'].includes(
+                                            role,
+                                        ) &&
+                                        rfq.status === 'pending' &&
+                                        ((form.products.reduce(
+                                            (sum, item) =>
+                                                sum +
+                                                item.estimation_price *
+                                                    item.quantity,
+                                            0,
+                                        ) > 1000000 &&
+                                            role === 'pimpinan') ||
+                                            (form.products.reduce(
+                                                (sum, item) =>
+                                                    sum +
+                                                    item.estimation_price *
+                                                        item.quantity,
+                                                0,
+                                            ) <= 1000000 &&
+                                                role === 'pejabat-teknis' &&
+                                                rfq.user.department ==
+                                                    department)) &&
+                                        item.quantity > 0
+                                    "
+                                    class="px-4 py-1 text-right pr-4"
+                                >
+                                    <a
+                                        href="#"
+                                        class="text-red-500 hover:text-red-300 font-bold"
+                                        @click="
+                                            setTolak(item.product_id, index)
+                                        "
+                                        type="button"
+                                    >
+                                        Tolak
+                                    </a>
+                                </td>
+                                <td class="px-4 py1">
+                                    <a
+                                        target="_blank"
+                                        :href="
+                                            route('rfqs.po.print', {
+                                                rfq: rfq.id,
+                                                tag: rfq.id,
+                                            })
+                                        "
+                                        class="text-blue-700 dark:text-blue-300 hover:underline"
+                                    >
+                                        Lihat PO
+                                    </a>
+                                </td>
+                                <td class="px-4 py1">Terima Barang</td>
+                            </tr>
+                            <tr>
+                                <td
+                                    v-if="
+                                        [
+                                            'admin-gudang',
+                                            'purchasing',
+                                            'pejabat-teknis',
+                                            'pimpinan',
+                                        ].includes(role)
+                                    "
+                                    class="px-4 py-3 text-center"
+                                    colspan="2"
+                                >
+                                    &nbsp;
+                                </td>
+                                <td
+                                    v-if="
+                                        [
+                                            'purchasing',
+                                            'pejabat-teknis',
+                                            'pimpinan',
+                                        ].includes(role)
+                                    "
+                                    class="px-4 py-3 text-right"
+                                >
+                                    TOTAL
+                                </td>
+                                <td
+                                    v-if="
+                                        [
+                                            'purchasing',
+                                            'pejabat-teknis',
+                                            'pimpinan',
+                                        ].includes(role)
+                                    "
+                                    class="px-4 py-3"
+                                >
+                                    {{
+                                        utils.formatDecimal(
+                                            uniqueSuppliers
+                                                .reduce(
+                                                    (sum, item) =>
+                                                        sum + item.discount,
+                                                    0,
+                                                )
+                                                .toFixed(2),
+                                        )
+                                    }}
+                                </td>
+                                <td class="px-4 py-3">
+                                    {{
+                                        utils.formatDecimal(
+                                            uniqueSuppliers
+                                                .reduce(
+                                                    (sum, item) =>
+                                                        sum + item.tax,
+                                                    0,
+                                                )
+                                                .toFixed(2),
+                                        )
+                                    }}
+                                </td>
+                                <td
+                                    v-if="
+                                        [
+                                            'purchasing',
+                                            'pejabat-teknis',
+                                            'pimpinan',
+                                        ].includes(role) && rfq.verified_4
+                                    "
+                                    class="px-4 py-3 text-right"
+                                >
+                                    {{
+                                        utils.formatDecimal(
+                                            uniqueSuppliers
+                                                .reduce(
+                                                    (sum, item) =>
+                                                        sum + item.transport,
+                                                    0,
+                                                )
+                                                .toFixed(2),
+                                        )
+                                    }}
+                                </td>
+                                <td class="px-4 py-1 text-right pr-4"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- ./ Tabel Summary Supplier -->
 
                 <div v-if="rfq.status === 'siap-diambil'" class="mt-4">
                     <h2 class="text-sm">Bukti Penyerahan</h2>
@@ -1562,7 +2449,7 @@ watch(
                                     >
                                         {{
                                             new Date(
-                                                item.created_at
+                                                item.created_at,
                                             ).toLocaleDateString("en-GB", {
                                                 day: "2-digit",
                                                 month: "2-digit",
@@ -1570,7 +2457,7 @@ watch(
                                             }) +
                                             " " +
                                             new Date(
-                                                item.created_at
+                                                item.created_at,
                                             ).toLocaleTimeString("en-GB", {
                                                 hour: "2-digit",
                                                 minute: "2-digit",
@@ -1594,7 +2481,7 @@ watch(
                                                 item.role
                                                     .replace(/-/g, " ")
                                                     .replace(/\b\w/g, (l) =>
-                                                        l.toUpperCase()
+                                                        l.toUpperCase(),
                                                     )
                                             }}
                                         </span>
@@ -1622,7 +2509,7 @@ watch(
                             form.products.reduce(
                                 (sum, item) =>
                                     sum + item.estimation_price * item.quantity,
-                                0
+                                0,
                             ) <= 1000000 && role === 'pimpinan'
                         )
                     "
@@ -1666,7 +2553,7 @@ watch(
                             (['keuangan'].includes(role) &&
                                 ['diproses', 'selesai'].includes(rfq.status) &&
                                 !form.suppliers.every(
-                                    (supplier) => supplier.file_receipt
+                                    (supplier) => supplier.file_receipt,
                                 ))
                         "
                     >
@@ -1685,7 +2572,7 @@ watch(
                                     (sum, item) =>
                                         sum +
                                         item.estimation_price * item.quantity,
-                                    0
+                                    0,
                                 ) > 1000000 &&
                                     role === 'pimpinan') ||
                                     (form.products.reduce(
@@ -1693,12 +2580,12 @@ watch(
                                             sum +
                                             item.estimation_price *
                                                 item.quantity,
-                                        0
+                                        0,
                                     ) <= 1000000 &&
                                         role === 'pejabat-teknis' &&
                                         rfq.user.department == department) ||
                                     !['pejabat-teknis', 'pimpinan'].includes(
-                                        role
+                                        role,
                                     ))
                             "
                         >
@@ -1708,7 +2595,7 @@ watch(
                                 type="button"
                                 v-if="
                                     ['pejabat-teknis', 'pimpinan'].includes(
-                                        role
+                                        role,
                                     )
                                 "
                             >
